@@ -317,8 +317,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const action = actionEl.dataset.action;
 
     if (action === 'goto-skill') {
-      // Only navigate if the click wasn't on a button inside the card
-      if (e.target.closest('button')) return;
+      // Allow navigation if clicking the card OR specifically the "View Details" button.
+      // Other buttons (Copy/Download/Buy) should NOT trigger card navigation.
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.action !== 'goto-skill') return;
+
       window.location.href = 'skill-detail.html?id=' + encodeURIComponent(actionEl.dataset.id);
       return;
     }

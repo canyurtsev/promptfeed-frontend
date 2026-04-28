@@ -136,7 +136,7 @@ function renderCard(p){
         <button class="pf-btn pf-btn--ghost" style="font-size:12px;padding:5px 12px"
           data-action="gotoDetail" data-id="${esc(p.promptId||p.id)}">Details</button>
         ${!isFree?`<button class="pf-btn pf-btn--primary" style="font-size:12px;padding:5px 12px"
-          onclick="handleBuy('${esc(p.id)}','${esc(p.title||'')}','${esc(String(p.price||'0'))}')">Buy</button>`
+          data-action="buy" data-id="${esc(p.id)}" data-title="${esc(p.title||'')}" data-price="${esc(String(p.price||'0'))}">Buy</button>`
           :`<button class="pf-btn pf-btn--ghost" style="font-size:12px;padding:5px 12px;color:var(--pf-success);border-color:var(--pf-success)"
           data-action="gotoDetail" data-id="${esc(p.promptId||p.id)}">Get Free</button>`}
       </div>
@@ -203,9 +203,10 @@ async function loadProducts(){
 }
 
 /* ── Buy Handler ── */
-async function handleBuy(productId, title, price, e){
+async function handleBuy(btn){
   if(!requireAuth('purchase prompts')) return;
-  const btn=e ? e.target.closest('[data-action="buy"]') : null; if (!btn) return;
+  if (!btn) return;
+  const { id: productId, title, price } = btn.dataset;
   const origText=btn.textContent;
   btn.textContent='Buying...'; btn.disabled=true;
   try{
@@ -292,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const buyBtn = e.target.closest('[data-action="buy"]');
     if (buyBtn) {
       e.stopPropagation();
-      handleBuy(buyBtn.dataset.id, buyBtn.dataset.title, buyBtn.dataset.price, e);
+      handleBuy(buyBtn);
       return;
     }
 
