@@ -15,10 +15,10 @@ export const errorHandler = (err, req, res, next) => {
     // Standardized Error Codes Mapping
     const errorCodes = {
         'ValidationError': 'VALIDATION_ERROR',
+        'BadRequestError': 'BAD_REQUEST',
         'UnauthorizedError': 'UNAUTHORIZED',
         'ForbiddenError': 'FORBIDDEN',
         'NotFoundError': 'NOT_FOUND',
-        'BadRequestError': 'BAD_REQUEST',
         'JsonWebTokenError': 'UNAUTHORIZED',
         'TokenExpiredError': 'UNAUTHORIZED',
         'RateLimitError': 'RATE_LIMITED'
