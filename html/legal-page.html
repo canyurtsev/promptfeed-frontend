@@ -1,125 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>PromptFeed - Legal & Info</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <script id="tailwind-config">
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        "dark-bg": "#0d1117",
-                        "dark-card": "#161b22",
-                        "dark-border": "#30363d",
-                        "dark-surface": "#21262d",
-                        "accent": "#D4A373",
-                        "accent-hover": "#BC8A5F",
-                        "text-primary": "#f0f6fc",
-                        "text-secondary": "#8b949e",
-                        "text-muted": "#6e7681",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"],
-                        "mono": ["JetBrains Mono", "monospace"]
-                    }
-                },
-            },
-        }
-    </script>
-    <style>
-        body { background-color: #0d1117; color: #f0f6fc; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    </style>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Legal â€” PromptFeed</title>
+<meta name="description" content="PromptFeed legal and policy information."/>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    background: #0d1117;
+    color: #c9d1d9;
+  }
+  .wrap {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 32px 24px 56px;
+  }
+  .card {
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    background: #161b22;
+    padding: 24px;
+  }
+  a { color: #58a6ff; text-decoration: none; }
+  .nav {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+</style>
 </head>
-
-<body class="font-display min-h-screen flex flex-col">
-    <header class="sticky top-0 z-50 w-full border-b border-dark-border bg-dark-card/95 backdrop-blur-md px-4 md:px-10 py-3">
-        <div class="max-w-[1280px] mx-auto flex items-center justify-between gap-4">
-            <div class="flex items-center gap-8">
-                <a href="main-page.html" class="flex items-center gap-2 text-accent cursor-pointer">
-                    <div class="size-8 bg-accent rounded flex items-center justify-center text-dark-bg">
-                        <span class="material-symbols-outlined">terminal</span>
-                    </div>
-                    <h2 class="text-xl font-bold leading-tight tracking-tight text-text-primary">PromptFeed</h2>
-                </a>
-            </div>
-            <div class="flex items-center gap-4">
-                <nav class="hidden lg:flex items-center gap-6">
-                    <a class="text-text-secondary hover:text-accent text-sm font-medium transition-colors" href="main-page.html">Home</a>
-                </nav>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-[1280px] mx-auto px-4 md:px-10 py-12 flex-1 w-full">
-        <div class="bg-dark-card rounded-xl border border-dark-border p-12 text-center flex flex-col items-center max-w-3xl mx-auto mt-10">
-            <div class="size-20 bg-dark-surface rounded-full flex items-center justify-center text-accent mb-6 shadow-lg shadow-accent/10">
-                <span class="material-symbols-outlined text-4xl" id="icon">gavel</span>
-            </div>
-            <h1 class="text-3xl font-bold text-text-primary tracking-tight mb-3" id="title">Legal & Information</h1>
-            <p class="text-text-secondary text-base leading-relaxed mb-8 max-w-xl mx-auto" id="description">
-                Our legal documents, user agreements, privacy policies, and contact information are currently being finalized by our team.
-            </p>
-            
-            <div class="w-full text-left bg-dark-bg border border-dark-border rounded-lg p-6 mb-8 text-text-secondary text-sm space-y-4">
-                <p>Welcome to PromptFeed. By using our platform, you agree to follow basic community rules until our full terms are published:</p>
-                <ul class="list-disc pl-5 space-y-2">
-                    <li>Do not upload malicious prompts or code.</li>
-                    <li>Respect intellectual property rights.</li>
-                    <li>Maintain a clean, helpful community environment.</li>
-                </ul>
-            </div>
-
-            <div class="flex gap-4 w-full justify-center">
-                <a href="main-page.html" class="px-6 py-3 bg-dark-surface hover:bg-dark-border border border-dark-border text-text-primary rounded-lg font-medium transition-all flex items-center gap-2 shadow-sm">
-                    <span class="material-symbols-outlined text-sm">home</span> Back to Home
-                </a>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        // Simple logic to change text based on URL parameters
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const type = urlParams.get('type');
-            
-            const titleEl = document.getElementById('title');
-            const descEl = document.getElementById('description');
-            const iconEl = document.getElementById('icon');
-
-            if (type === 'privacy') {
-                titleEl.textContent = 'Privacy Policy';
-                descEl.textContent = 'Your privacy is important to us. The full privacy policy document is under review and will be published shortly.';
-                iconEl.textContent = 'privacy_tip';
-            } else if (type === 'terms' || type === 'agreement') {
-                titleEl.textContent = 'Terms & User Agreement';
-                descEl.textContent = 'Our detailed Terms of Service and User Agreement are currently being finalized.';
-                iconEl.textContent = 'gavel';
-            } else if (type === 'contact') {
-                titleEl.textContent = 'Contact Us';
-                descEl.textContent = 'Need help? You can reach our support team via email at support@promptfeed.com.';
-                iconEl.textContent = 'mail';
-            } else if (type === 'api') {
-                titleEl.textContent = 'API Documentation';
-                descEl.textContent = 'Developer API access is currently in private beta. Documentation will be public when we launch v1.0.';
-                iconEl.textContent = 'api';
-            } else if (type === 'about') {
-                titleEl.textContent = 'About PromptFeed';
-                descEl.textContent = 'PromptFeed is the leading community and marketplace for AI prompt engineers. Learn more about our mission soon.';
-                iconEl.textContent = 'info';
-            }
-        });
-    </script>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html">Index</a>
+      <a href="community.html">Community</a>
+      <a href="signin.html">Sign In</a>
+    </div>
+    <div class="card">
+      <h1>Legal</h1>
+      <p>PromptFeed terms, privacy, and policy information live here in static form.</p>
+      <p>For account access, use the sign-in page.</p>
+    </div>
+  </div>
 </body>
 </html>

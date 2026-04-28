@@ -1,196 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>PromptFeed - Support</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <script id="tailwind-config">
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        "dark-bg": "#0d1117",
-                        "dark-card": "#161b22",
-                        "dark-border": "#30363d",
-                        "dark-surface": "#21262d",
-                        "accent": "#D4A373",
-                        "accent-hover": "#BC8A5F",
-                        "text-primary": "#f0f6fc",
-                        "text-secondary": "#8b949e",
-                        "text-muted": "#6e7681",
-                    },
-                    fontFamily: { "display": ["Inter", "sans-serif"] },
-                },
-            },
-        }
-    </script>
-    <style>
-        body {
-            background-color: #0d1117;
-            color: #f0f6fc;
-        }
-
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-    </style>
-    <script src="../javascript/backend.js"></script>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Support â€” PromptFeed</title>
+<meta name="description" content="PromptFeed support and help resources."/>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    background: #0d1117;
+    color: #c9d1d9;
+  }
+  .wrap {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 32px 24px 56px;
+  }
+  .card {
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    background: #161b22;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  a { color: #58a6ff; text-decoration: none; }
+  .nav {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+</style>
 </head>
-
-<body class="font-display min-h-screen">
-    <header
-        class="sticky top-0 z-50 w-full border-b border-dark-border bg-dark-card/90 backdrop-blur-md px-4 md:px-10 py-3">
-        <div class="max-w-[1280px] mx-auto flex items-center justify-between gap-4">
-            <div class="flex items-center gap-8">
-                <div id="logo" class="flex items-center gap-2 text-text-primary cursor-pointer">
-                    <div class="size-8 bg-accent rounded flex items-center justify-center text-dark-bg">
-                        <span class="material-symbols-outlined">terminal</span>
-                    </div>
-                    <h2 class="text-xl font-bold leading-tight tracking-tight hidden sm:block">PromptFeed</h2>
-                </div>
-            </div>
-            <nav class="flex items-center gap-6">
-                <a class="text-text-secondary hover:text-accent text-sm font-medium transition-colors"
-                    href="guidelines.html">Guidelines</a>
-                <a class="text-accent text-sm font-medium transition-colors" href="support.html">Support</a>
-                <div id="user-avatar"
-                    class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-dark-border cursor-pointer"
-                    style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDlwzcFd5gTpbatKkwtsue7C0fCanoyIIQ4k3bIXNknlhyuUvrAwObTQg2zFGW2EqR2YHFdrb4Utt2UUq9fJ1ggIBOU_yv3vohMe9bAQiCpz13mSs6o7RspbTN9rwf9vbNQhp3mOwWLob4yweOgqS7LGcF6okkTcF-TVf6vcdXMtCKI5ubGILqjryWAilerHA9VTQc8PhEuK9Itz8DwurXg2wwuEsw3Uqe4KuIULNyD87yzCmHMpsPr2SezH-xgy7q-s4hWtB6rxhU");'>
-                </div>
-            </nav>
-        </div>
-    </header>
-
-    <main class="max-w-3xl mx-auto px-6 py-12">
-        <h1 class="text-3xl font-bold text-accent mb-8">Support</h1>
-
-        <!-- FAQ Section -->
-        <section class="bg-dark-card rounded-xl border border-dark-border p-6 mb-8">
-            <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-accent">help</span> Quick Help / FAQ
-            </h2>
-            <div class="space-y-4">
-                <details class="group bg-dark-surface rounded-lg">
-                    <summary
-                        class="cursor-pointer px-4 py-3 text-sm font-bold text-text-primary flex justify-between items-center">
-                        How do I submit a new prompt?
-                        <span
-                            class="material-symbols-outlined text-text-secondary group-open:rotate-180 transition-transform">expand_more</span>
-                    </summary>
-                    <p class="px-4 pb-3 text-sm text-text-secondary">Click the "Submit Prompt" button on the main page.
-                        Fill in
-                        the title, description, and content, then publish.</p>
-                </details>
-                <details class="group bg-dark-surface rounded-lg">
-                    <summary
-                        class="cursor-pointer px-4 py-3 text-sm font-bold text-text-primary flex justify-between items-center">
-                        How does the ranking system work?
-                        <span
-                            class="material-symbols-outlined text-text-secondary group-open:rotate-180 transition-transform">expand_more</span>
-                    </summary>
-                    <p class="px-4 pb-3 text-sm text-text-secondary">Posts are ranked using a formula that considers
-                        upvotes,
-                        downvotes, age, and boost status. Fresh, high-quality content rises faster.</p>
-                </details>
-                <details class="group bg-dark-surface rounded-lg">
-                    <summary
-                        class="cursor-pointer px-4 py-3 text-sm font-bold text-text-primary flex justify-between items-center">
-                        What is the "Boost" feature?
-                        <span
-                            class="material-symbols-outlined text-text-secondary group-open:rotate-180 transition-transform">expand_more</span>
-                    </summary>
-                    <p class="px-4 pb-3 text-sm text-text-secondary">Boost temporarily increases your prompt's
-                        visibility in the
-                        feed. It's a paid feature available to PRO users.</p>
-                </details>
-                <details class="group bg-dark-surface rounded-lg">
-                    <summary
-                        class="cursor-pointer px-4 py-3 text-sm font-bold text-text-primary flex justify-between items-center">
-                        How do I report a violation?
-                        <span
-                            class="material-symbols-outlined text-text-secondary group-open:rotate-180 transition-transform">expand_more</span>
-                    </summary>
-                    <p class="px-4 pb-3 text-sm text-text-secondary">Use the "..." menu on any post or comment to find
-                        the Report
-                        option. Our moderation team reviews all reports.</p>
-                </details>
-            </div>
-        </section>
-
-        <!-- Contact Form -->
-        <section class="bg-dark-card rounded-xl border border-dark-border p-6">
-            <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-accent">mail</span> Contact Us
-            </h2>
-            <p class="text-sm text-text-secondary mb-4">Can't find your answer? Send us a message.</p>
-
-            <form id="contact-form" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Subject</label>
-                    <input type="text"
-                        class="w-full bg-dark-surface border border-dark-border rounded-lg px-4 py-2.5 text-sm text-text-primary focus:ring-accent focus:border-accent placeholder:text-text-muted"
-                        placeholder="Brief description of your issue">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Message</label>
-                    <textarea
-                        class="w-full bg-dark-surface border border-dark-border rounded-lg px-4 py-3 text-sm text-text-primary focus:ring-accent focus:border-accent min-h-[120px] placeholder:text-text-muted"
-                        placeholder="Describe your issue in detail..."></textarea>
-                </div>
-                <button type="submit"
-                    class="w-full bg-accent hover:bg-accent-hover text-dark-bg font-bold py-3 rounded-lg transition-all shadow-md shadow-accent/20">
-                    Send Message
-                </button>
-            </form>
-
-            <div id="contact-confirmation"
-                class="hidden mt-4 p-4 bg-accent/20 border border-accent/50 rounded-lg text-accent text-sm font-medium flex items-center gap-2">
-                <span class="material-symbols-outlined">check_circle</span> Message sent! We'll get back to you soon.
-            </div>
-        </section>
-    </main>
-
-    <script>
-        document.getElementById('logo').onclick = () => window.location.href = 'main-page.html';
-        document.getElementById('user-avatar').onclick = () => window.location.href = 'user-page.html';
-
-        document.getElementById('contact-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const subject = e.target.querySelector('input[type="text"]').value;
-            const message = e.target.querySelector('textarea').value;
-
-            if (!subject || !message) {
-                alert('Please fill in all fields.');
-                return;
-            }
-
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Sending...';
-
-            try {
-                // Try API, fall back to frontend-only confirmation
-                await fetch('http://localhost:5000/api/support/contact', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subject, message })
-                });
-            } catch (err) {
-                // silent fail — still show confirmation
-            }
-
-            document.getElementById('contact-form').classList.add('hidden');
-            document.getElementById('contact-confirmation').classList.remove('hidden');
-        };
-    </script>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="index.html">Index</a>
+      <a href="community.html">Community</a>
+      <a href="signin.html">Sign In</a>
+    </div>
+    <div class="card">
+      <h1>Support</h1>
+      <p>Help resources, account access, and general support live here.</p>
+      <p>Use the current app pages for live browsing and sign-in.</p>
+    </div>
+  </div>
 </body>
-
 </html>
