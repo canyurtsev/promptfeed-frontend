@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Pricing — PromptFeed</title>
+<title>Pricing â€” PromptFeed</title>
 <meta name="description" content="Choose how you build with PromptFeed. Start free, upgrade for more runs and creator monetization."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 <link rel="stylesheet" href="pf-layout.css"/>
 <style>
-/* ── Subscription Specifics ── */
+/* â”€â”€ Subscription Specifics â”€â”€ */
 .sub-hero {
   text-align: center;
   padding: 40px 20px 32px;
@@ -215,7 +215,7 @@
           <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Access to free prompts and skills</li>
           <li class="sub-card__feature" style="opacity:0.6"><span class="material-symbols-outlined" style="color:var(--pf-warning)">info</span> Ads enabled</li>
         </ul>
-        <button class="pf-btn pf-btn--ghost" id="btn-free" onclick="handlePlanAction('free')" style="width:100%">Current Plan</button>
+        <button class="pf-btn pf-btn--ghost" id="btn-free" data-action="plan-action" data-plan="free" style="width:100%">Current Plan</button>
       </div>
 
       <!-- PRO -->
@@ -231,7 +231,7 @@
           <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Collections / saved searches</li>
           <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Priority community features</li>
         </ul>
-        <button class="pf-btn pf-btn--primary" id="btn-pro" onclick="handlePlanAction('pro')" style="width:100%">Upgrade to Pro</button>
+        <button class="pf-btn pf-btn--primary" id="btn-pro" data-action="plan-action" data-plan="pro" style="width:100%">Upgrade to Pro</button>
       </div>
 
       <!-- CREATOR -->
@@ -247,7 +247,7 @@
           <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Sales analytics</li>
           <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Verified creator badge</li>
         </ul>
-        <button class="pf-btn pf-btn--ghost" id="btn-creator" onclick="handlePlanAction('creator')" style="width:100%;border-color:var(--pf-pro);color:var(--pf-pro)">Become a Creator</button>
+        <button class="pf-btn pf-btn--ghost" id="btn-creator" data-action="plan-action" data-plan="creator" style="width:100%;border-color:var(--pf-pro);color:var(--pf-pro)">Become a Creator</button>
       </div>
     </div>
 
@@ -308,8 +308,8 @@
           </tr>
           <tr>
             <td>Platform Fee</td>
-            <td>—</td>
-            <td>—</td>
+            <td>â€”</td>
+            <td>â€”</td>
             <td>Reduced</td>
           </tr>
           <tr>
@@ -326,7 +326,7 @@
     <div class="sub-expl">
       <h3><span class="material-symbols-outlined" style="color:var(--pf-accent)">how_to_vote</span> Votes vs Boosts</h3>
       <p><strong>Votes</strong> reflect community quality. Users cast votes organically on prompts and skills they find valuable, which improves natural ranking in the community feed.</p>
-      <p><strong>Boosts</strong> are available exclusively to Creators to promote their content across the network. Boosted content must always be clearly labeled as “Promoted” and does not alter the underlying organic vote score, ensuring community trust and Truth Mode integrity.</p>
+      <p><strong>Boosts</strong> are available exclusively to Creators to promote their content across the network. Boosted content must always be clearly labeled as â€œPromotedâ€ and does not alter the underlying organic vote score, ensuring community trust and Truth Mode integrity.</p>
     </div>
   </main>
 
@@ -360,116 +360,6 @@
 
 </div>
 
-<script>
-/* ================================================================
-   subscription.html — Controller
-   Honest user state mapping without mock data
-   ================================================================ */
-const API = 'http://localhost:5000';
-const token = localStorage.getItem('accessToken');
-let currentUser = null;
-
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function toast(msg, ok=true){
-  const t = document.createElement('div');
-  t.className = 'pf-toast';
-  t.textContent = msg;
-  if(!ok) t.style.borderColor = 'var(--pf-danger)';
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
-
-/* ── Auth & Plan Loading ── */
-async function initAuth(){
-  const area = document.getElementById('nav-auth-area');
-  if(!token){
-    area.innerHTML = `<a href="signin.html" class="pf-btn pf-btn--ghost">Sign In</a>
-      <a href="signin.html?mode=register" class="pf-btn pf-btn--primary">Sign Up</a>`;
-    return;
-  }
-  try {
-    const r = await fetch(API+'/api/users/me', {headers:{Authorization:'Bearer '+token}});
-    const d = await r.json();
-    if(d.success && d.data){
-      currentUser = d.data;
-      area.innerHTML = `
-        <div class="pf-wallet-chip" title="Wallet balance">
-          <span class="material-symbols-outlined pf-wallet-chip__icon">toll</span>
-          <span>${esc(String(currentUser.walletBalance??'—'))}</span>
-        </div>
-        <div class="pf-avatar" id="user-avatar" title="Profile"
-          style="${currentUser.avatarUrl ? 'background-image:url('+esc(currentUser.avatarUrl)+')' : ''}"
-          onclick="window.location.href='signin.html'"></div>`;
-      
-      applyPlanState(currentUser.plan || 'free');
-    } else { guestNav(area); }
-  } catch { guestNav(area); }
-}
-
-function guestNav(a){
-  a.innerHTML = `<a href="signin.html" class="pf-btn pf-btn--ghost">Sign In</a>
-    <a href="signin.html?mode=register" class="pf-btn pf-btn--primary">Sign Up</a>`;
-}
-
-function applyPlanState(plan){
-  const p = plan.toLowerCase();
-  
-  // Show banner
-  const banner = document.getElementById('current-plan-banner');
-  const nameSpan = document.getElementById('current-plan-name');
-  banner.style.display = 'block';
-  nameSpan.textContent = p;
-
-  // Reset buttons
-  const btnFree = document.getElementById('btn-free');
-  const btnPro = document.getElementById('btn-pro');
-  const btnCreator = document.getElementById('btn-creator');
-  
-  btnFree.textContent = 'Downgrade to Free';
-  btnFree.classList.replace('pf-btn--primary', 'pf-btn--ghost');
-  
-  btnPro.textContent = 'Upgrade to Pro';
-  btnPro.classList.replace('pf-btn--ghost', 'pf-btn--primary');
-  
-  btnCreator.textContent = 'Become a Creator';
-
-  if(p === 'free'){
-    btnFree.textContent = 'Current Plan';
-    btnFree.disabled = true;
-    document.getElementById('card-free').style.borderColor = 'var(--pf-success)';
-  } else if(p === 'pro'){
-    btnPro.textContent = 'Current Plan';
-    btnPro.disabled = true;
-    btnPro.classList.replace('pf-btn--primary', 'pf-btn--ghost');
-    btnFree.classList.replace('pf-btn--primary', 'pf-btn--ghost');
-    document.getElementById('card-pro').style.borderColor = 'var(--pf-success)';
-    document.getElementById('card-pro').style.boxShadow = '0 0 0 2px var(--pf-success)';
-  } else if(p === 'creator'){
-    btnCreator.textContent = 'Current Plan';
-    btnCreator.disabled = true;
-    btnFree.classList.replace('pf-btn--primary', 'pf-btn--ghost');
-    btnPro.classList.replace('pf-btn--primary', 'pf-btn--ghost');
-    document.getElementById('card-creator').style.borderColor = 'var(--pf-success)';
-  }
-}
-
-/* ── Actions ── */
-function handlePlanAction(targetPlan){
-  if(!token || !currentUser){
-    window.location.href = 'signin.html?returnUrl='+encodeURIComponent(location.href);
-    return;
-  }
-  
-  // Since we don't have a fake payment integration and we must adhere to Truth Mode,
-  // we will show the coming soon toast if the backend doesn't support the subscription endpoint natively yet.
-  toast('Checkout integration is Coming Soon.', false);
-}
-
-/* ── Init ── */
-(async function(){
-  await initAuth();
-})();
-</script>
+<script src="js/pages/subscription.js"></script>
 </body>
 </html>
