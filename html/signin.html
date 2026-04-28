@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Sign in — PromptFeed</title>
+<title>Sign in â€” PromptFeed</title>
 <meta name="description" content="Sign in to PromptFeed to vote, publish, buy, run prompts and manage your AI workflow library."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 <link rel="stylesheet" href="pf-layout.css"/>
 <style>
-/* ── Auth Specifics ── */
+/* â”€â”€ Auth Specifics â”€â”€ */
 .auth-container {
   display: flex;
   flex-direction: column;
@@ -225,8 +225,8 @@
     </div>
 
     <div class="auth-tabs">
-      <div class="auth-tab active" id="tab-login" onclick="setMode('login')">Sign In</div>
-      <div class="auth-tab" id="tab-register" onclick="setMode('register')">Create Account</div>
+      <div class="auth-tab active" id="tab-login" data-action="set-mode" data-mode="login">Sign In</div>
+      <div class="auth-tab" id="tab-register" data-action="set-mode" data-mode="register">Create Account</div>
     </div>
 
     <div id="error-box" class="error-box">
@@ -234,7 +234,7 @@
       <span id="error-reqid" class="error-reqid"></span>
     </div>
 
-    <form id="auth-form" onsubmit="handleAuth(event)">
+    <form id="auth-form">
       <div class="pf-form-group" id="group-username" style="display:none">
         <label class="pf-label" for="username">Username</label>
         <input class="pf-input" type="text" id="username" placeholder="developer123" autocomplete="username"/>
@@ -250,7 +250,7 @@
           <label class="pf-label" for="password">Password</label>
           <a href="#" style="font-size:12px;color:var(--pf-accent);text-decoration:none" id="forgot-link">Forgot password?</a>
         </div>
-        <input class="pf-input" type="password" id="password" required placeholder="••••••••" autocomplete="current-password"/>
+        <input class="pf-input" type="password" id="password" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password"/>
       </div>
 
       <button type="submit" class="auth-btn" id="submit-btn">Sign in</button>
@@ -258,12 +258,12 @@
 
     <div class="auth-divider">or continue with</div>
 
-    <button class="oauth-btn" onclick="handleOAuth('google')">
+    <button class="oauth-btn" data-action="oauth" data-provider="google">
       <!-- Google G symbol SVG placeholder -->
       <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Continue with Google
     </button>
-    <button class="oauth-btn" onclick="handleOAuth('github')">
+    <button class="oauth-btn" data-action="oauth" data-provider="github">
       <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
       Continue with GitHub
     </button>
@@ -276,128 +276,6 @@
 
 </main>
 
-<script>
-/* ================================================================
-   signin.html — Controller
-   ================================================================ */
-const API = 'http://localhost:5000';
-let mode = 'login';
-const urlParams = new URLSearchParams(window.location.search);
-const returnUrl = urlParams.get('returnUrl');
-
-// Pre-fill mode if in url
-if(urlParams.get('mode') === 'register') setMode('register');
-
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function showError(msg, reqId){
-  const box = document.getElementById('error-box');
-  const spanMsg = document.getElementById('error-msg');
-  const spanReq = document.getElementById('error-reqid');
-  box.style.display = 'block';
-  spanMsg.textContent = msg;
-  if(reqId){
-    spanReq.textContent = 'ReqID: ' + reqId;
-  } else {
-    spanReq.textContent = '';
-  }
-}
-function hideError(){
-  document.getElementById('error-box').style.display = 'none';
-}
-
-function setMode(newMode){
-  mode = newMode;
-  hideError();
-  
-  if(mode === 'login'){
-    document.getElementById('tab-login').classList.add('active');
-    document.getElementById('tab-register').classList.remove('active');
-    document.getElementById('group-username').style.display = 'none';
-    document.getElementById('submit-btn').textContent = 'Sign in';
-    document.querySelector('.auth-title').textContent = 'Sign in to PromptFeed';
-    document.getElementById('password').autocomplete = 'current-password';
-    document.getElementById('forgot-link').style.display = 'block';
-  } else {
-    document.getElementById('tab-register').classList.add('active');
-    document.getElementById('tab-login').classList.remove('active');
-    document.getElementById('group-username').style.display = 'flex';
-    document.getElementById('submit-btn').textContent = 'Create Account';
-    document.querySelector('.auth-title').textContent = 'Join PromptFeed';
-    document.getElementById('password').autocomplete = 'new-password';
-    document.getElementById('forgot-link').style.display = 'none';
-  }
-}
-
-async function handleAuth(e){
-  e.preventDefault();
-  hideError();
-  
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value; // do not trim passwords
-  const username = document.getElementById('username').value.trim();
-  
-  const btn = document.getElementById('submit-btn');
-  const origText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Please wait...';
-
-  const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
-  const payload = mode === 'login' ? { email, password } : { email, password, username };
-
-  try {
-    const res = await fetch(API + endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    
-    const data = await res.json();
-    
-    if(data.success && data.data?.token){
-      // Save real token
-      localStorage.setItem('accessToken', data.data.token);
-      
-      // Redirect
-      if(returnUrl){
-        window.location.href = returnUrl;
-      } else {
-        window.location.href = 'community.html';
-      }
-    } else {
-      showError(data.message || data.error?.message || 'Authentication failed.', data.error?.requestId);
-      btn.disabled = false;
-      btn.textContent = origText;
-    }
-  } catch(err) {
-    showError('Network error. Ensure backend is running.', null);
-    btn.disabled = false;
-    btn.textContent = origText;
-  }
-}
-
-async function handleOAuth(provider){
-  // If endpoints do not exist, we just show a coming soon toast according to requirements
-  // We do not fake tokens. We do not navigate randomly.
-  const t = document.createElement('div');
-  t.className = 'pf-toast';
-  t.textContent = provider.toUpperCase() + ' OAuth integration is Coming Soon.';
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
-
-// Redirect immediately if already logged in? Optional, but good UX.
-if(token){
-  // Check if token valid
-  fetch(API+'/api/users/me', {headers:{Authorization:'Bearer '+token}})
-  .then(r=>r.json())
-  .then(d=>{
-    if(d.success) {
-      if(returnUrl) window.location.href = returnUrl;
-      else window.location.href = 'community.html';
-    }
-  }).catch(()=>{});
-}
-</script>
+<script src="js/pages/signin.js"></script>
 </body>
 </html>
