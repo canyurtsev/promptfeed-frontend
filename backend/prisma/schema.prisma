@@ -17,7 +17,7 @@ model User {
   id            String   @id @default(uuid())
   email         String   @unique
   username      String   @unique
-  passwordHash  String
+  passwordHash  String?
   fullName      String?
   avatarUrl     String?
   bio           String?
@@ -45,6 +45,50 @@ model User {
   skills            Skill[]
   aiLogs            AILog[]
   ownerships        Ownership[]
+  oauthAccounts     OAuthAccount[]
+  oauthStates      OAuthState[]
+}
+
+// ============================================
+// OAUTH ACCOUNT MODEL
+// ============================================
+model OAuthAccount {
+  id           String   @id @default(uuid())
+  userId       String
+  provider    String   // "google" | "github"
+  providerId  String   // provider's user ID
+  email       String
+  accessToken String?  // provider's access token (encrypted)
+  refreshToken String? // provider's refresh token
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@unique([provider, email])
+  @@index([userId])
+}
+
+// ============================================
+// OAUTH STATE MODEL
+// ============================================
+model OAuthState {
+  id          String   @id @default(uuid())
+  state       String   @unique
+  provider    String   // "google" | "github"
+  returnUrl   String?
+  code        String?  @unique // one-time exchange code
+  codeUsed    Boolean  @default(false)
+  userId      String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([state])
+  @@index([code])
 }
 
 // ============================================

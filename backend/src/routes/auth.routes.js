@@ -41,4 +41,39 @@ router.post('/refresh', asyncHandler(authController.refresh.bind(authController)
  */
 router.get('/me', authenticate, asyncHandler(authController.getMe.bind(authController)));
 
+/**
+ * @route   GET /api/auth/google
+ * @desc    Initiate Google OAuth flow
+ * @access  Public
+ */
+router.get('/google', asyncHandler(authController.initiateGoogle.bind(authController)));
+
+/**
+ * @route   GET /api/auth/google/callback
+ * @desc    Handle Google OAuth callback
+ * @access  Public
+ */
+router.get('/google/callback', asyncHandler(authController.handleGoogleCallback.bind(authController)));
+
+/**
+ * @route   GET /api/auth/github
+ * @desc    Initiate GitHub OAuth flow
+ * @access  Public
+ */
+router.get('/github', asyncHandler(authController.initiateGithub.bind(authController)));
+
+/**
+ * @route   GET /api/auth/github/callback
+ * @desc    Handle GitHub OAuth callback
+ * @access  Public
+ */
+router.get('/github/callback', asyncHandler(authController.handleGithubCallback.bind(authController)));
+
+/**
+ * @route   POST /api/auth/oauth/exchange
+ * @desc    Exchange OAuth code for JWT tokens
+ * @access  Public
+ */
+router.post('/oauth/exchange', asyncHandler(authController.exchangeOAuthCode.bind(authController)));
+
 export default router;

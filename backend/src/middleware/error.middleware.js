@@ -18,6 +18,7 @@ export const errorHandler = (err, req, res, next) => {
         'UnauthorizedError': 'UNAUTHORIZED',
         'ForbiddenError': 'FORBIDDEN',
         'NotFoundError': 'NOT_FOUND',
+        'BadRequestError': 'BAD_REQUEST',
         'JsonWebTokenError': 'UNAUTHORIZED',
         'TokenExpiredError': 'UNAUTHORIZED',
         'RateLimitError': 'RATE_LIMITED'
@@ -82,5 +83,11 @@ export class ForbiddenError extends AppError {
 export class NotFoundError extends AppError {
     constructor(message = 'Resource not found') {
         super(message, 404);
+    }
+}
+
+export class BadRequestError extends AppError {
+    constructor(message = 'Bad request') {
+        super(message, 400);
     }
 }
