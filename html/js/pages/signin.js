@@ -76,8 +76,11 @@ async function handleAuth(e) {
 
     const data = await res.json();
 
-    if (data.success && data.data?.token) {
-      localStorage.setItem('accessToken', data.data.token);
+    if (data.success && data.data?.accessToken) {
+      localStorage.setItem('accessToken', data.data.accessToken);
+      if (data.data.refreshToken) {
+        localStorage.setItem('refreshToken', data.data.refreshToken);
+      }
 
       if (returnUrl) {
         window.location.href = returnUrl;
@@ -97,11 +100,76 @@ async function handleAuth(e) {
 }
 
 function handleOAuth(provider) {
-  const t = document.createElement('div');
-  t.className = 'pf-toast';
-  t.textContent = provider.toUpperCase() + ' OAuth integration is Coming Soon.';
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  const redirectTo = returnUrl || 'community.html';
+  const targetUrl = `${API}/api/auth/${provider}?returnUrl=${encodeURIComponent(redirectTo)}`;
+  window.location.href = targetUrl;
+}
+
+async function handleOAuthCallback() {
+  const oauthCode = urlParams.get('oauthCode');
+  const error = urlParams.get('error');
+
+  if (error) {
+    showError(error, null);
+    clearOAuthParams();
+    return;
+  }
+
+  if (!oauthCode) return;
+
+  const btn = document.getElementById('submit-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Completing sign in...';
+  }
+
+  try {
+    const res = await fetch(API + '/api/auth/oauth/exchange', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: oauthCode })
+    });
+
+    const data = await res.json();
+
+    if (data.success && data.data?.accessToken) {
+      localStorage.setItem('accessToken', data.data.accessToken);
+      if (data.data.refreshToken) {
+        localStorage.setItem('refreshToken', data.data.refreshToken);
+      }
+
+      clearOAuthParams();
+
+      if (returnUrl) {
+        window.location.href = returnUrl;
+      } else {
+        window.location.href = 'community.html';
+      }
+    } else {
+      showError(data.message || data.error?.message || 'OAuth exchange failed.', data.error?.requestId);
+      clearOAuthParams();
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+      }
+    }
+  } catch (err) {
+    showError('Network error. Ensure backend is running.', null);
+    clearOAuthParams();
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  }
+}
+
+function clearOAuthParams() {
+  const url = new URL(window.location);
+  url.searchParams.delete('oauthCode');
+  url.searchParams.delete('error');
+  url.searchParams.delete('returnUrl');
+  window.history.replaceState({}, '', url);
 }
 
 function checkExistingSession() {
@@ -140,5 +208,6 @@ document.addEventListener('submit', e => {
 
 document.addEventListener('DOMContentLoaded', () => {
   if (urlParams.get('mode') === 'register') setMode('register');
+  handleOAuthCallback();
   checkExistingSession();
 });
