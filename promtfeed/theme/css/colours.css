@@ -1,0 +1,241 @@
+/**
+ * PromptFeed Coffee Theme - Color Overrides
+ * Prosilver color palette overrides for coffee theme
+ */
+
+/* ============================================
+   Prosilver Color Overrides
+   ============================================ */
+
+/* Override Prosilver default colors */
+body {
+    background-color: var(--pf-background-light);
+}
+
+/* Header */
+.headerbar {
+    background-color: var(--pf-latte);
+    border-bottom: 1px solid rgba(166, 137, 102, 0.2);
+}
+
+/* Navigation */
+.navbar {
+    background-color: var(--pf-latte);
+}
+
+.nav-tabs>li>a {
+    color: var(--pf-mocha);
+}
+
+.nav-tabs>li>a:hover,
+.nav-tabs>li.active>a {
+    color: var(--pf-coffee-roast);
+    border-bottom-color: var(--pf-coffee-roast);
+}
+
+/* Panels / Forumrow */
+.panel,
+.forumrow {
+    background-color: #ffffff;
+    border: 1px solid rgba(166, 137, 102, 0.2);
+    border-radius: var(--pf-radius-xl);
+}
+
+.panel>.inner {
+    background-color: transparent;
+}
+
+/* Post backgrounds */
+.post-body,
+.postbody {
+    background-color: #ffffff;
+}
+
+.post {
+    background-color: #ffffff;
+    border: 1px solid rgba(166, 137, 102, 0.2);
+    border-radius: var(--pf-radius-xl);
+    margin-bottom: var(--pf-space-4);
+}
+
+/* Buttons - Primary */
+.button,
+.button1,
+input[type="submit"],
+button {
+    background: var(--pf-coffee-roast);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--pf-radius-lg);
+    padding: var(--pf-space-2) var(--pf-space-4);
+    font-weight: var(--pf-font-weight-bold);
+    font-size: var(--pf-font-size-sm);
+    cursor: pointer;
+    transition: background-color var(--pf-transition-fast);
+}
+
+.button:hover,
+.button1:hover,
+input[type="submit"]:hover,
+button:hover {
+    background: var(--pf-espresso);
+    color: #ffffff;
+}
+
+/* Buttons - Secondary */
+.button2 {
+    background: #ffffff;
+    color: var(--pf-coffee-roast);
+    border: 1px solid rgba(166, 137, 102, 0.3);
+    border-radius: var(--pf-radius-lg);
+}
+
+.button2:hover {
+    background: var(--pf-tan);
+    color: var(--pf-coffee-roast);
+}
+
+/* Links */
+a:link,
+a:visited {
+    color: var(--pf-coffee-roast);
+}
+
+a:hover,
+a:active {
+    color: var(--pf-primary);
+}
+
+/* Forum Topics List */
+.topiclist .row {
+    background-color: #ffffff;
+    border-bottom: 1px solid rgba(166, 137, 102, 0.1);
+}
+
+.topiclist .row:hover {
+    background-color: var(--pf-tan);
+}
+
+.topiclist .topictitle {
+    color: var(--pf-espresso);
+    font-weight: var(--pf-font-weight-bold);
+}
+
+.topiclist .topictitle:hover {
+    color: var(--pf-coffee-roast);
+}
+
+/* Forum Categories */
+.forabg {
+    background-color: #ffffff;
+    border: 1px solid rgba(166, 137, 102, 0.2);
+    border-radius: var(--pf-radius-xl);
+    margin-bottom: var(--pf-space-4);
+    overflow: hidden;
+}
+
+.forabg .header {
+    background: linear-gradient(135deg, var(--pf-coffee-roast) 0%, var(--pf-mocha) 100%);
+    color: #ffffff;
+    padding: var(--pf-space-3) var(--pf-space-5);
+}
+
+.forabg .header a {
+    color: #ffffff;
+}
+
+/* Sidebar */
+.rightside {
+    background-color: var(--pf-cream-dark);
+    border: 1px solid rgba(166, 137, 102, 0.2);
+    border-radius: var(--pf-radius-xl);
+    padding: var(--pf-space-5);
+}
+
+/* User Profile Highlight */
+.postprofile {
+    background-color: var(--pf-tan);
+    border-radius: var(--pf-radius-lg);
+    padding: var(--pf-space-4);
+}
+
+/* Tags */
+.tag,
+.label {
+    background-color: var(--pf-tan);
+    color: var(--pf-coffee-roast);
+    padding: var(--pf-space-1) var(--pf-space-2);
+    border-radius: var(--pf-radius-sm);
+    font-size: var(--pf-font-size-xs);
+    font-weight: var(--pf-font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(166, 137, 102, 0.1);
+}
+
+/* Alerts / Notices */
+.notice,
+.announcement {
+    background-color: var(--pf-latte);
+    border: 1px solid var(--pf-mocha);
+    border-radius: var(--pf-radius-lg);
+    padding: var(--pf-space-4);
+}
+
+.error {
+    background-color: #fef2f2;
+    border-color: var(--pf-error);
+    color: var(--pf-error);
+}
+
+.success {
+    background-color: #f0fdf4;
+    border-color: var(--pf-success);
+    color: var(--pf-success);
+}
+
+/* Pagination */
+.pagination {
+    background-color: var(--pf-tan);
+    border-radius: var(--pf-radius-lg);
+    padding: var(--pf-space-2);
+}
+
+.pagination a,
+.pagination span {
+    padding: var(--pf-space-2) var(--pf-space-3);
+    border-radius: var(--pf-radius-md);
+}
+
+.pagination a:hover {
+    background-color: var(--pf-mocha);
+    color: #ffffff;
+}
+
+.pagination .current {
+    background-color: var(--pf-coffee-roast);
+    color: #ffffff;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+    background-color: transparent;
+    padding: var(--pf-space-2) 0;
+}
+
+.breadcrumbs a {
+    color: var(--pf-mocha);
+    font-size: var(--pf-font-size-xs);
+    font-weight: var(--pf-font-weight-medium);
+}
+
+.breadcrumbs a:hover {
+    color: var(--pf-coffee-roast);
+}
+
+/* Footer */
+#page-footer {
+    background-color: var(--pf-cream-dark);
+    border-top: 1px solid rgba(166, 137, 102, 0.2);
+    padding: var(--pf-space-8) 0;
+}

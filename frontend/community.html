@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Community — PromptFeed</title>
+
+  <!-- Design System -->
+  <link href="css/styles.css" rel="stylesheet" />
+
+  <!-- Icons (Lucide) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Page Specific Overrides */
+    .pf-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr 300px;
+      gap: 2rem;
+      padding-top: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .pf-layout {
+        grid-template-columns: 240px 1fr;
+      }
+
+      .pf-sidebar-right {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .pf-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .pf-sidebar-left {
+        display: none;
+      }
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: var(--bg-surface);
+      color: var(--text-white);
+    }
+
+    .nav-link.active {
+      background: rgba(124, 114, 255, 0.1);
+      color: var(--accent-purple);
+    }
+
+    .feed-card {
+      display: flex;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-muted);
+      transition: background 0.2s;
+    }
+
+    .feed-card:hover {
+      background: rgba(22, 27, 34, 0.5);
+    }
+
+    .tag-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(56, 139, 253, 0.1);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 139, 253, 0.2);
+    }
+  </style>
+</head>
+
+<body class="pf-main">
+
+  <header class="pf-header"></header>
+
+  <main class="pf-main">
+    <div id="sort-controls"
+      style="display: flex; gap: 8px; margin-bottom: 2rem; border-bottom: 1px solid var(--border-muted); padding-bottom: 1rem;">
+      <button data-sort="hot" class="btn btn-primary active" style="padding: 4px 12px; font-size: 13px;">Hot</button>
+      <button data-sort="new" class="btn btn-ghost" style="padding: 4px 12px; font-size: 13px;">New</button>
+    </div>
+
+    <div id="prompt-feed">
+      <!-- Prompts will be loaded here -->
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui-components.js"></script>
+  <script src="js/pages/community.js"></script>
+</body>
+
+</html>

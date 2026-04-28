@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>PromptFeed - AI Community</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "dark-bg": "#0d1117",
+                        "dark-card": "#161b22",
+                        "dark-border": "#30363d",
+                        "dark-surface": "#21262d",
+                        "accent": "#D4A373",
+                        "accent-hover": "#BC8A5F",
+                        "text-primary": "#f0f6fc",
+                        "text-secondary": "#8b949e",
+                        "text-muted": "#6e7681",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #f0f6fc;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .code-snippet {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.875rem;
+        }
+
+        /* Notification Panel Styles */
+        #notification-panel {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #notification-panel.open {
+            transform: translateX(0);
+        }
+
+        #notification-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #notification-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Skills Panel Styles */
+        #skills-panel {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #skills-panel.open {
+            transform: translateX(0);
+        }
+
+        #skills-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #skills-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .skill-card {
+            transition: background-color 0.2s ease;
+        }
+
+        .skill-card:hover {
+            background-color: #21262d;
+        }
+    </style>
+    <script>
+        // Auth Check
+        if (!localStorage.getItem('accessToken')) {
+            window.location.href = 'login-page.html';
+        }
+    </script>
+    <script src="../javascript/backend.js"></script>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+</head>
+
+<body class="font-display min-h-screen">
+    <!-- Notification Panel Overlay -->
+    <div id="notification-overlay" class="fixed inset-0 bg-black/50 z-[60]"></div>
+
+    <!-- Notification Panel -->
+    <div id="notification-panel"
+        class="fixed top-0 right-0 h-full w-80 bg-dark-card shadow-2xl z-[70] flex flex-col border-l border-dark-border">
+        <div class="flex items-center justify-between p-4 border-b border-dark-border">
+            <h3 class="font-bold text-lg text-text-primary">Notifications</h3>
+            <button id="close-notifications" class="p-1 hover:bg-dark-surface rounded transition-colors">
+                <span class="material-symbols-outlined text-text-secondary">close</span>
+            </button>
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div class="w-16 h-16 bg-dark-surface rounded-full flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-3xl text-text-muted">notifications_off</span>
+            </div>
+            <p class="text-sm font-medium text-text-secondary">You have no notifications yet</p>
+            <p class="text-xs text-text-muted mt-1">When you get upvotes, replies, or mentions they'll appear here.</p>
+        </div>
+        <div class="p-4 border-t border-dark-border">
+            <p class="text-[10px] text-text-muted uppercase tracking-wider font-bold">Prepared for:</p>
+            <div class="flex gap-2 mt-2">
+                <span class="text-xs bg-dark-surface text-text-secondary px-2 py-1 rounded">Upvotes</span>
+                <span class="text-xs bg-dark-surface text-text-secondary px-2 py-1 rounded">Replies</span>
+                <span class="text-xs bg-dark-surface text-text-secondary px-2 py-1 rounded">Mentions</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills Panel Overlay -->
+    <div id="skills-overlay" class="fixed inset-0 bg-black/50 z-[60]"></div>
+
+    <!-- Skills Panel -->
+    <div id="skills-panel"
+        class="fixed top-0 right-0 h-full w-[420px] bg-dark-card shadow-2xl z-[70] flex flex-col border-l border-dark-border">
+        <div class="flex items-center justify-between p-4 border-b border-dark-border">
+            <div class="flex items-center gap-3">
+                <div class="size-8 bg-accent/20 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-accent">psychology</span>
+                </div>
+                <h3 class="font-bold text-lg text-text-primary">Skills</h3>
+            </div>
+            <button id="close-skills" class="p-1 hover:bg-dark-surface rounded transition-colors">
+                <span class="material-symbols-outlined text-text-secondary">close</span>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+            <div id="skills-list" class="flex flex-col">
+                <!-- Rendered by JavaScript -->
+            </div>
+        </div>
+        <div class="p-4 border-t border-dark-border">
+            <p class="text-[10px] text-text-muted uppercase tracking-wider font-bold mb-2">Stats Legend</p>
+            <div class="flex gap-3 text-xs text-text-secondary">
+                <span class="flex items-center gap-1"><span class="text-text-muted">↓</span> Downloads</span>
+                <span class="flex items-center gap-1"><span class="text-text-muted">T</span> Forks</span>
+                <span class="flex items-center gap-1"><span class="text-text-muted">★</span> Stars</span>
+                <span class="flex items-center gap-1"><span class="text-text-muted">v</span> Versions</span>
+            </div>
+        </div>
+    </div>
+
+    <header
+        class="sticky top-0 z-50 w-full border-b border-dark-border bg-dark-card/95 backdrop-blur-md px-4 md:px-10 py-3">
+        <div class="max-w-[1280px] mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-8">
+                <div id="logo" class="flex items-center gap-2 text-accent cursor-pointer">
+                    <div class="size-8 bg-accent rounded flex items-center justify-center text-dark-bg">
+                        <span class="material-symbols-outlined">terminal</span>
+                    </div>
+                    <h2 class="text-xl font-bold leading-tight tracking-tight text-text-primary">PromptFeed</h2>
+                </div>
+                <label class="flex flex-col min-w-40 h-10 max-w-md">
+                    <div
+                        class="flex w-full flex-1 items-stretch rounded-lg h-full bg-dark-surface border border-dark-border">
+                        <div class="text-text-muted flex items-center justify-center pl-4">
+                            <span class="material-symbols-outlined text-xl">search</span>
+                        </div>
+                        <input
+                            class="form-input flex w-full min-w-0 flex-1 border-none bg-transparent focus:outline-0 focus:ring-0 text-sm font-normal text-text-primary placeholder:text-text-muted px-4"
+                            placeholder="Search prompts, tags, or users..." value="" />
+                    </div>
+                </label>
+            </div>
+            <div class="flex items-center gap-4">
+                <nav class="hidden lg:flex items-center gap-6">
+                    <a class="text-text-secondary hover:text-accent text-sm font-medium transition-colors"
+                        href="guidelines.html">Guidelines</a>
+                    <a class="text-text-secondary hover:text-accent text-sm font-medium transition-colors"
+                        href="legal-page.html?type=api">API</a>
+                    <a class="text-text-secondary hover:text-accent text-sm font-medium transition-colors"
+                        href="support.html">Support</a>
+                </nav>
+                <div class="h-6 w-px bg-dark-border hidden lg:block"></div>
+
+                <!-- Language Switcher -->
+                <div class="relative">
+                    <button id="lang-toggle"
+                        class="flex items-center gap-1 px-2 py-1 text-xs font-bold text-text-secondary hover:text-accent transition-colors border border-dark-border rounded-lg bg-dark-surface">
+                        <span id="current-lang">EN</span>
+                        <span class="material-symbols-outlined text-sm">expand_more</span>
+                    </button>
+                    <div id="lang-dropdown"
+                        class="hidden absolute top-full right-0 mt-1 bg-dark-card border border-dark-border rounded-lg shadow-lg overflow-hidden min-w-[100px] z-50">
+                        <button
+                            class="lang-option w-full px-3 py-2 text-left text-xs font-medium text-text-primary hover:bg-dark-surface transition-colors flex items-center justify-between"
+                            data-lang="EN">
+                            English <span class="text-accent hidden" id="check-en">✓</span>
+                        </button>
+                        <button
+                            class="lang-option w-full px-3 py-2 text-left text-xs font-medium text-text-primary hover:bg-dark-surface transition-colors flex items-center justify-between"
+                            data-lang="TR">
+                            Türkçe <span class="text-accent hidden" id="check-tr">✓</span>
+                        </button>
+                        <div class="border-t border-dark-border"></div>
+                        <span class="block px-3 py-2 text-[10px] text-text-muted">More coming soon...</span>
+                    </div>
+                </div>
+
+                <button id="notification-btn"
+                    class="flex items-center justify-center rounded-lg h-10 w-10 bg-dark-surface text-text-secondary hover:bg-dark-border hover:text-accent transition-colors relative">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div id="user-avatar"
+                    class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-dark-border cursor-pointer"
+                    style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDlwzcFd5gTpbatKkwtsue7C0fCanoyIIQ4k3bIXNknlhyuUvrAwObTQg2zFGW2EqR2YHFdrb4Utt2UUq9fJ1ggIBOU_yv3vohMe9bAQiCpz13mSs6o7RspbTN9rwf9vbNQhp3mOwWLob4yweOgqS7LGcF6okkTcF-TVf6vcdXMtCKI5ubGILqjryWAilerHA9VTQc8PhEuK9Itz8DwurXg2wwuEsw3Uqe4KuIULNyD87yzCmHMpsPr2SezH-xgy7q-s4hWtB6rxhU");'>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Composer Section -->
+    <section class="max-w-[1280px] mx-auto px-4 md:px-10 pt-6">
+        <div class="bg-dark-card rounded-xl border border-dark-border p-4">
+            <div class="flex gap-4">
+                <div id="user-avatar-composer"
+                    class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-dark-border shrink-0 cursor-pointer"
+                    style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDlwzcFd5gTpbatKkwtsue7C0fCanoyIIQ4k3bIXNknlhyuUvrAwObTQg2zFGW2EqR2YHFdrb4Utt2UUq9fJ1ggIBOU_yv3vohMe9bAQiCpz13mSs6o7RspbTN9rwf9vbNQhp3mOwWLob4yweOgqS7LGcF6okkTcF-TVf6vcdXMtCKI5ubGILqjryWAilerHA9VTQc8PhEuK9Itz8DwurXg2wwuEsw3Uqe4KuIULNyD87yzCmHMpsPr2SezH-xgy7q-s4hWtB6rxhU");'>
+                </div>
+                <div class="flex-1">
+                    <textarea id="prompt-composer"
+                        class="w-full bg-dark-surface border border-dark-border focus:ring-2 focus:ring-accent/30 focus:border-accent rounded-xl p-3 text-sm text-text-primary placeholder:text-text-muted min-h-[60px] resize-none"
+                        placeholder="What's brewing in your prompt engineering world today?"></textarea>
+                    <div class="flex items-center justify-between mt-3">
+                        <div class="flex gap-2">
+                            <button
+                                class="p-2 text-text-secondary hover:bg-dark-surface hover:text-accent rounded-lg transition-colors">
+                                <span class="material-symbols-outlined text-xl">image</span>
+                            </button>
+                            <button
+                                class="p-2 text-text-secondary hover:bg-dark-surface hover:text-accent rounded-lg transition-colors">
+                                <span class="material-symbols-outlined text-xl">code</span>
+                            </button>
+                            <button
+                                class="p-2 text-text-secondary hover:bg-dark-surface hover:text-accent rounded-lg transition-colors">
+                                <span class="material-symbols-outlined text-xl">link</span>
+                            </button>
+                        </div>
+                        <button id="submit-prompt-btn"
+                            class="px-6 py-2 bg-accent hover:bg-accent-hover text-dark-bg font-bold text-sm rounded-lg transition-all shadow-md shadow-accent/20">
+                            Share Prompt
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Posts Section -->
+    <section class="max-w-[1280px] mx-auto px-4 md:px-10 pt-6">
+        <div class="mb-4">
+            <h3 class="text-lg font-bold text-text-primary">Featured Posts</h3>
+        </div>
+        <div id="featured-posts" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Rendered by JavaScript -->
+        </div>
+    </section>
+
+    <main class="max-w-[1280px] mx-auto px-4 md:px-10 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <aside class="flex lg:col-span-2 flex-col gap-1">
+            <!-- Navigation -->
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-accent text-dark-bg font-bold" href="main-page.html">
+                <span class="material-symbols-outlined">home</span> Home
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-dark-surface hover:text-accent transition-colors"
+                href="topics-page.html">
+                <span class="material-symbols-outlined">topic</span> Topics
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-dark-surface hover:text-accent transition-colors"
+                href="users-page.html">
+                <span class="material-symbols-outlined">group</span> Users
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-dark-surface hover:text-accent transition-colors"
+                href="tags-page.html">
+                <span class="material-symbols-outlined">sell</span> Tags
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-dark-surface hover:text-accent transition-colors"
+                href="legal-page.html?type=about">
+                <span class="material-symbols-outlined">info</span> About
+            </a>
+            <button id="open-skills-btn"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-dark-surface hover:text-accent transition-colors w-full text-left">
+                <span class="material-symbols-outlined">psychology</span> Skills
+            </button>
+
+            <!-- Categories Section -->
+            <div class="my-4 border-t border-dark-border"></div>
+            <p class="px-3 text-xs font-bold text-text-muted uppercase tracking-widest mb-2">Categories</p>
+            <div id="sidebar-categories" class="flex flex-col gap-1">
+                <!-- Rendered by JavaScript -->
+            </div>
+
+            <!-- Tags Section -->
+            <div class="my-4 border-t border-dark-border"></div>
+            <p class="px-3 text-xs font-bold text-text-muted uppercase tracking-widest mb-2">Popular Tags</p>
+            <div id="sidebar-tags" class="flex flex-col gap-1">
+                <!-- Rendered by JavaScript -->
+            </div>
+            <a class="px-3 py-2 text-xs font-medium text-text-secondary hover:text-accent transition-colors" href="tags-page.html">
+                View all tags →
+            </a>
+        </aside>
+        <div class="lg:col-span-7 flex flex-col gap-4">
+            <!-- View Mode Tabs -->
+            <div class="bg-dark-card rounded-xl border border-dark-border overflow-hidden">
+                <div class="flex px-4 gap-4 flex-wrap">
+                    <button class="view-tab flex items-center gap-2 border-b-2 border-accent text-accent pb-3 pt-4"
+                        data-view="categories">
+                        <span class="material-symbols-outlined text-lg">folder</span>
+                        <p class="text-sm font-bold leading-normal">Categories</p>
+                    </button>
+                    <button
+                        class="view-tab flex items-center gap-2 border-b-2 border-transparent text-text-secondary pb-3 pt-4 hover:text-accent transition-colors"
+                        data-view="feed">
+                        <span class="material-symbols-outlined text-lg">dynamic_feed</span>
+                        <p class="text-sm font-bold leading-normal">Feed</p>
+                    </button>
+                    <button
+                        class="view-tab flex items-center gap-2 border-b-2 border-transparent text-text-secondary pb-3 pt-4 hover:text-accent transition-colors"
+                        data-view="popular">
+                        <span class="material-symbols-outlined text-lg">local_fire_department</span>
+                        <p class="text-sm font-bold leading-normal">Popular</p>
+                    </button>
+                    <button
+                        class="view-tab flex items-center gap-2 border-b-2 border-transparent text-text-secondary pb-3 pt-4 hover:text-accent transition-colors"
+                        data-view="latest">
+                        <span class="material-symbols-outlined text-lg">schedule</span>
+                        <p class="text-sm font-bold leading-normal">Latest</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Categories View -->
+            <div id="categories-view" class="flex flex-col gap-3">
+                <!-- Rendered by JavaScript -->
+            </div>
+
+            <!-- Feed View -->
+            <div id="feed-view" class="hidden">
+                <!-- Feed Tabs -->
+                <div class="bg-dark-card rounded-xl border border-dark-border overflow-hidden mb-4">
+                    <div class="flex px-4 gap-8">
+                        <button class="feed-tab flex items-center gap-2 border-b-2 border-accent text-accent pb-3 pt-4"
+                            data-tab="top">
+                            <span class="material-symbols-outlined text-lg">trending_up</span>
+                            <p class="text-sm font-bold leading-normal">Top</p>
+                        </button>
+                        <button
+                            class="feed-tab flex items-center gap-2 border-b-2 border-transparent text-text-secondary pb-3 pt-4 hover:text-accent transition-colors"
+                            data-tab="new">
+                            <span class="material-symbols-outlined text-lg">schedule</span>
+                            <p class="text-sm font-bold leading-normal">New</p>
+                        </button>
+                        <button
+                            class="feed-tab flex items-center gap-2 border-b-2 border-transparent text-text-secondary pb-3 pt-4 hover:text-accent transition-colors"
+                            data-tab="controversial">
+                            <span class="material-symbols-outlined text-lg">bolt</span>
+                            <p class="text-sm font-bold leading-normal">Controversial</p>
+                        </button>
+                    </div>
+                </div>
+                <div id="feed-container" class="flex flex-col gap-4"></div>
+            </div>
+        </div>
+        <aside class="flex lg:col-span-3 flex-col gap-6">
+
+            <!-- Popular Discussions -->
+            <div class="bg-dark-card rounded-xl border border-dark-border overflow-hidden">
+                <div class="px-5 pt-5 pb-2">
+                    <h4 class="font-bold text-base text-text-primary">Recent Discussions</h4>
+                    <p class="text-xs text-text-secondary font-medium mt-0.5">Most active topics</p>
+                </div>
+                <div id="popular-discussions" class="flex flex-col">
+                    <!-- Rendered by JavaScript -->
+                </div>
+                <div class="px-5 pb-4 pt-2">
+                    <a class="text-xs font-medium text-text-secondary hover:text-accent hover:underline decoration-text-muted underline-offset-4 transition-colors block"
+                        href="topics-page.html">View all discussions</a>
+                </div>
+            </div>
+            <div class="bg-dark-card rounded-xl border border-dark-border p-5">
+                <h4 class="font-bold text-sm uppercase tracking-wider text-text-muted mb-4">Community Stats</h4>
+                <div class="flex flex-col gap-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-text-secondary">Active Users</span>
+                        <span class="text-sm font-bold text-text-primary flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-accent"></span> 1,429
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-text-secondary">Total Prompts</span>
+                        <span class="text-sm font-bold text-text-primary">12,504</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-text-secondary">Resolved Queries</span>
+                        <span class="text-sm font-bold text-text-primary">8,912</span>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="flex flex-wrap gap-x-4 gap-y-2 px-2 opacity-60 text-[10px] font-medium uppercase tracking-widest text-text-muted">
+                <a class="hover:text-accent transition-colors" href="legal-page.html?type=agreement">User Agreement</a>
+                <a class="hover:text-accent transition-colors" href="legal-page.html?type=privacy">Privacy Policy</a>
+                <a class="hover:text-accent transition-colors" href="legal-page.html?type=agreement">Content Policy</a>
+                <span>© 2024 PromptFeed Inc.</span>
+            </div>
+        </aside>
+    </main>
+    <script>
+        const token = localStorage.getItem('accessToken');
+        const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+
+        // Navigation
+        document.getElementById('logo').onclick = () => window.location.href = 'main-page.html';
+        document.getElementById('user-avatar').onclick = () => window.location.href = 'user-page.html';
+        document.getElementById('submit-prompt-btn').onclick = async () => {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                alert('Please sign in to share a prompt.');
+                window.location.href = 'login-page.html';
+                return;
+            }
+
+            const composer = document.getElementById('prompt-composer');
+            const text = composer.value.trim();
+
+            if (text.length < 10) {
+                alert('Prompt is too short. Please provide at least 10 characters.');
+                return;
+            }
+
+            // Simple parser: first line is title, hashtags become tags
+            const lines = text.split('\n');
+            let title = lines[0].replace(/#/g, '').trim().substring(0, 100);
+            if (title.length < 3) title = 'My Cool Prompt';
+
+            const hashtagRegex = /#[\w-]+/g;
+            const extractedTags = (text.match(hashtagRegex) || []).map(t => t.slice(1));
+            const tags = extractedTags.length > 0 ? extractedTags.join(',') : 'general,prompt';
+
+            try {
+                const btn = document.getElementById('submit-prompt-btn');
+                const origText = btn.textContent;
+                btn.textContent = 'Sharing...';
+                btn.disabled = true;
+
+                const res = await fetch('http://localhost:5000/api/prompts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        description: 'Created via quick-share composer.',
+                        content: text,
+                        tags: tags,
+                        category: 'Writing' // default
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    composer.value = '';
+                    // re-render feed gracefully
+                    renderFeed(currentFilter, currentTag, searchQuery);
+                    showComingSoonToast('✅ Prompt shared successfully!');
+                } else {
+                    alert('Error sharing prompt: ' + (data.message || JSON.stringify(data.errors)));
+                }
+
+                btn.textContent = origText;
+                btn.disabled = false;
+            } catch (err) {
+                console.error(err);
+                alert('Connection error sharing prompt.');
+                document.getElementById('submit-prompt-btn').disabled = false;
+                document.getElementById('submit-prompt-btn').textContent = 'Share Prompt';
+            }
+        };
+        // Set user avatar from localStorage
+        if (currentUser && currentUser.avatarUrl) {
+            const avatars = document.querySelectorAll('#user-avatar, #user-avatar-composer');
+            avatars.forEach(av => av.style.backgroundImage = `url(${currentUser.avatarUrl})`);
+        }
+
+        // Notification Panel
+        const notifBtn = document.getElementById('notification-btn');
+        const notifPanel = document.getElementById('notification-panel');
+        const notifOverlay = document.getElementById('notification-overlay');
+        const closeNotif = document.getElementById('close-notifications');
+
+        const openNotifications = () => {
+            notifPanel.classList.add('open');
+            notifOverlay.classList.add('open');
+        };
+        const closeNotifications = () => {
+            notifPanel.classList.remove('open');
+            notifOverlay.classList.remove('open');
+        };
+
+        notifBtn.onclick = openNotifications;
+        closeNotif.onclick = closeNotifications;
+        notifOverlay.onclick = closeNotifications;
+
+        // Skills Panel
+        const skillsBtn = document.getElementById('open-skills-btn');
+        const skillsPanel = document.getElementById('skills-panel');
+        const skillsOverlay = document.getElementById('skills-overlay');
+        const closeSkills = document.getElementById('close-skills');
+
+        const openSkillsPanel = () => {
+            skillsPanel.classList.add('open');
+            skillsOverlay.classList.add('open');
+            renderSkills();
+        };
+        const closeSkillsPanel = () => {
+            skillsPanel.classList.remove('open');
+            skillsOverlay.classList.remove('open');
+        };
+
+        skillsBtn.onclick = openSkillsPanel;
+        closeSkills.onclick = closeSkillsPanel;
+        skillsOverlay.onclick = closeSkillsPanel;
+
+        // ==========================================
+        // RENDER SKILLS
+        // ==========================================
+        const renderSkills = () => {
+            const container = document.getElementById('skills-list');
+            const skills = window.backend.getSkills();
+
+            container.innerHTML = skills.map(skill => `
+                <div class="skill-card px-5 py-4 border-b border-dark-border cursor-pointer">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="font-bold text-sm text-text-primary hover:text-accent transition-colors">${skill.name}</h4>
+                                <span class="text-xs text-text-muted font-mono">${skill.slug}</span>
+                            </div>
+                            <p class="text-sm text-text-secondary leading-relaxed">${skill.description}</p>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-text-muted shrink-0">
+                            <span class="flex items-center gap-1" title="Downloads">
+                                <span>↓</span>
+                                <span class="text-text-secondary">${skill.downloads}</span>
+                            </span>
+                            <span class="flex items-center gap-1" title="Forks">
+                                <span>T</span>
+                                <span class="text-text-secondary">${skill.forks}</span>
+                            </span>
+                            <span class="flex items-center gap-1" title="Stars">
+                                <span>★</span>
+                                <span class="text-text-secondary">${skill.stars}</span>
+                            </span>
+                            <span class="flex items-center gap-1" title="Versions">
+                                <span class="text-text-secondary">${skill.versions}</span>
+                                <span>v</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        // Language Switcher
+        const langToggle = document.getElementById('lang-toggle');
+        const langDropdown = document.getElementById('lang-dropdown');
+        const currentLang = document.getElementById('current-lang');
+        let selectedLang = 'EN';
+
+        langToggle.onclick = (e) => {
+            e.stopPropagation();
+            langDropdown.classList.toggle('hidden');
+        };
+
+        document.querySelectorAll('.lang-option').forEach(opt => {
+            opt.onclick = () => {
+                selectedLang = opt.dataset.lang;
+                currentLang.textContent = selectedLang;
+                document.getElementById('check-en').classList.toggle('hidden', selectedLang !== 'EN');
+                document.getElementById('check-tr').classList.toggle('hidden', selectedLang !== 'TR');
+                langDropdown.classList.add('hidden');
+            };
+        });
+
+        document.addEventListener('click', () => langDropdown.classList.add('hidden'));
+
+        // Feed State
+        let currentFilter = 'top';
+        let currentTag = null;
+        let searchQuery = null;
+        let currentView = 'categories';
+
+        // Search Input
+        const searchInput = document.querySelector('input.form-input');
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderFeed(currentFilter, currentTag, searchQuery);
+        });
+
+        // ==========================================
+        // RENDER FEATURED POSTS
+        // ==========================================
+        const renderFeaturedPosts = () => {
+            const container = document.getElementById('featured-posts');
+            const posts = window.backend.getFeaturedPosts();
+
+            container.innerHTML = posts.map(post => `
+                <div class="bg-dark-card rounded-xl border border-dark-border p-4 hover:border-accent/50 transition-all cursor-pointer group">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-accent/20 text-accent">${post.tag}</span>
+                    </div>
+                    <h4 class="font-bold text-sm text-text-primary group-hover:text-accent transition-colors line-clamp-2">${post.title}</h4>
+                    <p class="text-xs text-text-secondary mt-1 line-clamp-2">${post.description}</p>
+                    <div class="flex items-center gap-2 mt-3">
+                        <div class="w-5 h-5 rounded-full bg-dark-surface flex items-center justify-center">
+                            <span class="material-symbols-outlined text-xs text-text-secondary">person</span>
+                        </div>
+                        <span class="text-xs text-text-secondary font-medium">${post.author}</span>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        // ==========================================
+        // RENDER CATEGORIES VIEW (Main Content)
+        // ==========================================
+        const renderCategoriesView = () => {
+            const container = document.getElementById('categories-view');
+            const categories = window.backend.getCategories();
+
+            container.innerHTML = categories.map(cat => `
+                <div class="bg-dark-card rounded-xl border border-dark-border p-4 hover:border-accent/50 transition-all cursor-pointer group">
+                    <div class="flex items-start gap-4">
+                        <div class="flex items-center gap-3 flex-1">
+                            <div class="w-1 h-12 rounded-full" style="background-color: ${cat.color}"></div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-lg" style="color: ${cat.color}">${cat.icon}</span>
+                                    <h4 class="font-bold text-base text-text-primary group-hover:text-accent transition-colors">${cat.name}</h4>
+                                </div>
+                                <p class="text-sm text-text-secondary mt-1">${cat.description}</p>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    ${cat.subtags.map(tag => `<span class="text-[10px] font-medium px-2 py-0.5 rounded bg-dark-surface text-text-secondary">${tag}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="text-lg font-bold text-accent">${cat.topicsCount}</span>
+                            <span class="text-xs text-text-secondary">/${cat.topicsLabel}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        // ==========================================
+        // RENDER SIDEBAR CATEGORIES
+        // ==========================================
+        const renderSidebarCategories = () => {
+            const container = document.getElementById('sidebar-categories');
+            const categories = window.backend.getCategories();
+
+            container.innerHTML = categories.map(cat => `
+                <a class="flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary hover:bg-dark-surface hover:text-accent transition-colors cursor-pointer" href="#">
+                    <span class="w-2 h-2 rounded-full" style="background-color: ${cat.color}"></span>
+                    <span class="text-sm font-medium">${cat.name}</span>
+                </a>
+            `).join('');
+        };
+
+        // ==========================================
+        // RENDER SIDEBAR TAGS
+        // ==========================================
+        const renderSidebarTags = () => {
+            const container = document.getElementById('sidebar-tags');
+            const tags = window.backend.getTags().slice(0, 6);
+
+            container.innerHTML = tags.map(tag => `
+                <a class="flex items-center justify-between px-3 py-1.5 rounded-lg text-text-secondary hover:bg-dark-surface hover:text-accent transition-colors cursor-pointer" href="#" onclick="filterByTag('${tag.name}')">
+                    <span class="text-sm font-medium">#${tag.name}</span>
+                    ${tag.trending ? '<span class="material-symbols-outlined text-xs text-accent">trending_up</span>' : ''}
+                </a>
+            `).join('');
+        };
+
+        // ==========================================
+        // RENDER POPULAR DISCUSSIONS (Right Sidebar)
+        // ==========================================
+        const renderPopularDiscussions = () => {
+            const container = document.getElementById('popular-discussions');
+            const discussions = window.backend.getPopularDiscussions();
+
+            container.innerHTML = discussions.map(disc => `
+                <a class="flex items-start gap-3 px-5 py-3 hover:bg-dark-surface transition-colors group" href="#">
+                    <div class="w-8 h-8 rounded-full bg-dark-surface flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-sm text-text-secondary">chat</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h5 class="text-sm font-medium text-text-primary group-hover:text-accent transition-colors line-clamp-2">${disc.title}</h5>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded" style="background-color: ${disc.categoryColor}30; color: ${disc.categoryColor}">${disc.category}</span>
+                            <span class="text-xs text-text-muted">${disc.views > 999 ? (disc.views / 1000).toFixed(1) + 'k' : disc.views} views</span>
+                        </div>
+                    </div>
+                    ${disc.isNew ? '<span class="text-[10px] font-bold text-accent bg-accent/20 px-1.5 py-0.5 rounded">NEW</span>' : ''}
+                </a>
+            `).join('');
+        };
+
+        // ==========================================
+        // RENDER FEED (API-Driven)
+        // ==========================================
+        const renderFeed = async (filter = 'top', tag = null, query = null) => {
+            const container = document.getElementById('feed-container');
+            container.innerHTML = `<div class="flex items-center justify-center p-12"><span class="material-symbols-outlined animate-spin text-4xl text-accent">sync</span></div>`;
+
+            let prompts = [];
+            try {
+                const params = new URLSearchParams();
+                if (filter === 'top') params.set('sort', 'score');
+                else if (filter === 'new') params.set('sort', 'date');
+                if (tag) params.set('tag', tag);
+                if (query) params.set('search', query);
+                params.set('limit', '20');
+
+                const headers = {};
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const res = await fetch(`http://localhost:5000/api/prompts?${params.toString()}`, { headers });
+                const data = await res.json();
+
+                if (data.success) {
+                    // Handle both paginated and non-paginated responses
+                    prompts = data.data?.prompts || data.data || [];
+                }
+            } catch (err) {
+                console.warn('API feed failed, using mock fallback:', err);
+                if (window.backend) {
+                    prompts = window.backend.getFeed(filter, tag, query);
+                }
+            }
+
+            if (!prompts || prompts.length === 0) {
+                container.innerHTML = `
+                <div class="flex flex-col items-center justify-center p-12 text-center bg-dark-card rounded-xl border border-dark-border">
+                    <div class="w-16 h-16 bg-dark-surface rounded-full flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-3xl text-text-muted">search_off</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-text-primary">No results found</h3>
+                    <p class="text-sm text-text-secondary mt-1">Try adjusting your filters or search query.</p>
+                    ${tag ? `<button class="mt-4 text-xs font-bold text-accent hover:underline" onclick="clearTag()">Clear tag filter: #${tag}</button>` : ''}
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = prompts.map(post => {
+                const score = post.score ?? post.upvotes ?? 0;
+                const scoreDisplay = Math.abs(score) > 999 ? (score / 1000).toFixed(1) + 'k' : score;
+                const authorHandle = post.authorHandle || post.user?.username || 'unknown';
+                const tags = post.tags || [];
+                const tagsHtml = tags.map(t =>
+                    `<span class="tag-link bg-dark-surface text-text-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-dark-border cursor-pointer hover:bg-accent hover:text-dark-bg hover:border-accent transition-colors" onclick="filterByTag('${t}')">#${t}</span>`
+                ).join('');
+
+                const snippetHtml = post.content
+                    ? `<div class="bg-dark-bg rounded-lg p-3 border border-dark-border mt-2">
+                        <pre class="code-snippet text-text-secondary overflow-x-auto text-xs"><code>${post.content.slice(0, 150)}${post.content.length > 150 ? '...' : ''}</code></pre>
+                       </div>`
+                    : '';
+
+                return `
+                <div class="bg-dark-card rounded-xl border border-dark-border hover:border-accent/50 transition-all p-0 flex group">
+                    <div class="w-12 bg-dark-surface flex flex-col items-center py-4 gap-1 rounded-l-xl border-r border-dark-border">
+                        <button class="vote-up text-text-secondary hover:text-accent transition-colors" data-id="${post.id}" onclick="handleVote('${post.id}', 1, event)">
+                            <span class="material-symbols-outlined font-bold">expand_less</span>
+                        </button>
+                        <span class="vote-count text-sm font-bold text-accent" id="score-${post.id}">${scoreDisplay}</span>
+                        <button class="vote-down text-text-secondary hover:text-red-500 transition-colors" data-id="${post.id}" onclick="handleVote('${post.id}', -1, event)">
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </button>
+                    </div>
+                    <div class="flex-1 p-4 flex flex-col gap-2">
+                        <div class="flex items-center gap-2 text-xs text-text-secondary">
+                            <span class="font-bold text-accent cursor-pointer hover:underline" onclick="window.location.href='user-page.html'">u/${authorHandle}</span>
+                            <span>•</span>
+                            <span>${new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <h3 class="text-lg font-bold leading-tight text-text-primary cursor-pointer hover:text-accent transition-colors" onclick="window.location.href='form-page.html?id=${post.id}'">${post.title}</h3>
+                            <div class="flex flex-wrap gap-2 mt-1.5 mb-1">${tagsHtml}</div>
+                            <p class="text-sm text-text-secondary line-clamp-2">${post.description || ''}</p>
+                        </div>
+                        ${snippetHtml}
+                        <div class="flex items-center gap-4 mt-2">
+                            <button class="comment-btn flex items-center gap-2 text-text-secondary text-xs font-bold hover:bg-dark-surface hover:text-accent px-2 py-1.5 rounded transition-colors" onclick="window.location.href='form-page.html?id=${post.id}'">
+                                <span class="material-symbols-outlined text-base">chat_bubble</span> ${post.commentCount ?? post._count?.votes ?? 0} comments
+                            </button>
+                            <button class="share-btn flex items-center gap-2 text-text-secondary text-xs font-bold hover:bg-dark-surface hover:text-accent px-2 py-1.5 rounded transition-colors" onclick="copyLink('${post.id}')">
+                                <span class="material-symbols-outlined text-base">share</span> Share
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        };
+
+        // Vote handler for feed
+        window.handleVote = async (promptId, value, e) => {
+            e.stopPropagation();
+            if (!token) {
+                alert('Please login to vote.');
+                window.location.href = 'login-page.html';
+                return;
+            }
+            try {
+                const res = await fetch(`http://localhost:5000/api/prompts/${promptId}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ value })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const scoreEl = document.getElementById(`score-${promptId}`);
+                    if (scoreEl) scoreEl.textContent = data.data.score;
+                }
+            } catch (err) {
+                console.error('Vote failed:', err);
+            }
+        };
+
+        // Share handler — copy link
+        window.copyLink = (promptId) => {
+            const url = `${window.location.origin}/html/form-page.html?id=${promptId}`;
+            navigator.clipboard.writeText(url).then(() => {
+                const toast = document.createElement('div');
+                toast.textContent = 'Link copied!';
+                toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#D4A373;color:#0d1117;padding:10px 18px;border-radius:8px;font-weight:bold;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.4)';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2200);
+            });
+        };
+
+        // ==========================================
+        // VIEW MODE SWITCHING
+        // ==========================================
+        const switchView = (view) => {
+            currentView = view;
+            const categoriesView = document.getElementById('categories-view');
+            const feedView = document.getElementById('feed-view');
+
+            if (view === 'categories') {
+                categoriesView.classList.remove('hidden');
+                feedView.classList.add('hidden');
+            } else {
+                categoriesView.classList.add('hidden');
+                feedView.classList.remove('hidden');
+
+                if (view === 'popular') {
+                    renderFeed('top', currentTag, searchQuery);
+                } else if (view === 'latest') {
+                    renderFeed('new', currentTag, searchQuery);
+                } else {
+                    renderFeed(currentFilter, currentTag, searchQuery);
+                }
+            }
+        };
+
+        // View Tabs
+        document.querySelectorAll('.view-tab').forEach(tab => {
+            tab.onclick = () => {
+                const view = tab.getAttribute('data-view');
+                document.querySelectorAll('.view-tab').forEach(t => {
+                    t.classList.remove('border-coffee-roast', 'text-coffee-roast', 'border-accent', 'text-accent');
+                    t.classList.add('border-transparent', 'text-mocha');
+                });
+                tab.classList.add('border-accent', 'text-accent');
+                tab.classList.remove('border-transparent', 'text-mocha');
+                switchView(view);
+            };
+        });
+
+        // Filter Actions
+        window.filterByTag = (tag) => {
+            currentTag = tag;
+            searchInput.value = '';
+            // Switch to feed view when filtering by tag
+            document.querySelector('[data-view="feed"]').click();
+            renderFeed(currentFilter, currentTag, null);
+        };
+
+        window.clearTag = () => {
+            currentTag = null;
+            renderFeed(currentFilter, null, searchQuery);
+        };
+
+        // ==========================================
+        // INITIAL RENDER
+        // ==========================================
+        renderFeaturedPosts();
+        renderCategoriesView();
+        renderSidebarCategories();
+        renderSidebarTags();
+        renderPopularDiscussions();
+        renderFeed('top');
+
+        // Feed Tabs (inside feed view)
+        document.querySelectorAll('.feed-tab').forEach(tab => {
+            tab.onclick = () => {
+                currentFilter = tab.getAttribute('data-tab');
+                document.querySelectorAll('.feed-tab').forEach(t => {
+                    t.classList.remove('border-coffee-roast', 'text-coffee-roast');
+                    t.classList.add('border-transparent', 'text-mocha');
+                });
+                tab.classList.add('border-coffee-roast', 'text-coffee-roast');
+                tab.classList.remove('border-transparent', 'text-mocha');
+                renderFeed(currentFilter, currentTag, searchQuery);
+            };
+        });
+        // ==========================================
+        // UNHANDLED CLICKS (Coming Soon)
+        // ==========================================
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('a, button');
+            if (!target) return;
+
+            if (target.tagName === 'A') {
+                const text = target.textContent.trim().toLowerCase();
+                if (text === 'api') {
+                    e.preventDefault();
+                    window.location.href = 'http://localhost:5000/api-docs'; // Example link if swagger exists
+                    return;
+                }
+                if (text.includes('marketplace')) {
+                    e.preventDefault();
+                    window.location.href = 'marketplace.html';
+                    return;
+                }
+            }
+
+            // If it's an empty link
+            if (target.tagName === 'A' && target.getAttribute('href') === '#') {
+                e.preventDefault();
+                showComingSoonToast('Feature coming soon!');
+            }
+
+            // If it's a composer utility button (image, code, link)
+            if (target.tagName === 'BUTTON' && target.querySelector('.material-symbols-outlined')) {
+                const iconTxt = target.querySelector('.material-symbols-outlined').textContent.trim();
+                if (['image', 'code', 'link'].includes(iconTxt)) {
+                    showComingSoonToast(`${iconTxt} attachments coming soon!`);
+                }
+            }
+        });
+
+        function showComingSoonToast(msg) {
+            const toast = document.createElement('div');
+            toast.textContent = `🚧 ${msg}`;
+            toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#21262d;color:#f0f6fc;border:1px solid #30363d;padding:10px 18px;border-radius:8px;font-size:14px;z-index:9999;';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+    </script>
+</body>
+
+</html>

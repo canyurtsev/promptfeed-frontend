@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Sign in to PromptFeed · PromptFeed</title>
+
+  <!-- Design System -->
+  <link href="css/styles.css" rel="stylesheet" />
+
+  <!-- Icons (Lucide) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      background-color: var(--bg-subtle);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 4rem;
+    }
+
+    .auth-box {
+      width: 340px;
+      margin-top: 1.5rem;
+    }
+
+    .auth-form-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--text-white);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 5px 12px;
+      font-size: 14px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(68, 147, 248, 0.1);
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="logo-container">
+    <a href="index.html" style="color: var(--text-white);"><i data-lucide="terminal" size="48"
+        style="color: var(--accent-purple)"></i></a>
+    <h1 style="font-size: 24px; font-weight: 300; margin-top: 1.5rem;">Sign in to PromptFeed</h1>
+  </div>
+
+  <div class="auth-box">
+    <div class="auth-form-card">
+      <form id="signin-form">
+        <div class="form-group">
+          <label for="email">Username or email address</label>
+          <input type="text" id="email" class="form-control" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label for="password" style="margin-bottom: 0;">Password</label>
+            <a href="#" style="font-size: 12px;">Forgot password?</a>
+          </div>
+          <input type="password" id="password" class="form-control" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 8px;">Sign in</button>
+      </form>
+    </div>
+
+    <div class="card"
+      style="margin-top: 15px; padding: 15px; text-align: center; font-size: 14px; background: transparent;">
+      New to PromptFeed? <a href="signin.html">Create an account.</a>
+    </div>
+  </div>
+
+  <footer
+    style="margin-top: 6rem; padding: 2rem; font-size: 12px; color: var(--text-muted); display: flex; gap: 1rem; justify-content: center;">
+    <a href="#" style="color: inherit;">Terms</a>
+    <a href="#" style="color: inherit;">Privacy</a>
+    <a href="#" style="color: inherit;">Docs</a>
+    <a href="#" style="color: inherit;">Contact PromptFeed</a>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/pages/signin.js"></script>
+</body>
+</body>
+
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Bounty Board — PromptFeed</title>
+<meta name="description" content="Earn by solving community requests for prompts, skills and AI workflows."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<link rel="stylesheet" href="pf-layout.css"/>
+<style>
+.bb-card {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.bb-card:hover {
+  border-color: var(--pf-accent);
+  transform: translateY(-2px);
+}
+.bb-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.bb-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--pf-text-primary);
+  margin-bottom: 4px;
+}
+.bb-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--pf-text-secondary);
+}
+.bb-desc {
+  font-size: 13px;
+  color: var(--pf-text-primary);
+  line-height: 1.5;
+}
+.bb-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #3fb95015;
+  border: 1px solid #3fb95030;
+  color: var(--pf-success);
+  padding: 6px 12px;
+  border-radius: var(--pf-radius);
+  font-family: var(--pf-font-mono);
+  font-weight: 700;
+  font-size: 16px;
+}
+.bb-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.bb-status--open { background: #00c2ff15; color: var(--pf-accent); border: 1px solid #00c2ff30; }
+.bb-status--review { background: #d2992215; color: var(--pf-warning); border: 1px solid #d2992230; }
+.bb-status--completed { background: #3fb95015; color: var(--pf-success); border: 1px solid #3fb95030; }
+
+.bb-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--pf-border);
+  padding-top: 16px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.bb-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--pf-text-muted);
+}
+.bb-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.bb-actions {
+  display: flex;
+  gap: 8px;
+}
+</style>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+</head>
+<body>
+
+<!-- Gate Modal -->
+<div id="pf-gate" class="pf-gate-overlay">
+  <div class="pf-gate-modal">
+    <div class="pf-gate-modal__icon">🔒</div>
+    <div class="pf-gate-modal__title">Sign in required</div>
+    <div class="pf-gate-modal__desc" id="gate-desc">Sign in to perform this action.</div>
+    <div class="pf-gate-modal__actions">
+      <button class="pf-btn pf-btn--ghost" id="btn-close-gate">Cancel</button>
+      <button class="pf-btn pf-btn--primary" id="btn-goto-signin">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<header class="pf-topnav">
+  <div class="pf-topnav__inner">
+    <a href="index.html" class="pf-topnav__logo">
+      <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
+    </a>
+    <nav class="pf-topnav__nav" aria-label="Main">
+      <a href="index.html" class="pf-topnav__nav-link">News</a>
+      <a href="community.html" class="pf-topnav__nav-link">Community</a>
+      <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
+      <a href="benchmarks.html" class="pf-topnav__nav-link">Benchmarks</a>
+      <a href="skill-library.html" class="pf-topnav__nav-link">Skills</a>
+      <a href="bounty-board.html" class="pf-topnav__nav-link active" aria-current="page">Bounties</a>
+      <a href="subscription.html" class="pf-topnav__nav-link">Pricing</a>
+    </nav>
+    <div class="pf-topnav__search">
+      <span class="material-symbols-outlined pf-topnav__search-icon">search</span>
+      <input id="search-input" type="search" placeholder="Search bounties..." autocomplete="off"/>
+    </div>
+    <div class="pf-topnav__actions" id="nav-auth-area"></div>
+  </div>
+</header>
+
+<!-- AD BANNER -->
+<div id="top-ad-banner" class="pf-ad-banner pf-ad-banner--hidden">
+  <span class="pf-ad-banner__label">AD</span>
+  Advertisement — <a href="subscription.html" style="color:var(--pf-accent)">Upgrade to Pro</a> to remove ads
+</div>
+
+<div class="pf-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="pf-sidebar-left">
+    <div class="pf-sidebar-label">Categories</div>
+    <button class="pf-sidebar-link active" data-action="setFilter" data-type="category" data-val="">
+      <span class="material-symbols-outlined" style="font-size:16px">apps</span> All Bounties
+    </button>
+    <button class="pf-sidebar-link" data-action="setFilter" data-type="category" data-val="Prompt Requests">
+      <span class="pf-sidebar-link__dot" style="background:#00c2ff"></span>Prompt Requests
+    </button>
+    <button class="pf-sidebar-link" data-action="setFilter" data-type="category" data-val="Skill Requests">
+      <span class="pf-sidebar-link__dot" style="background:#a371f7"></span>Skill Requests
+    </button>
+    <button class="pf-sidebar-link" data-action="setFilter" data-type="category" data-val="Agent Workflows">
+      <span class="pf-sidebar-link__dot" style="background:#58a6ff"></span>Agent Workflows
+    </button>
+    <button class="pf-sidebar-link" data-action="setFilter" data-type="category" data-val="Security Audits">
+      <span class="pf-sidebar-link__dot" style="background:#f85149"></span>Security Audits
+    </button>
+    <button class="pf-sidebar-link" data-action="setFilter" data-type="category" data-val="Data Tasks">
+      <span class="pf-sidebar-link__dot" style="background:#79c0ff"></span>Data Tasks
+    </button>
+
+    <div class="pf-sidebar-divider"></div>
+    <div class="pf-sidebar-label">Status</div>
+    <button class="pf-sidebar-link" data-action="setFilter" data-type="status" data-val="open">
+      <span class="material-symbols-outlined" style="font-size:16px;color:var(--pf-accent)">radio_button_unchecked</span> Open
+    </button>
+    <button class="pf-sidebar-link" data-action="setFilter" data-type="status" data-val="review">
+      <span class="material-symbols-outlined" style="font-size:16px;color:var(--pf-warning)">pending</span> In Review
+    </button>
+    <button class="pf-sidebar-link" data-action="setFilter" data-type="status" data-val="completed">
+      <span class="material-symbols-outlined" style="font-size:16px;color:var(--pf-success)">task_alt</span> Completed
+    </button>
+  </aside>
+
+  <!-- CENTER: Feed -->
+  <main class="pf-feed" role="main">
+    <div style="margin-bottom:24px">
+      <h1 style="font-size:24px;font-weight:800;color:var(--pf-text-primary);margin-bottom:8px">Bounty Board</h1>
+      <p style="font-size:14px;color:var(--pf-text-secondary);line-height:1.5">Earn by solving community requests for prompts, skills and AI workflows.</p>
+    </div>
+
+    <div id="bounties-container" style="display:flex;flex-direction:column;gap:20px" aria-live="polite">
+      <!-- Loading state -->
+      <div class="pf-loading"><div class="pf-spinner"></div></div>
+    </div>
+  </main>
+
+  <!-- RIGHT RAIL -->
+  <aside class="pf-sidebar-right">
+    <div id="right-ad-slot" class="pf-ad-slot pf-ad-banner--hidden">
+      <span class="pf-ad-slot__label">Advertisement</span>
+      Sponsor slot available
+    </div>
+
+    <div class="pf-rail-widget">
+      <div class="pf-rail-widget__header">💎 Featured Bounty</div>
+      <div class="pf-rail-widget__body" style="font-size:12px;color:var(--pf-text-muted)" id="featured-bounty">
+        <span class="pf-stub-badge">Coming Soon</span>
+      </div>
+    </div>
+
+    <div class="pf-rail-widget">
+      <div class="pf-rail-widget__header">🏆 Top Earners</div>
+      <div class="pf-rail-widget__body" style="font-size:12px;color:var(--pf-text-muted)">
+        <span class="pf-stub-badge">Coming Soon</span>
+      </div>
+    </div>
+
+    <div id="pro-box" class="pf-pro-box pf-ad-banner--hidden">
+      <span class="pf-pro-box__badge">🚀 Creator</span>
+      <div class="pf-pro-box__title">Post a Bounty</div>
+      <ul class="pf-pro-box__list">
+        <li>Get custom workflows built</li>
+        <li>Harness the community</li>
+        <li>Review and accept the best</li>
+      </ul>
+      <a href="subscription.html" class="pf-pro-btn">Become a Creator</a>
+    </div>
+  </aside>
+
+</div>
+
+<script src="js/pages/bounty-board.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MODEL
+// ============================================
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  username      String   @unique
+  passwordHash  String
+  fullName      String?
+  avatarUrl     String?
+  bio           String?
+  role          String   @default("USER")
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  prompts           Prompt[]
+  products          Product[]
+  purchasedProducts Transaction[]      @relation("buyer")
+  soldProducts      Transaction[]      @relation("seller")
+  subscription      Subscription?
+  wallet            Wallet?
+  createdBounties   Bounty[]           @relation("creator")
+  wonBounties       Bounty[]           @relation("winner")
+  bountySubmissions BountySubmission[]
+  upvotes           PromptVote[]
+  bookmarks         PromptBookmark[]
+  reviews           Review[]
+  comments          Comment[]
+  notifications     Notification[]
+  boosts            Boost[]
+  skills            Skill[]
+  aiLogs            AILog[]
+  ownerships        Ownership[]
+}
+
+// ============================================
+// PROMPT MODEL
+// ============================================
+model Prompt {
+  id             String   @id @default(uuid())
+  userId         String
+  title          String
+  description    String?
+  content        String
+  category       String?
+  tags           String
+  isPremium      Boolean  @default(false)
+  price          Decimal? @db.Decimal(10, 2)
+  viewsCount     Int      @default(0)
+  score          Int      @default(0)
+  bookmarksCount Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product           Product?
+  votes             PromptVote[]
+  bookmarks         PromptBookmark[]
+  bountySubmissions BountySubmission[]
+  comments          Comment[]
+  versions          PromptVersion[]
+  metrics           PromptMetrics?
+  promptTags        PromptTag[]
+  boosts            Boost[]
+  skillPrompts      SkillPrompt[]
+  useCases          String?
+  exampleOutput     String?
+}
+
+// ============================================
+// PRODUCT MODEL (Premium Prompts)
+// ============================================
+model Product {
+  id              String   @id @default(uuid())
+  promptId        String   @unique
+  sellerId        String
+  price           Decimal  @db.Decimal(10, 2)
+  enterprisePrice Decimal? @db.Decimal(10, 2)
+  currency        String   @default("USD")
+  licenseType     String?
+  salesCount      Int      @default(0)
+  rating          Float    @default(0)
+  reviewCount     Int      @default(0)
+  isFeatured      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  // Relations
+  prompt       Prompt        @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  seller       User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  ownerships   Ownership[]
+  reviews      Review[]
+}
+
+// ============================================
+// TRANSACTION MODEL
+// ============================================
+model Transaction {
+  id              String   @id @default(uuid())
+  buyerId         String
+  sellerId        String
+  productId       String
+  amount          Decimal  @db.Decimal(10, 2)
+  platformFee     Decimal  @db.Decimal(10, 2)
+  sellerEarnings  Decimal  @db.Decimal(10, 2)
+  currency        String   @default("USD")
+  status          String
+  paymentMethod   String?
+  stripePaymentId String?
+  createdAt       DateTime @default(now())
+
+  // Relations
+  buyer   User    @relation("buyer", fields: [buyerId], references: [id])
+  seller  User    @relation("seller", fields: [sellerId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+// ============================================
+// SUBSCRIPTION MODEL
+// ============================================
+model Subscription {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  plan                 String
+  status               String
+  stripeSubscriptionId String?
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+  createdAt            DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// WALLET MODEL
+// ============================================
+model Wallet {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  balance         Decimal  @default(0) @db.Decimal(10, 2)
+  totalEarnings   Decimal  @default(0) @db.Decimal(10, 2)
+  totalSpent      Decimal  @default(0) @db.Decimal(10, 2)
+  pendingPayouts  Decimal  @default(0) @db.Decimal(10, 2)
+  lifetimePayouts Decimal  @default(0) @db.Decimal(10, 2)
+  payoutMethod    String?
+  payoutDetails   String?
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// BOUNTY MODEL
+// ============================================
+model Bounty {
+  id               String    @id @default(uuid())
+  creatorId        String
+  title            String
+  description      String?
+  amount           Decimal   @db.Decimal(10, 2)
+  currency         String    @default("USD")
+  status           String
+  escrowStatus     String    @default("HELD")
+  escrowAmount     Decimal   @default(0) @db.Decimal(10, 2)
+  escrowReleasedAt DateTime?
+  category         String?
+  tags             String
+  deadline         DateTime?
+  winnerId         String?
+  createdAt        DateTime  @default(now())
+
+  // Relations
+  creator     User               @relation("creator", fields: [creatorId], references: [id])
+  winner      User?              @relation("winner", fields: [winnerId], references: [id])
+  submissions BountySubmission[]
+}
+
+// ============================================
+// BOUNTY SUBMISSION MODEL
+// ============================================
+model BountySubmission {
+  id          String   @id @default(uuid())
+  bountyId    String
+  userId      String
+  promptId    String
+  status      String
+  submittedAt DateTime @default(now())
+
+  // Relations
+  bounty Bounty @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+  prompt Prompt @relation(fields: [promptId], references: [id])
+}
+
+// ============================================
+// PROMPT VOTE MODEL
+// ============================================
+model PromptVote {
+  id        String   @id @default(uuid())
+  promptId  String
+  userId    String
+  value     Int // 1 for upvote, -1 for downvote
+  weight    Int      @default(1) // For freemium weighting
+  createdAt DateTime @default(now())
+
+  // Relations
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([promptId, userId])
+}
+
+// ============================================
+// PROMPT BOOKMARK MODEL
+// ============================================
+model PromptBookmark {
+  id        String   @id @default(uuid())
+  promptId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([promptId, userId])
+}
+
+// ============================================
+// REVIEW MODEL
+// ============================================
+model Review {
+  id        String   @id @default(uuid())
+  productId String
+  userId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+}
+
+// ============================================
+// COMMENT MODEL
+// ============================================
+model Comment {
+  id        String   @id @default(uuid())
+  promptId  String
+  userId    String
+  content   String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  prompt   Prompt    @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent   Comment?  @relation("CommentThread", fields: [parentId], references: [id])
+  children Comment[] @relation("CommentThread")
+}
+
+// ============================================
+// TAG MODEL
+// ============================================
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  // Relations
+  promptTags PromptTag[]
+}
+
+// ============================================
+// PROMPT TAG MODEL (Join Table)
+// ============================================
+model PromptTag {
+  id       String @id @default(uuid())
+  promptId String
+  tagId    String
+
+  // Relations
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([promptId, tagId])
+}
+
+// ============================================
+// PROMPT VERSION MODEL
+// ============================================
+model PromptVersion {
+  id        String   @id @default(uuid())
+  promptId  String
+  version   Int
+  content   String
+  changelog String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// PROMPT METRICS MODEL
+// ============================================
+model PromptMetrics {
+  id        String @id @default(uuid())
+  promptId  String @unique
+  views     Int    @default(0)
+  runs      Int    @default(0) // totalRuns
+  cacheHits Int    @default(0) // dynamic savings processed backend
+  forks     Int    @default(0)
+  copies    Int    @default(0)
+
+  // Relations
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// API CACHE MODEL
+// ============================================
+model ApiCache {
+  id         String   @id @default(uuid())
+  promptHash String   @unique
+  promptText String
+  response   String
+  model      String
+  tokensUsed Int      @default(0)
+  hits       Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([promptHash])
+}
+
+// ============================================
+// NOTIFICATION MODEL
+// ============================================
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String // vote, comment, purchase, bounty
+  message   String
+  read      Boolean  @default(false)
+  metadata  String? // JSON string for extra data
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// BOOST MODEL
+// ============================================
+model Boost {
+  id        String   @id @default(uuid())
+  promptId  String
+  userId    String
+  weight    Float    @default(1.0)
+  startTime DateTime @default(now())
+  endTime   DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  // Relations
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// SKILL MODEL
+// ============================================
+model Skill {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  content     String // Markdown content
+  userId      String
+  tags        String // Comma separated tags
+  licenseType String   @default("free")
+  price       Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompts SkillPrompt[]
+}
+
+// ============================================
+// SKILL PROMPT RELATION (Join Table)
+// ============================================
+model SkillPrompt {
+  id       String @id @default(uuid())
+  skillId  String
+  promptId String
+
+  // Relations
+  skill  Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  @@unique([skillId, promptId])
+}
+
+// ============================================
+// AI LOG MODEL (Lightweight Metrics)
+// ============================================
+model AILog {
+  id        String   @id @default(uuid())
+  userId    String?
+  model     String
+  tokens    Int      @default(0)
+  latencyMs Int      @default(0)
+  cacheHit  Boolean  @default(false)
+  source    String? // 'api', 'cache_exact', 'cache_similarity'
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
+// ============================================
+// OWNERSHIP MODEL
+// ============================================
+model Ownership {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}

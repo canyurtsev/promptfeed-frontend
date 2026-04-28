@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Pricing · PromptFeed</title>
+
+  <!-- Design System -->
+  <link href="css/styles.css" rel="stylesheet" />
+
+  <!-- Icons (Lucide) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 768px) {
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tier-card {
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tier-card.featured {
+      border-color: var(--accent-purple);
+      box-shadow: 0 10px 30px rgba(124, 114, 255, 0.1);
+    }
+
+    .check-list {
+      list-style: none;
+      margin: 1.5rem 0;
+    }
+
+    .check-list li {
+      display: flex;
+      align-items: start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .check-list i {
+      color: var(--accent-green);
+      margin-top: 2px;
+    }
+  </style>
+</head>
+
+<body class="pf-main">
+
+  <!-- Header -->
+  <header class="pf-header">
+    <div class="pf-header__left">
+      <a href="index.html" class="pf-logo">
+        <i data-lucide="terminal" style="color: var(--accent-purple)"></i>
+        <span>PromptFeed</span>
+      </a>
+      <nav class="hidden md:flex" style="display: flex; gap: 1.5rem; margin-left: 1rem;">
+        <a href="community.html" class="btn btn-ghost"
+          style="color: var(--text-secondary); font-size: 13px;">Explore</a>
+        <a href="skills.html" class="btn btn-ghost" style="color: var(--text-secondary); font-size: 13px;">Agents</a>
+        <a href="marketplace.html" class="btn btn-ghost"
+          style="color: var(--text-secondary); font-size: 13px;">Marketplace</a>
+        <a href="subscription.html" class="btn btn-ghost"
+          style="color: var(--text-secondary); font-size: 13px;">Pricing</a>
+      </nav>
+    </div>
+
+    <div class="pf-header__right">
+      <a href="signin.html" class="btn btn-ghost">Sign in</a>
+    </div>
+  </header>
+
+  <div class="container" style="text-align: center; padding-top: 5rem;">
+    <h1 style="font-size: 3rem; margin-bottom: 1rem;">Choose your plan</h1>
+    <p style="color: var(--text-secondary); font-size: 1.25rem;">Scale your prompt engineering with the right tools.</p>
+
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="card tier-card" style="text-align: left;">
+        <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Free</h3>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 1.5rem;">For individuals getting started
+          with prompt logic.</p>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-white); margin-bottom: 2rem;">$0<span
+            style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/month</span></div>
+        <button class="btn" style="width: 100%; padding: 10px;">Get Started</button>
+        <ul class="check-list">
+          <li><i data-lucide="check" size="14"></i> Unlimited public prompts</li>
+          <li><i data-lucide="check" size="14"></i> Community access</li>
+          <li><i data-lucide="check" size="14"></i> 5 playground runs/day</li>
+        </ul>
+      </div>
+
+      <!-- Pro -->
+      <div class="card tier-card featured" style="text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="font-size: 1.5rem;">Pro</h3>
+          <span
+            style="font-size: 11px; font-weight: 700; color: var(--accent-purple); border: 1px solid var(--accent-purple); padding: 2px 8px; border-radius: 20px;">Most
+            Popular</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 1.5rem;">Advanced tools for professional
+          architects.</p>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--text-white); margin-bottom: 2rem;">$19<span
+            style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/month</span></div>
+        <button class="btn btn-primary" style="width: 100%; padding: 10px;">Upgrade to Pro</button>
+        <ul class="check-list">
+          <li><i data-lucide="check" size="14"></i> All Free features</li>
+          <li><i data-lucide="check" size="14"></i> Benchmark Suite access</li>
+          <li><i data-lucide="check" size="14"></i> 1,000 playground runs/day</li>
+          <li><i data-lucide="check" size="14"></i> Semantic Caching logic</li>
+        </ul>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="card tier-card" style="text-align: left;">
+        <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Enterprise</h3>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 1.5rem;">Custom solutions for large
+          scale LLM teams.</p>
+        <div
+          style="font-size: 2rem; font-weight: 700; color: var(--text-white); margin-bottom: 2.5rem; margin-top: 1rem;">
+          Contact Sales</div>
+        <button class="btn" style="width: 100%; padding: 10px;">Contact Us</button>
+        <ul class="check-list">
+          <li><i data-lucide="check" size="14"></i> Advanced security auditing</li>
+          <li><i data-lucide="check" size="14"></i> Private deployments</li>
+          <li><i data-lucide="check" size="14"></i> Custom SLA support</li>
+          <li><i data-lucide="check" size="14"></i> API access tokens</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/pages/subscription.js"></script>
+</body>
+
+</html>

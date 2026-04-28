@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Marketplace — PromptFeed</title>
+
+  <!-- Design System -->
+  <link href="css/styles.css" rel="stylesheet" />
+
+  <!-- Icons (Lucide) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .market-hero {
+      padding: 4rem 0;
+      text-align: center;
+      background: linear-gradient(to bottom, var(--bg-subtle), var(--bg-canvas));
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem 0;
+    }
+
+    .product-card {
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .product-card:hover {
+      border-color: var(--accent-purple);
+      transform: translateY(-2px);
+    }
+
+    .category-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-default);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .category-link:hover,
+    .category-link.active {
+      background: var(--bg-surface);
+      color: var(--text-white);
+      border-color: var(--accent-blue);
+    }
+  </style>
+</head>
+
+<body class="pf-main">
+
+  <header class="pf-header"></header>
+
+  <main class="pf-main">
+    <div style="width: 100%;">
+      <section class="market-hero">
+        <h1 style="font-size: 3rem; margin-bottom: 1rem;">Marketplace</h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+          Extend your AI architectures with professional-grade prompt logic and certified enterprise implementations.
+        </p>
+      </section>
+
+      <div style="padding: 2rem;">
+        <div
+          style="display: flex; gap: 10px; padding: 1rem 0; border-bottom: 1px solid var(--border-default); overflow-x: auto; white-space: nowrap; margin-bottom: 2rem;">
+          <div class="category-link active">All Categories</div>
+          <div class="category-link">Enterprise</div>
+          <div class="category-link">Creative</div>
+          <div class="category-link">Coding</div>
+          <div class="category-link">Automation</div>
+        </div>
+
+        <div id="market-grid" class="market-grid">
+          <!-- Loading -->
+          <div style="grid-column: 1 / -1; text-align: center; padding: 4rem;">
+            <div
+              style="width: 24px; height: 24px; border: 2px solid var(--accent-purple); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+
+
+  <script src="js/auth.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui-components.js"></script>
+  <script src="js/pages/marketplace.js"></script>
+</body>
+</body>
+
+</html>

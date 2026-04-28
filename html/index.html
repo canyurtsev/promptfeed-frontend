@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PromptFeed — AI Workflow Community</title>
+<meta name="description" content="Community for AI prompts, skill.md modules, benchmarks, articles and workflow discussions. Build, share and monetize AI workflows."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<link rel="stylesheet" href="pf-layout.css"/>
+<style>
+/* ── Landing-specific styles ── */
+.lp-hero {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 72px 24px 56px;
+  text-align: center;
+}
+.lp-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--pf-accent);
+  background: var(--pf-accent-dim);
+  border: 1px solid #00c2ff30;
+  border-radius: 20px;
+  padding: 4px 12px;
+  margin-bottom: 24px;
+}
+.lp-hero__title {
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--pf-text-primary);
+  letter-spacing: -1px;
+  margin-bottom: 18px;
+}
+.lp-hero__title span { color: var(--pf-accent); }
+.lp-hero__sub {
+  font-size: clamp(14px, 2vw, 17px);
+  color: var(--pf-text-secondary);
+  line-height: 1.7;
+  max-width: 620px;
+  margin: 0 auto 32px;
+}
+.lp-hero__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 22px;
+  border-radius: var(--pf-radius);
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.lp-btn--primary { background: var(--pf-accent); color: var(--pf-bg); }
+.lp-btn--primary:hover { background: var(--pf-accent-hover); transform: translateY(-1px); }
+.lp-btn--ghost { background: none; color: var(--pf-text-secondary); border: 1px solid var(--pf-border); }
+.lp-btn--ghost:hover { color: var(--pf-text-primary); border-color: var(--pf-text-muted); }
+.lp-btn--outline { background: none; color: var(--pf-pro); border: 1px solid #a371f730; }
+.lp-btn--outline:hover { background: #a371f710; }
+
+/* Section */
+.lp-section {
+  max-width: var(--pf-max-w);
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+.lp-section__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--pf-text-muted);
+  margin-bottom: 8px;
+}
+.lp-section__title {
+  font-size: clamp(18px, 3vw, 26px);
+  font-weight: 700;
+  color: var(--pf-text-primary);
+  margin-bottom: 32px;
+}
+
+/* Value Cards Grid */
+.lp-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.lp-card {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 22px 20px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.lp-card:hover { border-color: var(--pf-accent); transform: translateY(-2px); }
+.lp-card__icon {
+  width: 36px; height: 36px;
+  border-radius: var(--pf-radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.lp-card__title { font-size: 14px; font-weight: 700; color: var(--pf-text-primary); }
+.lp-card__desc { font-size: 12px; color: var(--pf-text-secondary); line-height: 1.5; flex: 1; }
+.lp-card__link { font-size: 12px; color: var(--pf-accent); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+
+/* Steps */
+.lp-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+.lp-step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lp-step__num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--pf-accent-dim);
+  border: 1px solid #00c2ff30;
+  color: var(--pf-accent);
+  font-weight: 800;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.lp-step__title { font-size: 14px; font-weight: 700; color: var(--pf-text-primary); }
+.lp-step__desc { font-size: 13px; color: var(--pf-text-secondary); line-height: 1.6; }
+
+/* Featured rows */
+.lp-featured {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  overflow: hidden;
+}
+.lp-featured__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--pf-border);
+}
+.lp-featured__head-title { font-size: 13px; font-weight: 700; color: var(--pf-text-primary); }
+.lp-featured__head-link { font-size: 12px; color: var(--pf-accent); font-weight: 600; }
+.lp-featured__body { padding: 4px 0; min-height: 80px; }
+.lp-featured__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--pf-border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.lp-featured__row:last-child { border-bottom: none; }
+.lp-featured__row:hover { background: var(--pf-surface); }
+.lp-featured__row-title { font-size: 13px; font-weight: 500; color: var(--pf-text-primary); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lp-featured__row-meta { font-size: 11px; color: var(--pf-text-muted); flex-shrink: 0; }
+.lp-empty-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  font-size: 12px;
+  color: var(--pf-text-muted);
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Divider */
+.lp-divider {
+  border: none;
+  border-top: 1px solid var(--pf-border);
+  max-width: var(--pf-max-w);
+  margin: 0 auto;
+}
+
+/* Footer */
+.lp-footer {
+  border-top: 1px solid var(--pf-border);
+  padding: 28px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: var(--pf-max-w);
+  margin: 0 auto;
+  font-size: 12px;
+  color: var(--pf-text-muted);
+}
+.lp-footer__links { display: flex; flex-wrap: wrap; gap: 16px; }
+.lp-footer__links a { color: var(--pf-text-muted); transition: color 0.15s; }
+.lp-footer__links a:hover { color: var(--pf-text-primary); }
+
+@media (max-width: 600px) {
+  .lp-hero { padding: 40px 16px 32px; }
+  .lp-section { padding: 32px 16px; }
+}
+</style>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+</head>
+<body>
+
+<!-- TOP NAV (shared style) -->
+<header class="pf-topnav">
+  <div class="pf-topnav__inner">
+    <a href="index.html" class="pf-topnav__logo">
+      <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
+    </a>
+    <nav class="pf-topnav__nav" aria-label="Main navigation">
+      <a href="index.html" class="pf-topnav__nav-link active" aria-current="page">News</a>
+      <a href="community.html" class="pf-topnav__nav-link">Community</a>
+      <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
+      <a href="benchmarks.html" class="pf-topnav__nav-link">Benchmarks</a>
+      <a href="skill-library.html" class="pf-topnav__nav-link">Skills</a>
+      <a href="bounty-board.html" class="pf-topnav__nav-link">Bounties</a>
+      <a href="subscription.html" class="pf-topnav__nav-link">Pricing</a>
+    </nav>
+    <div class="pf-topnav__search">
+      <span class="material-symbols-outlined pf-topnav__search-icon">search</span>
+      <input id="search-input" type="search" placeholder="Search prompts, skills..." autocomplete="off"
+        aria-label="Search" />
+    </div>
+    <div class="pf-topnav__actions" id="nav-auth-area"></div>
+  </div>
+</header>
+
+<!-- AD BANNER (free/guest only — JS-controlled) -->
+<div id="top-ad-banner" class="pf-ad-banner pf-ad-banner--hidden" aria-label="Advertisement">
+  <span class="pf-ad-banner__label">AD</span>
+  Advertisement — <a href="subscription.html" style="color:var(--pf-accent)">Upgrade to Pro</a> to remove ads
+</div>
+
+<!-- HERO -->
+<section aria-label="Hero">
+  <div class="lp-hero">
+    <div class="lp-hero__eyebrow">
+      <span class="material-symbols-outlined" style="font-size:13px">bolt</span>
+      AI Workflow Marketplace
+    </div>
+    <h1 class="lp-hero__title">Build, share and <span>monetize</span><br>AI workflows.</h1>
+    <p class="lp-hero__sub">
+      PromptFeed is a community for prompts, <code style="font-family:var(--pf-font-mono);font-size:0.9em;color:var(--pf-success)">skill.md</code> modules, benchmarks, articles and AI workflow discussions.
+    </p>
+    <div class="lp-hero__ctas">
+      <a href="community.html" class="lp-btn lp-btn--primary">
+        <span class="material-symbols-outlined" style="font-size:17px">groups</span>
+        Explore Community
+      </a>
+      <a href="marketplace.html" class="lp-btn lp-btn--ghost">
+        <span class="material-symbols-outlined" style="font-size:17px">storefront</span>
+        Browse Marketplace
+      </a>
+      <a href="skill-library.html" class="lp-btn lp-btn--outline">
+        <span class="material-symbols-outlined" style="font-size:17px">psychology</span>
+        Browse Skills
+      </a>
+    </div>
+  </div>
+</section>
+
+<hr class="lp-divider"/>
+
+<!-- VALUE CARDS -->
+<section class="lp-section" aria-label="Platform features">
+  <p class="lp-section__label">What's inside</p>
+  <h2 class="lp-section__title">Everything for AI workflow teams</h2>
+  <div class="lp-cards">
+    <a href="community.html" class="lp-card">
+      <div class="lp-card__icon" style="background:#00c2ff15">💬</div>
+      <div class="lp-card__title">Community Discussions</div>
+      <div class="lp-card__desc">Ask questions, share findings and discuss prompt engineering techniques with the community.</div>
+      <span class="lp-card__link">Browse community →</span>
+    </a>
+    <a href="marketplace.html" class="lp-card">
+      <div class="lp-card__icon" style="background:#a371f715">🛒</div>
+      <div class="lp-card__title">Prompt Marketplace</div>
+      <div class="lp-card__desc">Buy and sell premium prompt packs. Earn from your best AI workflows.</div>
+      <span class="lp-card__link">Open marketplace →</span>
+    </a>
+    <a href="skill-library.html" class="lp-card">
+      <div class="lp-card__icon" style="background:#3fb95015">⚡</div>
+      <div class="lp-card__title">Skill Library</div>
+      <div class="lp-card__desc">Reusable <code style="font-family:var(--pf-font-mono);font-size:0.9em">skill.md</code> modules that plug directly into AI agent pipelines.</div>
+      <span class="lp-card__link">Explore skills →</span>
+    </a>
+    <a href="benchmarks.html" class="lp-card">
+      <div class="lp-card__icon" style="background:#d2992215">📊</div>
+      <div class="lp-card__title">Benchmark Engine</div>
+      <div class="lp-card__desc">Compare prompts across models. Track efficiency, cost and quality metrics.</div>
+      <span class="lp-card__link">View benchmarks →</span>
+    </a>
+  </div>
+</section>
+
+<hr class="lp-divider"/>
+
+<!-- HOW IT WORKS -->
+<section class="lp-section" aria-label="How PromptFeed works">
+  <p class="lp-section__label">How it works</p>
+  <h2 class="lp-section__title">From idea to revenue in 3 steps</h2>
+  <div class="lp-steps">
+    <div class="lp-step">
+      <div class="lp-step__num">1</div>
+      <div class="lp-step__title">Share prompts, skills or questions</div>
+      <div class="lp-step__desc">Publish your AI prompts, skill.md modules or workflow questions to the community. Get feedback, votes and visibility.</div>
+    </div>
+    <div class="lp-step">
+      <div class="lp-step__num">2</div>
+      <div class="lp-step__title">Benchmark and improve AI workflows</div>
+      <div class="lp-step__desc">Run your prompts against multiple models. Track efficiency scores, token cost and output quality — all in one place.</div>
+    </div>
+    <div class="lp-step">
+      <div class="lp-step__num">3</div>
+      <div class="lp-step__title">Earn from premium prompts and skill packs</div>
+      <div class="lp-step__desc">List your best work on the marketplace. Set your price, earn wallet credits, and build your creator reputation.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="lp-divider"/>
+
+<!-- FEATURED SECTIONS (API-driven or honest empty) -->
+<section class="lp-section" aria-label="Latest activity">
+  <p class="lp-section__label">Community</p>
+  <h2 class="lp-section__title">Latest activity</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+
+    <!-- Latest Posts -->
+    <div class="lp-featured">
+      <div class="lp-featured__head">
+        <span class="lp-featured__head-title">💬 Community Posts</span>
+        <a href="community.html" class="lp-featured__head-link">View all →</a>
+      </div>
+      <div class="lp-featured__body" id="feat-posts">
+        <div class="pf-loading"><div class="pf-spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Popular Skills -->
+    <div class="lp-featured">
+      <div class="lp-featured__head">
+        <span class="lp-featured__head-title">⚡ Popular Skills</span>
+        <a href="skill-library.html" class="lp-featured__head-link">View all →</a>
+      </div>
+      <div class="lp-featured__body" id="feat-skills">
+        <div class="pf-loading"><div class="pf-spinner"></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bounties teaser -->
+  <div style="margin-top:20px">
+    <div class="lp-featured">
+      <div class="lp-featured__head">
+        <span class="lp-featured__head-title">🎯 Open Bounties</span>
+        <a href="bounty-board.html" class="lp-featured__head-link">View board →</a>
+      </div>
+      <div class="lp-featured__body" id="feat-bounties">
+        <div class="pf-loading"><div class="pf-spinner"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="lp-footer">
+    <span>© 2025 PromptFeed Inc.</span>
+    <div class="lp-footer__links">
+      <a href="legal-page.html?type=about">About</a>
+      <a href="http://localhost:5000/api-docs" target="_blank" rel="noopener">Docs</a>
+      <a href="guidelines.html">Community Guidelines</a>
+      <a href="subscription.html">Pricing</a>
+      <a href="legal-page.html?type=privacy">Privacy</a>
+      <a href="support.html">Support</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/pages/index.js" defer></script>
+</body>
+</html>

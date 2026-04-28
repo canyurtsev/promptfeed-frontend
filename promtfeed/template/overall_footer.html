@@ -1,0 +1,97 @@
+{% EVENT overall_footer_page_body_after %}
+</main>
+</div>
+
+<!-- Footer -->
+<footer id="page-footer" class="pf-footer">
+    <div class="pf-container" style="text-align: center;">
+        <div class="pf-flex pf-items-center pf-justify-center pf-gap-2" style="margin-bottom: var(--pf-space-6);">
+            <span class="material-symbols-outlined"
+                style="font-size: 1.5rem; color: var(--pf-coffee-roast);">coffee</span>
+            <span style="font-size: var(--pf-font-size-lg); font-weight: 700; color: var(--pf-espresso);">{{ SITENAME
+                }}</span>
+        </div>
+
+        <div class="pf-footer-links">
+            {% EVENT overall_footer_timezone_before %}
+            {% if S_DISPLAY_MEMBERLIST %}<a class="pf-footer-link" href="{{ U_MEMBERLIST }}">{{ lang('MEMBERLIST')
+                }}</a>{% endif %}
+            <a class="pf-footer-link" href="{{ U_TEAM }}">{{ lang('THE_TEAM') }}</a>
+            {% if U_CONTACT_US %}<a class="pf-footer-link" href="{{ U_CONTACT_US }}">{{ lang('CONTACT_US') }}</a>{%
+            endif %}
+            <a class="pf-footer-link" href="{{ U_TERMS_USE }}">{{ lang('TERMS_USE') }}</a>
+            <a class="pf-footer-link" href="{{ U_PRIVACY }}">{{ lang('PRIVACY') }}</a>
+            {% EVENT overall_footer_timezone_after %}
+        </div>
+
+        <p style="color: rgba(166, 137, 102, 0.7); font-size: var(--pf-font-size-sm); margin-top: var(--pf-space-6);">
+            {{ CREDIT_LINE }}
+        </p>
+
+        {% if DEBUG_OUTPUT %}
+        <div style="margin-top: var(--pf-space-4); font-size: var(--pf-font-size-xs); color: rgba(166, 137, 102, 0.5);">
+            {{ DEBUG_OUTPUT }}
+        </div>
+        {% endif %}
+    </div>
+</footer>
+
+<!-- JavaScript -->
+<script>
+    (function () {
+        'use strict';
+
+        // Remove nojs class
+        document.body.classList.remove('nojs');
+
+        // Notification Panel Logic
+        const notifBtn = document.getElementById('notification-btn');
+        const notifPanel = document.getElementById('notification-panel');
+        const notifOverlay = document.getElementById('notification-overlay');
+        const closeNotif = document.getElementById('close-notifications');
+
+        function openNotifications() {
+            notifPanel.classList.add('open');
+            notifOverlay.classList.add('open');
+        }
+
+        function closeNotifications() {
+            notifPanel.classList.remove('open');
+            notifOverlay.classList.remove('open');
+        }
+
+        if (notifBtn) notifBtn.addEventListener('click', openNotifications);
+        if (closeNotif) closeNotif.addEventListener('click', closeNotifications);
+        if (notifOverlay) notifOverlay.addEventListener('click', closeNotifications);
+
+        // Close on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeNotifications();
+            }
+        });
+
+        // Language Switcher (if exists)
+        const langToggle = document.getElementById('lang-toggle');
+        const langDropdown = document.getElementById('lang-dropdown');
+
+        if (langToggle && langDropdown) {
+            langToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                langDropdown.classList.toggle('pf-hidden');
+            });
+
+            document.addEventListener('click', function () {
+                if (langDropdown) langDropdown.classList.add('pf-hidden');
+            });
+        }
+    })();
+</script>
+
+{% EVENT overall_footer_after %}
+
+{$SCRIPTS}
+
+</body>
+
+</html>

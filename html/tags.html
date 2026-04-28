@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tags — PromptFeed</title>
+<meta name="description" content="Explore prompts, skills, discussions and workflows by topic."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<link rel="stylesheet" href="pf-layout.css"/>
+<style>
+.tg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.tg-card {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.tg-card:hover {
+  border-color: var(--pf-accent);
+  transform: translateY(-2px);
+}
+.tg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.tg-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--pf-accent);
+  font-family: var(--pf-font-mono);
+  word-break: break-all;
+}
+.tg-count {
+  font-size: 12px;
+  color: var(--pf-text-secondary);
+  background: var(--pf-surface);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.tg-desc {
+  font-size: 13px;
+  color: var(--pf-text-primary);
+  line-height: 1.5;
+  flex: 1;
+}
+.tg-actions {
+  margin-top: auto;
+  border-top: 1px solid var(--pf-border);
+  padding-top: 12px;
+}
+</style>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+</head>
+<body>
+
+<!-- Gate Modal -->
+<div id="pf-gate" class="pf-gate-overlay">
+  <div class="pf-gate-modal">
+    <div class="pf-gate-modal__icon">🔒</div>
+    <div class="pf-gate-modal__title">Sign in required</div>
+    <div class="pf-gate-modal__desc" id="gate-desc">Sign in to perform this action.</div>
+    <div class="pf-gate-modal__actions">
+      <button class="pf-btn pf-btn--ghost" onclick="closeGate()">Cancel</button>
+      <button class="pf-btn pf-btn--primary" onclick="gotoSignin()">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<header class="pf-topnav">
+  <div class="pf-topnav__inner">
+    <a href="index.html" class="pf-topnav__logo">
+      <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
+    </a>
+    <nav class="pf-topnav__nav" aria-label="Main">
+      <a href="index.html" class="pf-topnav__nav-link">News</a>
+      <a href="community.html" class="pf-topnav__nav-link">Community</a>
+      <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
+      <a href="benchmarks.html" class="pf-topnav__nav-link">Benchmarks</a>
+      <a href="skill-library.html" class="pf-topnav__nav-link">Skills</a>
+      <a href="bounty-board.html" class="pf-topnav__nav-link">Bounties</a>
+      <a href="subscription.html" class="pf-topnav__nav-link">Pricing</a>
+    </nav>
+    <div class="pf-topnav__search">
+      <span class="material-symbols-outlined pf-topnav__search-icon">search</span>
+      <input id="search-input" type="search" placeholder="Search tags..." autocomplete="off"/>
+    </div>
+    <div class="pf-topnav__actions" id="nav-auth-area"></div>
+  </div>
+</header>
+
+<!-- AD BANNER -->
+<div id="top-ad-banner" class="pf-ad-banner pf-ad-banner--hidden">
+  <span class="pf-ad-banner__label">AD</span>
+  Advertisement — <a href="subscription.html" style="color:var(--pf-accent)">Upgrade to Pro</a> to remove ads
+</div>
+
+<div class="pf-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="pf-sidebar-left">
+    <div class="pf-sidebar-label">Tag Groups</div>
+    <button class="pf-sidebar-link active" onclick="setFilter('')">
+      <span class="material-symbols-outlined" style="font-size:16px">apps</span> All Tags
+    </button>
+    
+    <div class="pf-sidebar-divider"></div>
+    <div class="pf-sidebar-label" style="font-size:10px;text-transform:uppercase;color:var(--pf-text-muted);letter-spacing:0.5px">By Category</div>
+    <button class="pf-sidebar-link" onclick="setFilter('AI Models')">
+      <span class="pf-sidebar-link__dot" style="background:#00c2ff"></span>AI Models
+    </button>
+    <button class="pf-sidebar-link" onclick="setFilter('Workflow Types')">
+      <span class="pf-sidebar-link__dot" style="background:#a371f7"></span>Workflow Types
+    </button>
+    <button class="pf-sidebar-link" onclick="setFilter('Use Cases')">
+      <span class="pf-sidebar-link__dot" style="background:#3fb950"></span>Use Cases
+    </button>
+    <button class="pf-sidebar-link" onclick="setFilter('Skill Types')">
+      <span class="pf-sidebar-link__dot" style="background:#f85149"></span>Skill Types
+    </button>
+    <button class="pf-sidebar-link" onclick="setFilter('Industries')">
+      <span class="pf-sidebar-link__dot" style="background:#ffa657"></span>Industries
+    </button>
+  </aside>
+
+  <!-- CENTER: Feed -->
+  <main class="pf-feed" role="main">
+    <div style="margin-bottom:24px">
+      <h1 style="font-size:24px;font-weight:800;color:var(--pf-text-primary);margin-bottom:8px">Tags</h1>
+      <p style="font-size:14px;color:var(--pf-text-secondary);line-height:1.5">Explore prompts, skills, discussions and workflows by topic.</p>
+    </div>
+
+    <div id="tags-container" class="tg-grid" aria-live="polite">
+      <!-- Loading state -->
+      <div class="pf-loading" style="grid-column: 1/-1"><div class="pf-spinner"></div></div>
+    </div>
+  </main>
+
+  <!-- RIGHT RAIL -->
+  <aside class="pf-sidebar-right">
+    <div id="right-ad-slot" class="pf-ad-slot pf-ad-banner--hidden">
+      <span class="pf-ad-slot__label">Advertisement</span>
+      Sponsor slot available
+    </div>
+
+    <div class="pf-rail-widget">
+      <div class="pf-rail-widget__header">🔥 Popular Tags</div>
+      <div class="pf-rail-widget__body" style="font-size:12px;color:var(--pf-text-muted)">
+        <span class="pf-stub-badge">Coming Soon</span>
+      </div>
+    </div>
+
+    <div id="pro-box" class="pf-pro-box pf-ad-banner--hidden">
+      <span class="pf-pro-box__badge">⭐ PRO</span>
+      <div class="pf-pro-box__title">Advanced Filtering</div>
+      <ul class="pf-pro-box__list">
+        <li>Cross-reference multiple tags</li>
+        <li>Saved searches</li>
+        <li>Tag alerts</li>
+      </ul>
+      <a href="subscription.html" class="pf-pro-btn">Upgrade to Pro</a>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+/* ================================================================
+   tags.html — Controller
+   Fallback logic: GET /api/tags -> Extract from /api/prompts & /api/skills
+   ================================================================ */
+const API = 'http://localhost:5000';
+const token = localStorage.getItem('accessToken');
+let currentUser = null;
+let activeGroup = '';
+let searchTimer = null;
+let rawTagsData = [];
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── Auth ── */
+async function initAuth(){
+  const area = document.getElementById('nav-auth-area');
+  if(!token){
+    area.innerHTML = `<a href="signin.html" class="pf-btn pf-btn--ghost">Sign In</a>
+      <a href="signin.html?mode=register" class="pf-btn pf-btn--primary">Sign Up</a>`;
+    showAds(); return;
+  }
+  try {
+    const r = await fetch(API+'/api/users/me', {headers:{Authorization:'Bearer '+token}});
+    const d = await r.json();
+    if(d.success && d.data){
+      currentUser = d.data;
+      const plan = (currentUser.plan || 'free').toLowerCase();
+      area.innerHTML = `
+        <div class="pf-wallet-chip" title="Wallet balance">
+          <span class="material-symbols-outlined pf-wallet-chip__icon">toll</span>
+          <span>${esc(String(currentUser.walletBalance??'—'))}</span>
+        </div>
+        <div class="pf-avatar" id="user-avatar" title="Profile"
+          style="${currentUser.avatarUrl ? 'background-image:url('+esc(currentUser.avatarUrl)+')' : ''}"
+          onclick="window.location.href='signin.html'"></div>`;
+      if(plan === 'free') showAds();
+    } else { guestNav(area); showAds(); }
+  } catch { guestNav(area); showAds(); }
+}
+function guestNav(a){
+  a.innerHTML = `<a href="signin.html" class="pf-btn pf-btn--ghost">Sign In</a>
+    <a href="signin.html?mode=register" class="pf-btn pf-btn--primary">Sign Up</a>`;
+}
+function showAds(){
+  ['top-ad-banner','right-ad-slot','pro-box'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('pf-ad-banner--hidden');
+  });
+}
+
+function requireAuth(label){
+  if(token && currentUser) return true;
+  document.getElementById('gate-desc').textContent = 'Sign in to ' + label + '.';
+  document.getElementById('pf-gate').classList.add('open');
+  return false;
+}
+function closeGate(){ document.getElementById('pf-gate').classList.remove('open'); }
+function gotoSignin(){ window.location.href = 'signin.html?returnUrl='+encodeURIComponent(location.href); }
+window.closeGate = closeGate; window.gotoSignin = gotoSignin;
+document.getElementById('pf-gate').addEventListener('click', e => { if(e.target.id==='pf-gate') closeGate(); });
+
+/* ── Filter ── */
+function setFilter(grp){
+  activeGroup = grp;
+  
+  const links = document.querySelectorAll('.pf-sidebar-left .pf-sidebar-link');
+  links.forEach(l => l.classList.remove('active'));
+  
+  for(const l of links){
+    if(grp === ''){
+      if(l.textContent.includes('All Tags')) { l.classList.add('active'); break; }
+    } else {
+      if(l.textContent.includes(grp)) { l.classList.add('active'); break; }
+    }
+  }
+
+  renderTags();
+}
+window.setFilter = setFilter;
+
+document.getElementById('search-input').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => renderTags(), 300);
+});
+
+/* ── Render ── */
+function renderCard(t){
+  const name = t.name || t.id || 'unknown';
+  const desc = t.description || '';
+  const count = t.count;
+  const group = t.group || '';
+
+  return `
+  <div class="tg-card">
+    <div class="tg-header">
+      <div class="tg-name">#${esc(name)}</div>
+      ${count !== undefined ? `<div class="tg-count" title="${count} items">${count}</div>` : ''}
+    </div>
+    
+    ${group ? `<div style="font-size:11px;color:var(--pf-text-muted);text-transform:uppercase;margin-bottom:4px">${esc(group)}</div>` : ''}
+    
+    <div class="tg-desc">${esc(desc)}</div>
+    
+    <div class="tg-actions">
+      <button class="pf-btn pf-btn--ghost" style="font-size:13px;width:100%;display:block;text-align:center" onclick="window.location.href='community.html?tag=${encodeURIComponent(name)}'">
+        View Content
+      </button>
+    </div>
+  </div>`;
+}
+
+function renderTags(){
+  const el = document.getElementById('tags-container');
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  
+  let filtered = rawTagsData;
+  if(activeGroup){
+    filtered = filtered.filter(t => (t.group||'').toLowerCase() === activeGroup.toLowerCase());
+  }
+  if(q){
+    filtered = filtered.filter(t => (t.name||'').toLowerCase().includes(q) || (t.description||'').toLowerCase().includes(q));
+  }
+
+  if(!filtered.length){
+    el.innerHTML = `
+      <div class="pf-empty-state" style="grid-column: 1/-1;margin-top:20px;padding:40px">
+        <div class="pf-empty-state__icon">🏷️</div>
+        <h3>No tags found yet.</h3>
+        <p>No topics matched your search or selection.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  el.innerHTML = filtered.map(renderCard).join('');
+}
+
+async function fetchTagsFallback(){
+  const tagMap = new Map();
+  let foundSomething = false;
+
+  const processItems = (items) => {
+    if(!Array.isArray(items)) return;
+    items.forEach(it => {
+      foundSomething = true;
+      if(Array.isArray(it.tags)){
+        it.tags.forEach(tag => {
+          if(!tagMap.has(tag)) tagMap.set(tag, { name: tag, count: 0 });
+          tagMap.get(tag).count++;
+        });
+      }
+    });
+  };
+
+  const headers = {};
+  if(token) headers['Authorization'] = 'Bearer '+token;
+
+  try {
+    const [pRes, sRes] = await Promise.all([
+      fetch(API + '/api/prompts', { headers }).catch(()=>null),
+      fetch(API + '/api/skills', { headers }).catch(()=>null)
+    ]);
+    
+    if(pRes && pRes.ok){
+      const pd = await pRes.json();
+      processItems(Array.isArray(pd.data) ? pd.data : pd.data?.prompts);
+    }
+    if(sRes && sRes.ok){
+      const sd = await sRes.json();
+      processItems(Array.isArray(sd.data) ? sd.data : sd.data?.skills);
+    }
+
+    if(!foundSomething) throw new Error("Could not extract any content data");
+
+  } catch(e) {
+    throw e;
+  }
+
+  const result = Array.from(tagMap.values());
+  result.sort((a,b) => b.count - a.count);
+  return result;
+}
+
+async function loadTags(){
+  const el = document.getElementById('tags-container');
+  el.innerHTML = '<div class="pf-loading" style="grid-column: 1/-1"><div class="pf-spinner"></div></div>';
+  
+  try {
+    const headers = {};
+    if(token) headers['Authorization'] = 'Bearer '+token;
+
+    let data;
+    let fallbackUsed = false;
+    
+    try {
+      const res = await fetch(API + '/api/tags', { headers });
+      if(!res.ok && res.status === 404) throw new Error('Endpoint not found');
+      const json = await res.json();
+      if(!json.success) throw new Error(json.message || "Failed to load tags");
+      data = Array.isArray(json.data) ? json.data : (json.data?.tags || []);
+    } catch(err) {
+      // Fallback: extract tags from prompts & skills
+      fallbackUsed = true;
+      data = await fetchTagsFallback();
+    }
+    
+    rawTagsData = data;
+    
+    if(!rawTagsData.length){
+      el.innerHTML = `
+        <div class="pf-empty-state" style="grid-column: 1/-1;margin-top:20px;padding:40px">
+          <div class="pf-empty-state__icon">🏷️</div>
+          <h3>No tags found yet.</h3>
+          <p>No content has been tagged in the system.</p>
+          ${fallbackUsed ? `
+            <div style="margin-top:16px;background:var(--pf-surface);border:1px solid var(--pf-border);padding:12px;border-radius:var(--pf-radius);text-align:left;font-size:12px">
+              <strong style="color:var(--pf-warning)">Backend Notice:</strong><br>
+              Extracted tags via fallback.<br>
+              Required endpoint: <code>GET /api/tags</code>
+            </div>
+          ` : ''}
+        </div>
+      `;
+      return;
+    }
+    
+    renderTags();
+    
+    if(fallbackUsed){
+      // Prepend a notice if there are items but we used fallback
+      const notice = document.createElement('div');
+      notice.style.gridColumn = '1/-1';
+      notice.innerHTML = `
+        <div style="background:var(--pf-surface);border:1px solid var(--pf-border);padding:12px;border-radius:var(--pf-radius);text-align:left;font-size:12px;margin-bottom:16px">
+          <strong style="color:var(--pf-warning)">Backend Notice:</strong><br>
+          Tags extracted dynamically via fallback.<br>
+          Required endpoint: <code>GET /api/tags</code>
+        </div>
+      `;
+      el.prepend(notice);
+    }
+    
+  } catch(err) {
+    el.innerHTML = `
+      <div class="pf-empty-state" style="grid-column: 1/-1;margin-top:20px;padding:40px">
+        <div class="pf-empty-state__icon">⚠️</div>
+        <h3>Could not load tags</h3>
+        <p style="color:var(--pf-danger);font-size:13px">${esc(err.message)}</p>
+        <p style="margin-top:12px;font-size:12px;color:var(--pf-text-muted)">Ensure backend is running: <code>npm run dev</code></p>
+      </div>
+    `;
+  }
+}
+
+/* ── Init ── */
+(async function(){
+  await initAuth();
+  loadTags();
+})();
+</script>
+</body>
+</html>

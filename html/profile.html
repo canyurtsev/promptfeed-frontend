@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>User Dashboard — PromptFeed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<link rel="stylesheet" href="pf-layout.css"/>
+<style>
+/* ── Profile Specifics ── */
+.pd-container {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+  max-width: var(--pf-max-w);
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+@media (max-width: 900px) {
+  .pd-container { grid-template-columns: 1fr; }
+}
+
+.pd-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pd-panel {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 24px;
+}
+
+.pd-header {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--pf-text-primary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--pf-border);
+  padding-bottom: 12px;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.profile-card__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--pf-text-muted);
+  background-size: cover;
+  background-position: center;
+}
+.profile-card__info {
+  flex: 1;
+}
+.profile-card__name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--pf-text-primary);
+  margin-bottom: 4px;
+}
+.profile-card__meta {
+  font-size: 13px;
+  color: var(--pf-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.plan-badge {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.plan-badge.free { background: var(--pf-surface); color: var(--pf-text-secondary); border: 1px solid var(--pf-border); }
+.plan-badge.pro { background: #00c2ff15; color: var(--pf-accent); border: 1px solid #00c2ff30; }
+.plan-badge.creator { background: #a371f715; color: var(--pf-pro); border: 1px solid #a371f730; }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+}
+.stat-box {
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  padding: 16px;
+  text-align: center;
+}
+.stat-box__val {
+  font-size: 24px;
+  font-weight: 800;
+  font-family: var(--pf-font-mono);
+  color: var(--pf-text-primary);
+  margin-bottom: 4px;
+}
+.stat-box__label {
+  font-size: 12px;
+  color: var(--pf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+}
+.item-row__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pf-text-primary);
+}
+.item-row__meta {
+  font-size: 12px;
+  color: var(--pf-text-muted);
+}
+</style>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<header class="pf-topnav">
+  <div class="pf-topnav__inner">
+    <a href="index.html" class="pf-topnav__logo">
+      <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
+    </a>
+    <nav class="pf-topnav__nav" aria-label="Main">
+      <a href="index.html" class="pf-topnav__nav-link">News</a>
+      <a href="community.html" class="pf-topnav__nav-link">Community</a>
+      <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
+      <a href="benchmarks.html" class="pf-topnav__nav-link">Benchmarks</a>
+      <a href="skill-library.html" class="pf-topnav__nav-link">Skills</a>
+      <a href="bounty-board.html" class="pf-topnav__nav-link">Bounties</a>
+      <a href="subscription.html" class="pf-topnav__nav-link">Pricing</a>
+    </nav>
+    <div class="pf-topnav__search">
+      <span class="material-symbols-outlined pf-topnav__search-icon">search</span>
+      <input type="search" placeholder="Search..." disabled/>
+    </div>
+    <div class="pf-topnav__actions" id="nav-auth-area"></div>
+  </div>
+</header>
+
+<div class="pd-container" id="page-content" style="display:none">
+  <!-- LEFT/MAIN -->
+  <main class="pd-main">
+    <div class="pd-panel">
+      <div class="profile-card">
+        <div class="profile-card__avatar" id="prof-avatar">
+          <span class="material-symbols-outlined">person</span>
+        </div>
+        <div class="profile-card__info">
+          <div class="profile-card__name" id="prof-name">User Name</div>
+          <div class="profile-card__meta">
+            <span id="prof-email">user@example.com</span>
+            <span>•</span>
+            <span class="plan-badge free" id="prof-plan">Free</span>
+            <span>•</span>
+            <span id="prof-joined">Joined recently</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pd-panel">
+      <div class="pd-header">
+        <span class="material-symbols-outlined" style="color:var(--pf-accent)">bar_chart</span> Activity Summary
+      </div>
+      <div class="stat-grid" id="activity-grid">
+        <div class="stat-box"><div class="stat-box__val">—</div><div class="stat-box__label">Saved Prompts</div></div>
+        <div class="stat-box"><div class="stat-box__val">—</div><div class="stat-box__label">Published</div></div>
+        <div class="stat-box"><div class="stat-box__val">—</div><div class="stat-box__label">Votes Used</div></div>
+        <div class="stat-box"><div class="stat-box__val">—</div><div class="stat-box__label">Playground Runs</div></div>
+      </div>
+    </div>
+
+    <div class="pd-panel" id="creator-panel" style="display:none">
+      <div class="pd-header">
+        <span class="material-symbols-outlined" style="color:var(--pf-pro)">storefront</span> Creator Dashboard
+      </div>
+      <div class="stat-grid" style="margin-bottom:16px">
+        <div class="stat-box"><div class="stat-box__val">$0.00</div><div class="stat-box__label">Earnings</div></div>
+        <div class="stat-box"><div class="stat-box__val">0</div><div class="stat-box__label">Sales</div></div>
+        <div class="stat-box"><div class="stat-box__val">0</div><div class="stat-box__label">Boost Credits</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--pf-text-muted);text-align:center">
+        Creator tools and detailed analytics coming soon.
+      </div>
+    </div>
+
+    <div class="pd-panel">
+      <div class="pd-header">
+        <span class="material-symbols-outlined" style="color:var(--pf-success)">folder</span> My Library
+      </div>
+      <div id="library-content" class="item-list">
+        <div class="pf-empty-state" style="padding:20px;margin:0">
+          <div class="pf-empty-state__icon" style="font-size:24px;margin-bottom:8px">📚</div>
+          <h3 style="font-size:14px">Library integration coming soon.</h3>
+          <p style="font-size:12px">Your saved prompts and downloaded modules will appear here.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- RIGHT RAIL -->
+  <aside>
+    <div class="pd-panel" style="margin-bottom:24px;padding:20px">
+      <div class="pd-header" style="margin-bottom:12px;border:none;padding:0">
+        <span class="material-symbols-outlined" style="font-size:18px">account_balance_wallet</span> Wallet
+      </div>
+      <div style="font-size:28px;font-weight:800;font-family:var(--pf-font-mono);color:var(--pf-text-primary);margin-bottom:16px" id="wallet-display">
+        $0.00
+      </div>
+      <button class="pf-btn pf-btn--ghost" style="width:100%;font-size:13px" disabled title="Coming soon">Add Funds</button>
+    </div>
+
+    <div class="pd-panel" style="margin-bottom:24px;padding:20px">
+      <div class="pd-header" style="margin-bottom:12px;border:none;padding:0">
+        <span class="material-symbols-outlined" style="font-size:18px">settings</span> Settings
+      </div>
+      <div style="font-size:13px;color:var(--pf-text-secondary);line-height:1.5;margin-bottom:16px">
+        Account settings, API keys, and notification preferences.
+      </div>
+      <button class="pf-btn pf-btn--ghost" style="width:100%;font-size:13px" disabled title="Coming soon">Manage Account</button>
+    </div>
+
+    <div id="upgrade-box" class="pf-pro-box pf-ad-banner--hidden">
+      <span class="pf-pro-box__badge">Upgrade</span>
+      <div class="pf-pro-box__title">Unlock PromptFeed</div>
+      <ul class="pf-pro-box__list">
+        <li>Sell your skills</li>
+        <li>Advanced analytics</li>
+        <li>Remove all ads</li>
+      </ul>
+      <a href="subscription.html" class="pf-pro-btn">View Plans</a>
+    </div>
+
+    <div id="right-ad-slot" class="pf-ad-slot pf-ad-banner--hidden" style="margin-top:24px">
+      <span class="pf-ad-slot__label">Advertisement</span>
+      Sponsor slot available
+    </div>
+  </aside>
+</div>
+
+<!-- Loading overlay -->
+<div id="init-loading" style="display:flex;justify-content:center;align-items:center;min-height:400px">
+  <div class="pf-spinner"></div>
+</div>
+
+<script>
+/* ================================================================
+   profile.html — Controller
+   Honest User Dashboard without Mock Data
+   ================================================================ */
+const API = 'http://localhost:5000';
+const token = localStorage.getItem('accessToken');
+let currentUser = null;
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── Auth & Load ── */
+async function initAuth(){
+  const area = document.getElementById('nav-auth-area');
+  if(!token){
+    window.location.href = 'signin.html?returnUrl='+encodeURIComponent(location.href);
+    return;
+  }
+  
+  try {
+    const r = await fetch(API+'/api/users/me', {headers:{Authorization:'Bearer '+token}});
+    const d = await r.json();
+    if(d.success && d.data){
+      currentUser = d.data;
+      
+      // Top nav wallet
+      area.innerHTML = `
+        <div class="pf-wallet-chip" title="Wallet balance">
+          <span class="material-symbols-outlined pf-wallet-chip__icon">toll</span>
+          <span>${esc(String(currentUser.walletBalance??'—'))}</span>
+        </div>
+        <div class="pf-avatar" id="user-avatar" title="Profile"
+          style="${currentUser.avatarUrl ? 'background-image:url('+esc(currentUser.avatarUrl)+')' : ''}"
+          onclick="window.location.href='signin.html'"></div>`;
+          
+      renderProfile();
+    } else {
+      window.location.href = 'signin.html?returnUrl='+encodeURIComponent(location.href);
+    }
+  } catch {
+    window.location.href = 'signin.html?returnUrl='+encodeURIComponent(location.href);
+  }
+}
+
+function renderProfile(){
+  const c = currentUser;
+  const plan = (c.plan || 'free').toLowerCase();
+  
+  // Basic info
+  document.getElementById('prof-name').textContent = c.username || 'Anonymous User';
+  document.getElementById('prof-email').textContent = c.email || '';
+  
+  if(c.avatarUrl){
+    document.getElementById('prof-avatar').style.backgroundImage = 'url('+esc(c.avatarUrl)+')';
+    document.getElementById('prof-avatar').innerHTML = '';
+  }
+  
+  const planBadge = document.getElementById('prof-plan');
+  planBadge.textContent = plan;
+  planBadge.className = 'plan-badge ' + plan;
+  
+  if(c.createdAt){
+    document.getElementById('prof-joined').textContent = 'Joined ' + new Date(c.createdAt).toLocaleDateString();
+  }
+  
+  // Wallet
+  let wb = c.walletBalance ?? 0;
+  let wbStr = String(wb);
+  if(!isNaN(parseFloat(wbStr))) wbStr = '$' + parseFloat(wbStr).toFixed(2);
+  document.getElementById('wallet-display').textContent = wbStr;
+  
+  // Activity Grid
+  // Since we don't fake data, we'll try to extract real counts from the user object if present.
+  const saved = c._count?.savedPrompts ?? c.savedPromptsCount ?? '—';
+  const published = c._count?.prompts ?? c.promptsCount ?? '—';
+  const votes = c.votesUsedToday ?? '—';
+  const runs = c.playgroundRuns ?? '—';
+  
+  document.getElementById('activity-grid').innerHTML = `
+    <div class="stat-box"><div class="stat-box__val">${saved}</div><div class="stat-box__label">Saved Prompts</div></div>
+    <div class="stat-box"><div class="stat-box__val">${published}</div><div class="stat-box__label">Published</div></div>
+    <div class="stat-box"><div class="stat-box__val">${votes}</div><div class="stat-box__label">Votes Used</div></div>
+    <div class="stat-box"><div class="stat-box__val">${runs}</div><div class="stat-box__label">Playground Runs</div></div>
+  `;
+  
+  // Creator Panel
+  if(plan === 'creator'){
+    document.getElementById('creator-panel').style.display = 'block';
+  } else {
+    document.getElementById('upgrade-box').classList.remove('pf-ad-banner--hidden');
+  }
+  
+  if(plan === 'free'){
+    document.getElementById('right-ad-slot').classList.remove('pf-ad-banner--hidden');
+  }
+
+  document.getElementById('init-loading').style.display = 'none';
+  document.getElementById('page-content').style.display = 'grid';
+}
+
+/* ── Init ── */
+(async function(){
+  await initAuth();
+})();
+</script>
+</body>
+</html>

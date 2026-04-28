@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Bounty Board — PromptFeed</title>
+
+  <!-- Design System -->
+  <link href="css/styles.css" rel="stylesheet" />
+
+  <!-- Icons (Lucide) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .bounty-row {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-muted);
+      display: flex;
+      align-items: start;
+      gap: 1rem;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    .bounty-row:hover {
+      background: rgba(22, 27, 34, 0.5);
+    }
+
+    .bounty-row:last-child {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .status-badge.open {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .status-badge.closed {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+  </style>
+</head>
+
+<body class="pf-main">
+
+  <!-- Header -->
+  <header class="pf-header">
+    <div class="pf-header__left">
+      <a href="index.html" class="pf-logo">
+        <i data-lucide="terminal" style="color: var(--accent-purple)"></i>
+        <span>PromptFeed</span>
+      </a>
+      <nav class="hidden md:flex" style="display: flex; gap: 1.5rem; margin-left: 1rem;">
+        <a href="community.html" class="btn btn-ghost"
+          style="color: var(--text-secondary); font-size: 13px;">Explore</a>
+        <a href="skills.html" class="btn btn-ghost" style="color: var(--text-secondary); font-size: 13px;">Agents</a>
+        <a href="marketplace.html" class="btn btn-ghost"
+          style="color: var(--text-secondary); font-size: 13px;">Marketplace</a>
+        <a href="subscription.html" class="btn btn-ghost"
+          style="color: var(--text-secondary); font-size: 13px;">Pricing</a>
+      </nav>
+    </div>
+
+    <div class="pf-header__right">
+      <button class="btn btn-primary" style="font-size: 12px; padding: 4px 12px;">Create Bounty</button>
+    </div>
+  </header>
+
+  <div class="container" style="padding-top: 3rem;">
+    <div style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: end;">
+      <div>
+        <h1 style="font-size: 2rem; margin-bottom: 8px;">Open Bounties</h1>
+        <p style="color: var(--text-secondary); font-size: 14px;">High-priority architectural challenges with verified
+          rewards from the community.</p>
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <div class="btn-group" style="display: flex; border: 1px solid var(--border-default); border-radius: 6px;">
+          <button class="btn btn-ghost"
+            style="border: none; border-right: 1px solid var(--border-default); font-size: 12px;">Open</button>
+          <button class="btn btn-ghost" style="border: none; font-size: 12px;">Closed</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bounty List (GitHub Issues style) -->
+    <div class="card" style="border-radius: 8px; overflow: hidden;">
+      <div
+        style="background: var(--bg-surface); padding: 12px 1.5rem; border-bottom: 1px solid var(--border-default); display: flex; align-items: center; gap: 1rem;">
+        <i data-lucide="circle-dot" size="16" style="color: var(--accent-green)"></i>
+        <span style="font-size: 13px; font-weight: 600;">Active Challenges</span>
+      </div>
+      <div id="bounty-grid">
+        <!-- Loading -->
+        <div style="text-align: center; padding: 4rem;">
+          <div
+            style="width: 20px; height: 20px; border: 2px solid var(--accent-purple); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/pages/bounty-board.js"></script>
+</body>
+</body>
+
+</html>

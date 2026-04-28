@@ -1,0 +1,169 @@
+{% INCLUDECSS promptfeed.css %}
+{% INCLUDECSS colours.css %}
+{% INCLUDECSS components.css %}
+<!DOCTYPE html>
+<html dir="{{ S_CONTENT_DIRECTION }}" lang="{{ S_USER_LANG }}">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {{ META }}
+    <title>{% if PROMPT_TITLE %}{{ PROMPT_TITLE }} - {% endif %}{{ SITENAME }}</title>
+
+    <!-- Google Fonts - Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    {$STYLESHEETS}
+
+    {{ definition.HEAD_STYLESHEET}}
+
+    {% if S_ALLOW_CDN %}
+    <link href="{{ T_ASSETS_PATH }}/javascript/jquery-ui-1.12.1.custom/jquery-ui.min.css" rel="stylesheet">
+    {% endif %}
+
+    {% EVENT overall_header_head_append %}
+</head>
+
+<body id="phpbb" class="pf-body nojs {{ S_CONTENT_DIRECTION }} {{ BODY_CLASS }}">
+
+    <!-- Notification Panel Overlay -->
+    <div id="notification-overlay" class="pf-notification-overlay"></div>
+
+    <!-- Notification Panel -->
+    <div id="notification-panel" class="pf-notification-panel">
+        <div class="pf-notification-header">
+            <h3 class="pf-notification-title">{{ lang('NOTIFICATIONS') }}</h3>
+            <button id="close-notifications" class="pf-btn-ghost" aria-label="{{ lang('CLOSE') }}">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="pf-notification-body" id="notification-list">
+            {% if not NOTIFICATIONS %}
+            <div class="pf-notification-empty-icon">
+                <span class="material-symbols-outlined" style="font-size: 1.5rem;">notifications_off</span>
+            </div>
+            <p style="font-size: var(--pf-font-size-sm); font-weight: 500; color: var(--pf-mocha);">{{
+                lang('NO_NOTIFICATIONS') }}</p>
+            <p style="font-size: var(--pf-font-size-xs); color: rgba(166, 137, 102, 0.6); margin-top: 0.25rem;">{{
+                lang('NOTIFICATIONS_EXPLAIN') }}</p>
+            {% else %}
+            {% for notification in NOTIFICATIONS %}
+            <div class="pf-notification-item">
+                {{ notification.AVATAR }}
+                <div>
+                    <p>{{ notification.TEXT }}</p>
+                    <span>{{ notification.TIME }}</span>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <div style="padding: var(--pf-space-4); border-top: 1px solid rgba(166, 137, 102, 0.1);">
+            <p
+                style="font-size: 10px; color: rgba(166, 137, 102, 0.5); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">
+                {{ lang('NOTIFICATION_TYPES') }}</p>
+            <div style="display: flex; gap: var(--pf-space-2); margin-top: var(--pf-space-2);">
+                <span class="pf-tag">{{ lang('UPVOTES') }}</span>
+                <span class="pf-tag">{{ lang('REPLIES') }}</span>
+                <span class="pf-tag">{{ lang('MENTIONS') }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="pf-header" id="header">
+        <div class="pf-header-inner">
+            <div class="pf-flex pf-items-center pf-gap-8">
+                <!-- Logo -->
+                <a href="{{ U_INDEX }}" class="pf-logo" id="logo">
+                    <div class="pf-logo-icon">
+                        <span class="material-symbols-outlined">terminal</span>
+                    </div>
+                    <h2 class="pf-logo-text">{{ SITENAME }}</h2>
+                </a>
+
+                <!-- Search -->
+                <form action="{{ U_SEARCH }}" method="get" class="pf-search" role="search">
+                    <div class="pf-search-icon">
+                        <span class="material-symbols-outlined" style="font-size: 1.25rem;">search</span>
+                    </div>
+                    <input type="text" name="keywords" class="pf-search-input"
+                        placeholder="{{ lang('SEARCH_MINI') }}" />
+                    <input type="hidden" name="fid[]" value="" />
+                </form>
+            </div>
+
+            <div class="pf-flex pf-items-center pf-gap-4">
+                <!-- Navigation -->
+                <nav class="pf-nav">
+                    {% EVENT navbar_header_quick_links_before %}
+                    <a class="pf-nav-link" href="{{ U_INDEX }}">{{ lang('FORUM_INDEX') }}</a>
+                    {% if U_PORTAL %}<a class="pf-nav-link" href="{{ U_PORTAL }}">{{ lang('PORTAL') }}</a>{% endif %}
+                    <a class="pf-nav-link" href="{{ U_FAQ }}">{{ lang('FAQ') }}</a>
+                    {% EVENT navbar_header_quick_links_after %}
+                </nav>
+
+                <div style="height: 1.5rem; width: 1px; background: rgba(166, 137, 102, 0.2); display: none;"
+                    class="pf-lg-block"></div>
+
+                <!-- Language Switcher (if enabled) -->
+                {% if S_DISPLAY_LANGBOX %}
+                <div class="pf-lang-switcher" style="position: relative;">
+                    <button id="lang-toggle" class="pf-btn-ghost"
+                        style="font-size: var(--pf-font-size-xs); font-weight: 700; border: 1px solid rgba(166, 137, 102, 0.2); border-radius: var(--pf-radius-lg); padding: 0.25rem 0.5rem;">
+                        <span id="current-lang">{{ S_USER_LANG|upper|slice(0, 2) }}</span>
+                        <span class="material-symbols-outlined" style="font-size: 0.875rem;">expand_more</span>
+                    </button>
+                </div>
+                {% endif %}
+
+                <!-- Notification Bell -->
+                <button id="notification-btn" class="pf-btn-icon" aria-label="{{ lang('NOTIFICATIONS') }}">
+                    <span class="material-symbols-outlined">notifications</span>
+                    {% if NOTIFICATIONS_COUNT > 0 %}
+                    <span class="pf-notification-badge">{{ NOTIFICATIONS_COUNT }}</span>
+                    {% endif %}
+                </button>
+
+                <!-- User Avatar / Login -->
+                {% if S_USER_LOGGED_IN %}
+                <a href="{{ U_PROFILE }}" id="user-avatar" class="pf-avatar pf-avatar-md"
+                    style="background-image: url('{{ CURRENT_USER_AVATAR }}');" title="{{ CURRENT_USERNAME }}"></a>
+                {% else %}
+                <a href="{{ U_LOGIN_LOGOUT }}" class="pf-btn pf-btn-primary">{{ lang('LOGIN') }}</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Wrapper -->
+    <div id="wrap" class="wrap">
+        {% if not S_IS_BOT %}{% EVENT overall_header_searchbox %}{% endif %}
+
+        <!-- Breadcrumbs -->
+        {% if S_DISPLAY_BREADCRUMB %}
+        <nav class="breadcrumbs"
+            style="max-width: 1280px; margin: 0 auto; padding: var(--pf-space-3) var(--pf-space-4);">
+            <div class="pf-flex pf-items-center pf-gap-2" style="flex-wrap: wrap;">
+                {% for navlink in navlinks %}
+                <a href="{{ navlink.U_VIEW_FORUM }}" class="pf-nav-link" style="font-size: var(--pf-font-size-xs);">{{
+                    navlink.FORUM_NAME }}</a>
+                {% if not loop.last %}<span
+                    style="color: var(--pf-mocha); font-size: var(--pf-font-size-xs);">/</span>{% endif %}
+                {% endfor %}
+            </div>
+        </nav>
+        {% endif %}
+
+        <main id="page-body" class="pf-container"
+            style="padding-top: var(--pf-space-6); padding-bottom: var(--pf-space-6);">
+            {% EVENT overall_header_page_body_before %}

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Prompt Detail — PromptFeed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<link rel="stylesheet" href="pf-layout.css"/>
+<style>
+/* ── Detail Page Specifics ── */
+.pd-container {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  max-width: var(--pf-max-w);
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+@media (max-width: 900px) {
+  .pd-container { grid-template-columns: 1fr; }
+}
+
+.pd-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pd-header {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 24px;
+}
+
+.pd-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--pf-text-primary);
+  margin-bottom: 8px;
+}
+
+.pd-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--pf-text-secondary);
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.pd-desc {
+  font-size: 14px;
+  color: var(--pf-text-primary);
+  line-height: 1.6;
+  padding-top: 16px;
+  border-top: 1px solid var(--pf-border);
+}
+
+.pd-content-box {
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  padding: 16px;
+  font-family: var(--pf-font-mono);
+  font-size: 13px;
+  color: var(--pf-text-primary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.pd-content-box--locked {
+  filter: blur(4px);
+  user-select: none;
+}
+
+.pd-locked-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(13, 17, 23, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* ── Panels ── */
+.pd-panel {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pd-panel__header {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--pf-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--pf-border);
+  padding-bottom: 12px;
+}
+
+.pd-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.pd-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pd-stat__label { font-size: 11px; color: var(--pf-text-muted); text-transform: uppercase; font-weight: 600; }
+.pd-stat__val { font-size: 16px; font-weight: 700; color: var(--pf-text-primary); font-family: var(--pf-font-mono); }
+
+.pd-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.pd-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.pd-badge--free { background: #3fb95020; color: var(--pf-success); border: 1px solid #3fb95030; }
+.pd-badge--premium { background: #a371f720; color: var(--pf-pro); border: 1px solid #a371f730; }
+
+.pd-actions { display: flex; flex-direction: column; gap: 10px; }
+.pd-action-row { display: flex; gap: 10px; }
+.pd-action-row > * { flex: 1; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--pf-surface) 25%, var(--pf-border) 50%, var(--pf-surface) 75%);
+  background-size: 400% 100%;
+  animation: skel 1.5s infinite;
+  border-radius: 4px;
+}
+@keyframes skel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+</style>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+</head>
+<body>
+
+<!-- Gate Modal -->
+<div id="pf-gate" class="pf-gate-overlay">
+  <div class="pf-gate-modal">
+    <div class="pf-gate-modal__icon">🔒</div>
+    <div class="pf-gate-modal__title">Sign in required</div>
+    <div class="pf-gate-modal__desc" id="gate-desc">Sign in to perform this action.</div>
+    <div class="pf-gate-modal__actions">
+      <button class="pf-btn pf-btn--ghost" id="btn-close-gate">Cancel</button>
+      <button class="pf-btn pf-btn--primary" id="btn-goto-signin">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<header class="pf-topnav">
+  <div class="pf-topnav__inner">
+    <a href="index.html" class="pf-topnav__logo">
+      <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
+    </a>
+    <nav class="pf-topnav__nav" aria-label="Main">
+      <a href="index.html" class="pf-topnav__nav-link">News</a>
+      <a href="community.html" class="pf-topnav__nav-link">Community</a>
+      <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
+      <a href="benchmarks.html" class="pf-topnav__nav-link">Benchmarks</a>
+      <a href="skill-library.html" class="pf-topnav__nav-link">Skills</a>
+      <a href="bounty-board.html" class="pf-topnav__nav-link">Bounties</a>
+      <a href="subscription.html" class="pf-topnav__nav-link">Pricing</a>
+    </nav>
+    <div class="pf-topnav__search">
+      <span class="material-symbols-outlined pf-topnav__search-icon">search</span>
+      <input id="search-input" type="search" placeholder="Search prompts..." autocomplete="off"/>
+    </div>
+    <div class="pf-topnav__actions" id="nav-auth-area"></div>
+  </div>
+</header>
+
+<div class="pd-container" id="page-content">
+  <!-- Loading State by Default -->
+  <div class="pd-main" id="loading-main">
+    <div class="pd-header skeleton" style="height:200px"></div>
+    <div class="skeleton" style="height:300px"></div>
+  </div>
+  <aside class="pd-sidebar" id="loading-side">
+    <div class="pd-panel skeleton" style="height:250px; margin-bottom:24px"></div>
+    <div class="pd-panel skeleton" style="height:350px"></div>
+  </aside>
+</div>
+
+<script src="js/pages/prompt-detail.js" defer></script>
+</body>
+</html>

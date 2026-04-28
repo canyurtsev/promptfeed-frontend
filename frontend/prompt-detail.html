@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Architecture Detail · PromptFeed</title>
+
+  <!-- Design System -->
+  <link href="css/styles.css" rel="stylesheet" />
+
+  <!-- Icons (Lucide) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .repo-header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-default);
+      padding: 1.5rem 0 0;
+    }
+
+    .repo-nav {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .repo-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      padding-bottom: 8px;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .repo-tab.active {
+      color: var(--text-white);
+      border-color: #f78166;
+      font-weight: 600;
+    }
+
+    .file-container {
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 2rem;
+    }
+
+    .file-header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-default);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .file-content {
+      padding: 2rem;
+      background: var(--bg-canvas);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: var(--text-primary);
+    }
+
+    .sidebar-heading {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-white);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+
+<body class="pf-main">
+
+  <header class="pf-header"></header>
+
+  <main class="pf-main">
+    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem; width: 100%;">
+      <!-- Main Content -->
+      <section>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 1.25rem; color: var(--accent-blue); margin-bottom: 1.5rem;">
+          <i data-lucide="book-open" size="20"></i>
+          <a href="#" style="font-weight: 400; color: inherit;">curator</a>
+          <span style="color: var(--text-muted);">/</span>
+          <a href="#" id="repo-title" style="font-weight: 600; color: inherit;">loading-architecture...</a>
+          <span
+            style="font-size: 11px; padding: 1px 10px; border: 1px solid var(--border-default); border-radius: 20px; color: var(--text-muted); margin-left: 8px;">Public</span>
+        </div>
+
+        <div class="file-container">
+          <div class="file-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div
+                style="width: 24px; height: 24px; border-radius: 50%; background: #238636; overflow: hidden; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: 700;">
+                A</div>
+              <span style="font-size: 13px; font-weight: 600; color: var(--text-white);" id="author-name">architect</span>
+              <span style="font-size: 13px; color: var(--text-muted); margin-left: 8px;">Initial architecture commit</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);" id="time-ago-header">2 hours ago</span>
+          </div>
+          <div class="file-content">
+            <pre id="prompt-content">{{ LOADING_PROMPT_ARCHITECTURE }}</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sidebar -->
+      <aside>
+        <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem; border-color: var(--pf-efficiency); box-shadow: var(--pf-glow);">
+          <h4 class="sidebar-heading" style="display: flex; align-items: center; justify-content: space-between;">
+            <span>Performance</span>
+            <span class="pf-badge badge-efficiency" style="font-size: 9px;">BENCHMARK</span>
+          </h4>
+          
+          <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; color: var(--text-secondary);">⚡ Efficiency</span>
+              <span style="font-size: 14px; font-weight: 700; color: var(--pf-efficiency);" id="perf-efficiency">94</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; color: var(--text-secondary);">💰 Avg Cost</span>
+              <span style="font-size: 13px; font-weight: 600; color: var(--pf-low-cost);" id="perf-cost">$0.004</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; color: var(--text-secondary);">🧠 Quality</span>
+              <span style="font-size: 13px; font-weight: 600; color: var(--pf-quality);" id="perf-quality">4.8</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; color: var(--text-secondary);">📉 Tokens</span>
+              <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);" id="perf-tokens">820 avg</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; color: var(--text-secondary);">⏱ Latency</span>
+              <span style="font-size: 13px; font-weight: 600; color: var(--pf-latency);" id="perf-latency">1.2s</span>
+            </div>
+            
+            <div style="margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--border-muted);">
+               <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Best Model:</div>
+               <div style="font-size: 13px; font-weight: 600; color: var(--accent-blue);" id="perf-model">GPT-4o-mini</div>
+            </div>
+
+            <div style="margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--border-muted); display: flex; flex-direction: column; gap: 8px;">
+               <div style="font-size: 12px; color: var(--pf-low-cost); display: flex; align-items: center; gap: 6px;">
+                 <i data-lucide="check-circle" size="14"></i> Verified Runs: <span id="perf-runs" style="font-weight: 700; margin-left: auto;">1,204</span>
+               </div>
+               <div style="font-size: 12px; color: var(--pf-low-cost); display: flex; align-items: center; gap: 6px;">
+                 <i data-lucide="check-circle" size="14"></i> Success Rate: <span id="perf-success" style="font-weight: 700; margin-left: auto;">96%</span>
+               </div>
+            </div>
+          </div>
+
+          <div id="purchase-section" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <button id="btn-run" class="btn btn-primary" style="width: 100%; height: 42px; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--pf-efficiency); border: none; font-weight: 600;">
+              Run Prompt
+            </button>
+            <button id="btn-buy" class="btn" style="width: 100%; height: 42px; display: none; border: 1px solid var(--pf-efficiency); color: var(--pf-efficiency); font-weight: 600;">Buy $89</button>
+            <div id="owned-badge"
+              style="display: none; background: rgba(35, 134, 54, 0.1); border: 1px solid #238636; color: #3fb950; padding: 12px; border-radius: 6px; text-align: center; font-size: 14px; font-weight: 600;">
+              <i data-lucide="check-circle" size="16"></i> Owned
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+          <h4 class="sidebar-heading">About</h4>
+          <p id="prompt-desc" style="font-size: 14px; color: var(--text-primary); margin-bottom: 1rem;">Architectural
+            implementation for specialized AI agency tasks.</p>
+          <div class="stat-row"><i data-lucide="star" size="14"></i> <strong id="stat-stars">0</strong> <span
+              style="margin-left: 4px;">stars</span></div>
+          <div class="stat-row"><i data-lucide="eye" size="14"></i> <strong id="stat-watching">0</strong> <span
+              style="margin-left: 4px;">watching</span></div>
+          <div class="stat-row"><i data-lucide="git-fork" size="14"></i> <strong id="stat-forks">0</strong> <span
+              style="margin-left: 4px;">forks</span></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui-components.js"></script>
+  <script src="js/pages/prompt-detail.js"></script>
+</body>
+</body>
+
+</html>

@@ -1,0 +1,545 @@
+/**
+ * MockBackend - Simulates server-side logic and database
+ */
+class MockBackend {
+    constructor() {
+        this.currentUser = {
+            id: 'u1',
+            handle: '@current_user',
+            reputation: 150,
+            badges: ['Early Adopter']
+        };
+
+        this.users = [
+            { id: 'u1', handle: '@current_user', reputation: 150, badges: ['Early Adopter'] },
+            { id: 'u2', handle: '@dev_pro', reputation: 2450, badges: ['Prompt Engineer', 'Top Contributor'] },
+            { id: 'u3', handle: '@frontend_guru', reputation: 1890, badges: ['UI Expert'] },
+            { id: 'u4', handle: '@data_wizard', reputation: 3200, badges: ['SQL Master'] },
+            { id: 'u5', handle: '@senior_dev_jane', reputation: 5600, badges: ['Legend'] },
+            { id: 'u6', handle: '@ai_researcher', reputation: 4100, badges: ['AI Pioneer', 'Verified'] },
+            { id: 'u7', handle: '@cloud_architect', reputation: 2900, badges: ['Cloud Expert'] },
+            { id: 'u8', handle: '@ml_engineer', reputation: 3750, badges: ['ML Specialist', 'Top Contributor'] },
+            { id: 'u9', handle: '@creative_coder', reputation: 1200, badges: ['Artist'] },
+            { id: 'u10', handle: '@devops_ninja', reputation: 2100, badges: ['Automation Pro'] },
+            { id: 'u11', handle: '@security_hawk', reputation: 4500, badges: ['Security Expert', 'Verified'] },
+            { id: 'u12', handle: '@prompt_master', reputation: 6800, badges: ['Legend', 'Top Contributor', 'Prompt Engineer'] }
+        ];
+
+        this.prompts = [
+            {
+                id: 'p1',
+                title: 'Optimizing C# LINQ queries for large datasets',
+                description: 'Can someone review this prompt for generating high-performance boilerplate? The goal is to minimize memory allocation in hot paths.',
+                authorId: 'u2',
+                tags: ['C#', 'Performance'],
+                upvotes: 1200,
+                downvotes: 15,
+                createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+                commentCount: 54,
+                isBoosted: false,
+                content: `Act as a Senior .NET Engineer. Refactor the following LINQ \nexpression into a high-performance loop-based alternative \nusing Span<T> where possible...`,
+                exampleOutput: `public void ProcessData(Span<int> data) {\n    for (int i = 0; i < data.Length; i++) {\n        // High performance processing\n    }\n}`
+            },
+            {
+                id: 'p2',
+                title: 'System prompt for debugging React hydration errors',
+                description: 'Helpful for identifying mismatch between server and client render. This specific variant works best with Next.js 14 and App Router.',
+                authorId: 'u3',
+                tags: ['Web', 'React', 'Debugging'],
+                upvotes: 482,
+                downvotes: 2,
+                createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+                commentCount: 12,
+                image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDAZWt2nF4WN1ukFAJg2jm1N2mBNm90L2p4zSPHr3NRTk2FPPWtr1o0sfrlT3x8wXNuG28-SUeX_VNKCP70aGRUzwUNFIePz4R8HBKhdyjsDjc6eq1mBOhEuHTa4UxV2TSfXgctR8ENCcCH3owuUY65rKEwCsl8mHQpIy3HH7tTtdSSo7EdOdK_rCAYDI4XVy1Jm4Pv1r7qjlx9ZRJuZaCRIlewi0tBdTw4AAkbdKsUdmwPiBh7YLqsgUmlhN_J9fyzaM1V1LXqhTE',
+                isBoosted: false
+            },
+            {
+                id: 'p3',
+                title: 'Universal SQL generator prompt for Postgres',
+                description: 'Input schema and get optimized queries. I verified this on schemas with 50+ tables and it maintains context well.',
+                authorId: 'u4',
+                tags: ['SQL', 'Database', 'Postgres'],
+                upvotes: 2100,
+                downvotes: 45,
+                createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+                commentCount: 38,
+                isBoosted: true,
+                boostWeight: 50,
+                content: `[CONSTRAINTS]\n- Use subqueries only when necessary\n- Prefer JOINs over EXISTS\n- Output PostgreSQL 15 syntax...`,
+                exampleOutput: `SELECT u.name, o.total\nFROM users u\nJOIN orders o ON u.id = o.user_id\nWHERE o.status = 'completed';`
+            },
+            {
+                id: 'p4',
+                title: 'Claude 3.5 Sonnet — Ultimate code refactoring agent',
+                description: 'A battle-tested system prompt that turns Claude into a senior engineer. Handles TypeScript, Python, and Go. Includes chain-of-thought reasoning.',
+                authorId: 'u6',
+                tags: ['Claude', 'Refactoring', 'AI'],
+                upvotes: 3400,
+                downvotes: 28,
+                createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+                commentCount: 91,
+                isBoosted: true,
+                boostWeight: 30,
+                content: `You are an expert software engineer specializing in code refactoring.\n[RULES]\n1. Always explain WHY you made each change\n2. Preserve backward compatibility\n3. Add inline comments for complex logic...`,
+                exampleOutput: `// Refactored version\nfunction calculateTotal(items) {\n    return items.reduce((sum, item) => sum + item.price, 0);\n}\n// I used reduce to make it more declarative and readable.`
+            },
+            {
+                id: 'p5',
+                title: 'GPT-4 Turbo: Academic paper summarizer with citations',
+                description: 'Feed it any arXiv paper and get a structured summary with key findings, methodology, and limitations. Tested on 200+ papers.',
+                authorId: 'u8',
+                tags: ['GPT-4', 'Research', 'Academic'],
+                upvotes: 890,
+                downvotes: 7,
+                createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+                commentCount: 24,
+                isBoosted: false,
+                content: `[ROLE] You are an academic research assistant.\n[FORMAT]\n## Summary\n## Key Findings\n## Methodology\n## Limitations\n## Citation (APA)\n\nRules: Maintain academic tone...`
+            },
+            {
+                id: 'p6',
+                title: 'Midjourney v6 cinematic scene generator',
+                description: 'Generates photorealistic cinematic prompts with perfect lighting, composition, and mood. Works great for concept art and storyboarding.',
+                authorId: 'u9',
+                tags: ['AI-Art', 'Midjourney', 'Creative'],
+                upvotes: 1650,
+                downvotes: 22,
+                createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+                commentCount: 67,
+                isBoosted: false,
+                image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDlwzcFd5gTpbatKkwtsue7C0fCanoyIIQ4k3bIXNknlhyuUvrAwObTQg2zFGW2EqR2YHFdrb4Utt2UUq9fJ1ggIBOU_yv3vohMe9bAQiCpz13mSs6o7RspbTN9rwf9vbNQhp3mOwWLob4yweOgqS7LGcF6okkTcF-TVf6vcdXMtCKI5ubGILqjryWAilerHA9VTQc8PhEuK9Itz8DwurXg2wwuEsw3Uqe4KuIULNyD87yzCmHMpsPr2SezH-xgy7q-s4hWtB6rxhU'
+            },
+            {
+                id: 'p7',
+                title: 'Kubernetes troubleshooting prompt chain',
+                description: 'Step-by-step debugging assistant for K8s cluster issues. Covers pod crashes, networking, RBAC, and resource limits.',
+                authorId: 'u10',
+                tags: ['DevOps', 'Kubernetes', 'Debugging'],
+                upvotes: 745,
+                downvotes: 5,
+                createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+                commentCount: 19,
+                isBoosted: false,
+                content: `[CONTEXT] You are a Kubernetes SRE expert.\n[PROCESS]\n1. Analyze 'kubectl describe pod' output\n2. Check events and logs\n3. Identify root cause from error patterns\n4. Suggest remediation steps...`
+            },
+            {
+                id: 'p8',
+                title: 'Gemini Pro API — Structured data extractor',
+                description: 'Extract structured JSON from unstructured text. Supports invoices, receipts, emails, and contracts. Schema validation included.',
+                authorId: 'u12',
+                tags: ['Gemini', 'Data', 'API'],
+                upvotes: 2800,
+                downvotes: 31,
+                createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+                commentCount: 76,
+                isBoosted: false,
+                content: `[TASK] Extract structured data from the following document.\n[OUTPUT_FORMAT] JSON\n[SCHEMA]\n{\n  "vendor": string,\n  "date": ISO8601,\n  "items": [{name, qty, price}],\n  "total": number\n}`
+            },
+            {
+                id: 'p9',
+                title: 'Security audit prompt — OWASP Top 10 scanner',
+                description: 'Reviews code for OWASP Top 10 vulnerabilities. Tested on Node.js, Python Flask, and Java Spring Boot codebases.',
+                authorId: 'u11',
+                tags: ['Security', 'Coding', 'Audit'],
+                upvotes: 1950,
+                downvotes: 14,
+                createdAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
+                commentCount: 42,
+                isBoosted: false,
+                content: `[ROLE] Senior Application Security Engineer\n[SCAN FOR]\n- SQL Injection (A03:2021)\n- XSS (A07:2017)\n- Broken Authentication (A07:2021)\n- SSRF (A10:2021)\n[FORMAT] severity | location | description | fix`
+            },
+            {
+                id: 'p10',
+                title: 'Multi-language translation prompt with context awareness',
+                description: 'Translates between 15+ languages while preserving tone, idioms, and cultural nuances. Uses chain-of-thought for ambiguous phrases.',
+                authorId: 'u5',
+                tags: ['Language', 'Translation', 'GPT-4'],
+                upvotes: 560,
+                downvotes: 3,
+                createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+                commentCount: 8,
+                isBoosted: false,
+                content: `[ROLE] Expert translator and linguist.\n[RULES]\n1. Preserve the original tone (formal/informal)\n2. Adapt idioms to target culture\n3. Flag ambiguous phrases with [?] annotation\n4. Provide alternative translations when context-dependent`
+            }
+        ];
+    }
+
+    /**
+     * Ranking Algorithm
+     * rank = (score / (age_in_hours + 2)^1.5) + boost_weight
+     */
+    calculateRank(prompt) {
+        const score = prompt.upvotes - prompt.downvotes;
+        const ageInHours = (Date.now() - new Date(prompt.createdAt).getTime()) / (1000 * 60 * 60);
+        const gravity = 1.5;
+        const boost = prompt.isBoosted ? (prompt.boostWeight || 20) : 0;
+
+        return (score / Math.pow(ageInHours + 2, gravity)) + boost;
+    }
+
+    getFeed(filter = 'top', tag = null, searchQuery = null) {
+        let sortedPrompts = [...this.prompts];
+
+        // 1. Filter by Tag
+        if (tag) {
+            sortedPrompts = sortedPrompts.filter(p => p.tags.some(t => t.toLowerCase() === tag.toLowerCase()));
+        }
+
+        // 2. Filter by Search Query
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            sortedPrompts = sortedPrompts.filter(p =>
+                p.title.toLowerCase().includes(q) ||
+                p.description.toLowerCase().includes(q) ||
+                p.tags.some(t => t.toLowerCase().includes(q))
+            );
+        }
+
+        // 3. Sort
+        if (filter === 'top') {
+            sortedPrompts.sort((a, b) => this.calculateRank(b) - this.calculateRank(a));
+        } else if (filter === 'new') {
+            sortedPrompts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (filter === 'controversial') {
+            sortedPrompts.sort((a, b) => (b.upvotes + b.downvotes) - (a.upvotes + a.downvotes));
+        }
+
+        return sortedPrompts.map(p => {
+            const author = this.users.find(u => u.id === p.authorId);
+            return {
+                ...p,
+                authorHandle: author ? author.handle : 'Unknown',
+                rankScore: this.calculateRank(p).toFixed(2)
+            };
+        });
+    }
+
+    getUser(id) {
+        return this.users.find(u => u.id === id);
+    }
+
+    getCurrentUser() {
+        return this.currentUser;
+    }
+
+    /**
+     * Get Featured Posts for the carousel
+     */
+    getFeaturedPosts() {
+        return [
+            {
+                id: 'f1',
+                title: 'GPT-5 Rumors: What We Know So Far',
+                description: 'Latest leaks and predictions about OpenAI\'s next model — expected benchmarks and release timeline.',
+                author: 'AI_News',
+                image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDlwzcFd5gTpbatKkwtsue7C0fCanoyIIQ4k3bIXNknlhyuUvrAwObTQg2zFGW2EqR2YHFdrb4Utt2UUq9fJ1ggIBOU_yv3vohMe9bAQiCpz13mSs6o7RspbTN9rwf9vbNQhp3mOwWLob4yweOgqS7LGcF6okkTcF-TVf6vcdXMtCKI5ubGILqjryWAilerHA9VTQc8PhEuK9Itz8DwurXg2wwuEsw3Uqe4KuIULNyD87yzCmHMpsPr2SezH-xgy7q-s4hWtB6rxhU',
+                tag: 'News'
+            },
+            {
+                id: 'f2',
+                title: 'Claude 3.5 Sonnet: Best for Coding?',
+                description: 'A deep dive into Anthropic\'s latest model capabilities and how it stacks up against GPT-4 Turbo.',
+                author: 'TechReview',
+                image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDAZWt2nF4WN1ukFAJg2jm1N2mBNm90L2p4zSPHr3NRTk2FPPWtr1o0sfrlT3x8wXNuG28-SUeX_VNKCP70aGRUzwUNFIePz4R8HBKhdyjsDjc6eq1mBOhEuHTa4UxV2TSfXgctR8ENCcCH3owuUY65rKEwCsl8mHQpIy3HH7tTtdSSo7EdOdK_rCAYDI4XVy1Jm4Pv1r7qjlx9ZRJuZaCRIlewi0tBdTw4AAkbdKsUdmwPiBh7YLqsgUmlhN_J9fyzaM1V1LXqhTE',
+                tag: 'Review'
+            },
+            {
+                id: 'f3',
+                title: 'Prompt Engineering Masterclass 2025',
+                description: 'Free 8-week workshop series starting next week — from basics to advanced chain-of-thought techniques.',
+                author: 'PromptFeed',
+                image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDlwzcFd5gTpbatKkwtsue7C0fCanoyIIQ4k3bIXNknlhyuUvrAwObTQg2zFGW2EqR2YHFdrb4Utt2UUq9fJ1ggIBOU_yv3vohMe9bAQiCpz13mSs6o7RspbTN9rwf9vbNQhp3mOwWLob4yweOgqS7LGcF6okkTcF-TVf6vcdXMtCKI5ubGILqjryWAilerHA9VTQc8PhEuK9Itz8DwurXg2wwuEsw3Uqe4KuIULNyD87yzCmHMpsPr2SezH-xgy7q-s4hWtB6rxhU',
+                tag: 'Event'
+            }
+        ];
+    }
+
+    /**
+     * Get Forum Categories
+     */
+    getCategories() {
+        return [
+            {
+                id: 'cat1',
+                name: 'Announcements',
+                nameTr: 'Duyurular',
+                color: '#ef4444',
+                icon: 'campaign',
+                description: 'Official updates from the PromptFeed team',
+                descriptionTr: 'PromptFeed ekibinden resmi güncellemeler',
+                topicsCount: 14,
+                topicsLabel: 'hafta',
+                subtags: ['Release', 'Updates', 'Roadmap']
+            },
+            {
+                id: 'cat2',
+                name: 'Events / Meetups',
+                nameTr: 'Etkinlikler',
+                color: '#f97316',
+                icon: 'event',
+                description: 'AI meetups and events - dates, locations, and how to join!',
+                descriptionTr: 'AI buluşmaları ve etkinlikler - tarihler, lokasyonlar',
+                topicsCount: 23,
+                topicsLabel: 'hafta',
+                subtags: ['Online', 'Istanbul', 'Ankara', 'Global']
+            },
+            {
+                id: 'cat3',
+                name: 'Discussions',
+                nameTr: 'Tartışmalar',
+                color: '#D4A373',
+                icon: 'forum',
+                description: 'Talk shop with other AI enthusiasts. Workflows, tips, model comparisons.',
+                descriptionTr: 'AI meraklılarıyla sohbet. İş akışları, ipuçları, model karşılaştırmaları.',
+                topicsCount: 58,
+                topicsLabel: 'hafta',
+                subtags: ['GPT', 'Claude', 'Gemini', 'Local Models']
+            },
+            {
+                id: 'cat4',
+                name: 'Support',
+                nameTr: 'Destek',
+                color: '#3b82f6',
+                icon: 'help',
+                description: 'Get help from the community. Post bug reports or ask questions.',
+                descriptionTr: 'Topluluktan yardım alın. Hata raporları veya sorular.',
+                topicsCount: 487,
+                topicsLabel: 'toplam',
+                subtags: ['Bug Report', 'How To', 'Setup']
+            },
+            {
+                id: 'cat5',
+                name: 'Ideas',
+                nameTr: 'Fikirler',
+                color: '#a855f7',
+                icon: 'lightbulb',
+                description: 'Share your ideas for new features and improvements.',
+                descriptionTr: 'Yeni özellikler ve iyileştirmeler için fikirlerinizi paylaşın.',
+                topicsCount: 145,
+                topicsLabel: 'toplam',
+                subtags: ['Feature Request', 'Improvement']
+            },
+            {
+                id: 'cat6',
+                name: 'Showcase',
+                nameTr: 'Vitrin',
+                color: '#22c55e',
+                icon: 'star',
+                description: 'Show off your prompt creations, workflows, and AI-powered projects.',
+                descriptionTr: 'Prompt çalışmalarınızı, iş akışlarınızı ve AI projelerinizi sergileyin.',
+                topicsCount: 76,
+                topicsLabel: 'toplam',
+                subtags: ['Projects', 'Workflows', 'Templates']
+            }
+        ];
+    }
+
+    /**
+     * Get Popular/Recent Discussions for right sidebar
+     */
+    getPopularDiscussions() {
+        return [
+            {
+                id: 'd1',
+                title: 'Welcome to the PromptFeed Forum!',
+                category: 'Announcements',
+                categoryColor: '#ef4444',
+                author: 'Admin',
+                views: 2500,
+                replies: 45,
+                isNew: false
+            },
+            {
+                id: 'd2',
+                title: 'Share Your Experience with MCP Tools',
+                category: 'Discussions',
+                categoryColor: '#D4A373',
+                author: 'prompt_master',
+                views: 890,
+                replies: 15,
+                isNew: true
+            },
+            {
+                id: 'd3',
+                title: 'Where is agent editing gone?',
+                category: 'Support',
+                categoryColor: '#3b82f6',
+                author: 'new_user',
+                views: 234,
+                replies: 3,
+                isNew: false
+            },
+            {
+                id: 'd4',
+                title: 'Edit default model in Agent Plan mode',
+                category: 'Ideas',
+                categoryColor: '#a855f7',
+                author: 'dev_ninja',
+                views: 567,
+                replies: 8,
+                isNew: true
+            },
+            {
+                id: 'd5',
+                title: 'Best prompts for code refactoring?',
+                category: 'Discussions',
+                categoryColor: '#D4A373',
+                author: 'senior_dev',
+                views: 1200,
+                replies: 23,
+                isNew: false
+            },
+            {
+                id: 'd6',
+                title: 'Gemini 2.0 Flash vs GPT-4o — benchmark results',
+                category: 'Discussions',
+                categoryColor: '#D4A373',
+                author: 'ai_researcher',
+                views: 3100,
+                replies: 67,
+                isNew: true
+            },
+            {
+                id: 'd7',
+                title: 'PromptFeed v2.1 Released — New Marketplace Features',
+                category: 'Announcements',
+                categoryColor: '#ef4444',
+                author: 'Admin',
+                views: 4200,
+                replies: 89,
+                isNew: true
+            },
+            {
+                id: 'd8',
+                title: 'My AI workflow that saves 4 hours daily',
+                category: 'Showcase',
+                categoryColor: '#22c55e',
+                author: 'creative_coder',
+                views: 1800,
+                replies: 34,
+                isNew: false
+            }
+        ];
+    }
+
+    /**
+     * Get Popular Tags
+     */
+    getTags() {
+        return [
+            { name: 'GPT-4', count: 341, trending: true },
+            { name: 'Claude', count: 289, trending: true },
+            { name: 'Gemini', count: 256, trending: true },
+            { name: 'Prompt-Engineering', count: 512, trending: true },
+            { name: 'AI-Art', count: 198, trending: false },
+            { name: 'Coding', count: 645, trending: true },
+            { name: 'Local-LLM', count: 167, trending: false },
+            { name: 'API', count: 234, trending: false },
+            { name: 'Security', count: 145, trending: true },
+            { name: 'DevOps', count: 112, trending: false },
+            { name: 'Data-Science', count: 187, trending: true },
+            { name: 'Translation', count: 89, trending: false }
+        ];
+    }
+
+    /**
+     * Get Skills - Open Source AI Tools/Extensions
+     */
+    getSkills() {
+        return [
+            {
+                id: 's1',
+                name: 'Wacli',
+                slug: '/wacli',
+                description: 'Send WhatsApp messages to other people or search/sync WhatsApp history via the wacli CLI (not for normal user chats).',
+                downloads: 2682,
+                forks: 25,
+                stars: 7,
+                versions: 1
+            },
+            {
+                id: 's2',
+                name: 'Gog',
+                slug: '/gog',
+                description: 'Google Workspace CLI for Gmail, Calendar, Drive, Contacts, Sheets, and Docs.',
+                downloads: 2590,
+                forks: 39,
+                stars: 17,
+                versions: 1
+            },
+            {
+                id: 's3',
+                name: 'Remind Me',
+                slug: '/remind-me',
+                description: 'Set reminders using natural language. Automatically creates one-time cron jobs and logs to markdown.',
+                downloads: 1965,
+                forks: 11,
+                stars: 7,
+                versions: 3
+            },
+            {
+                id: 's4',
+                name: 'Agent Browser',
+                slug: '/agent-browser',
+                description: 'A fast Rust-based headless browser automation CLI with Node.js fallback that enables AI agents to navigate, click, type, and snapshot pages via structured commands.',
+                downloads: 1933,
+                forks: 9,
+                stars: 12,
+                versions: 2
+            },
+            {
+                id: 's5',
+                name: 'Auto-Updater Skill',
+                slug: '/auto-updater',
+                description: 'Automatically update Clawdbot and all installed skills once daily. Runs via cron, checks for updates, applies them, and messages the user with a summary of what changed.',
+                downloads: 1844,
+                forks: 12,
+                stars: 14,
+                versions: 1
+            },
+            {
+                id: 's6',
+                name: 'Prompt Optimizer',
+                slug: '/prompt-optimizer',
+                description: 'Analyze and optimize your prompts for better AI responses. Includes token counting, clarity scoring, and automatic suggestions.',
+                downloads: 3250,
+                forks: 45,
+                stars: 28,
+                versions: 4
+            },
+            {
+                id: 's7',
+                name: 'Code Reviewer',
+                slug: '/code-reviewer',
+                description: 'AI-powered code review assistant. Analyzes pull requests, suggests improvements, detects security issues, and enforces coding standards across 12+ languages.',
+                downloads: 4120,
+                forks: 67,
+                stars: 52,
+                versions: 3
+            },
+            {
+                id: 's8',
+                name: 'Doc Generator',
+                slug: '/doc-generator',
+                description: 'Automatically generate API documentation, README files, and inline code comments from your codebase. Supports JSDoc, Python docstrings, and Go comments.',
+                downloads: 2890,
+                forks: 33,
+                stars: 21,
+                versions: 2
+            },
+            {
+                id: 's9',
+                name: 'Data Pipeline',
+                slug: '/data-pipeline',
+                description: 'Build and manage ETL pipelines with natural language. Connect to PostgreSQL, MongoDB, Redis, and S3. Schedule jobs, monitor failures, and auto-retry.',
+                downloads: 1560,
+                forks: 18,
+                stars: 15,
+                versions: 1
+            }
+        ];
+    }
+}
+
+// Export global instance
+window.backend = new MockBackend();

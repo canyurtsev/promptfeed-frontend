@@ -1,0 +1,739 @@
+/**
+ * PromptFeed Coffee Theme - UI Components
+ * Reusable component styles for forum elements
+ */
+
+/* ============================================
+   Header & Navigation
+   ============================================ */
+
+.pf-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--pf-z-sticky);
+    width: 100%;
+    border-bottom: 1px solid rgba(166, 137, 102, 0.2);
+    background-color: rgba(253, 252, 240, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: var(--pf-space-3) var(--pf-space-4);
+}
+
+@media (min-width: 768px) {
+    .pf-header {
+        padding: var(--pf-space-3) var(--pf-space-10);
+    }
+}
+
+.pf-header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--pf-space-4);
+}
+
+/* Logo */
+.pf-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--pf-space-2);
+    color: var(--pf-primary);
+    cursor: pointer;
+}
+
+.pf-logo-icon {
+    width: 2rem;
+    height: 2rem;
+    background-color: var(--pf-coffee-roast);
+    border-radius: var(--pf-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+.pf-logo-text {
+    font-size: var(--pf-font-size-xl);
+    font-weight: var(--pf-font-weight-bold);
+    letter-spacing: -0.025em;
+}
+
+@media (max-width: 640px) {
+    .pf-logo-text {
+        display: none;
+    }
+}
+
+/* Navigation Links */
+.pf-nav {
+    display: none;
+    align-items: center;
+    gap: var(--pf-space-6);
+}
+
+@media (min-width: 1024px) {
+    .pf-nav {
+        display: flex;
+    }
+}
+
+.pf-nav-link {
+    color: var(--pf-mocha);
+    font-size: var(--pf-font-size-sm);
+    font-weight: var(--pf-font-weight-medium);
+    transition: color var(--pf-transition-fast);
+}
+
+.pf-nav-link:hover {
+    color: var(--pf-coffee-roast);
+}
+
+/* Search Box */
+.pf-search {
+    display: flex;
+    align-items: stretch;
+    min-width: 10rem;
+    max-width: 20rem;
+    height: 2.5rem;
+    background-color: rgba(245, 230, 211, 0.4);
+    border: 1px solid rgba(166, 137, 102, 0.1);
+    border-radius: var(--pf-radius-lg);
+}
+
+.pf-search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: var(--pf-space-4);
+    color: var(--pf-mocha);
+}
+
+.pf-search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0 var(--pf-space-4);
+    font-size: var(--pf-font-size-sm);
+    color: var(--pf-espresso);
+    outline: none;
+}
+
+.pf-search-input::placeholder {
+    color: rgba(166, 137, 102, 0.7);
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+
+.pf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--pf-space-2);
+    padding: var(--pf-space-2) var(--pf-space-4);
+    font-family: var(--pf-font-display);
+    font-size: var(--pf-font-size-sm);
+    font-weight: var(--pf-font-weight-bold);
+    border-radius: var(--pf-radius-lg);
+    cursor: pointer;
+    transition: all var(--pf-transition-fast);
+    border: none;
+    outline: none;
+}
+
+.pf-btn:active {
+    transform: scale(0.95);
+}
+
+/* Primary Button */
+.pf-btn-primary {
+    background-color: var(--pf-coffee-roast);
+    color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(75, 54, 33, 0.2);
+}
+
+.pf-btn-primary:hover {
+    background-color: var(--pf-espresso);
+    color: #ffffff;
+}
+
+/* Secondary Button */
+.pf-btn-secondary {
+    background-color: #ffffff;
+    color: var(--pf-coffee-roast);
+    border: 1px solid rgba(166, 137, 102, 0.3);
+}
+
+.pf-btn-secondary:hover {
+    background-color: var(--pf-tan);
+}
+
+/* Ghost Button */
+.pf-btn-ghost {
+    background-color: transparent;
+    color: var(--pf-mocha);
+}
+
+.pf-btn-ghost:hover {
+    background-color: rgba(245, 230, 211, 0.5);
+    color: var(--pf-coffee-roast);
+}
+
+/* Icon Button */
+.pf-btn-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    background-color: rgba(245, 230, 211, 0.4);
+    color: var(--pf-coffee-roast);
+    border-radius: var(--pf-radius-lg);
+}
+
+.pf-btn-icon:hover {
+    background-color: var(--pf-tan);
+}
+
+/* ============================================
+   Cards & Panels
+   ============================================ */
+
+.pf-card {
+    background-color: #ffffff;
+    border: 1px solid rgba(166, 137, 102, 0.2);
+    border-radius: var(--pf-radius-xl);
+    overflow: hidden;
+}
+
+.pf-card:hover {
+    border-color: var(--pf-mocha);
+}
+
+.pf-card-body {
+    padding: var(--pf-space-4);
+}
+
+/* Post Card */
+.pf-post-card {
+    display: flex;
+    background-color: #ffffff;
+    border: 1px solid rgba(166, 137, 102, 0.2);
+    border-radius: var(--pf-radius-xl);
+    overflow: hidden;
+    transition: border-color var(--pf-transition-fast);
+}
+
+.pf-post-card:hover {
+    border-color: var(--pf-mocha);
+}
+
+/* Vote Column */
+.pf-vote-column {
+    width: 3rem;
+    background-color: rgba(245, 230, 211, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--pf-space-4) 0;
+    gap: var(--pf-space-1);
+    border-right: 1px solid rgba(166, 137, 102, 0.1);
+}
+
+.pf-vote-btn {
+    color: var(--pf-mocha);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color var(--pf-transition-fast);
+}
+
+.pf-vote-btn:hover {
+    color: var(--pf-coffee-roast);
+}
+
+.pf-vote-count {
+    font-size: var(--pf-font-size-sm);
+    font-weight: var(--pf-font-weight-bold);
+    color: var(--pf-coffee-roast);
+}
+
+/* Post Content */
+.pf-post-content {
+    flex: 1;
+    padding: var(--pf-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--pf-space-2);
+}
+
+.pf-post-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--pf-space-2);
+    font-size: var(--pf-font-size-xs);
+    color: var(--pf-mocha);
+}
+
+.pf-post-author {
+    font-weight: var(--pf-font-weight-bold);
+    color: var(--pf-coffee-roast);
+    cursor: pointer;
+}
+
+.pf-post-author:hover {
+    text-decoration: underline;
+}
+
+.pf-post-title {
+    font-size: var(--pf-font-size-lg);
+    font-weight: var(--pf-font-weight-bold);
+    color: var(--pf-espresso);
+    line-height: 1.25;
+    margin: 0;
+}
+
+.pf-post-description {
+    font-size: var(--pf-font-size-sm);
+    color: rgba(45, 30, 18, 0.8);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Post Actions */
+.pf-post-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--pf-space-4);
+    margin-top: var(--pf-space-2);
+}
+
+.pf-post-action {
+    display: flex;
+    align-items: center;
+    gap: var(--pf-space-2);
+    color: var(--pf-mocha);
+    font-size: var(--pf-font-size-xs);
+    font-weight: var(--pf-font-weight-bold);
+    padding: var(--pf-space-1) var(--pf-space-2);
+    border-radius: var(--pf-radius-md);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--pf-transition-fast);
+}
+
+.pf-post-action:hover {
+    background-color: rgba(245, 230, 211, 0.5);
+}
+
+/* ============================================
+   Tags & Badges
+   ============================================ */
+
+.pf-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--pf-tan);
+    color: var(--pf-coffee-roast);
+    padding: var(--pf-space-1) var(--pf-space-2);
+    border-radius: var(--pf-radius-sm);
+    font-size: 10px;
+    font-weight: var(--pf-font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(166, 137, 102, 0.1);
+    cursor: pointer;
+    transition: all var(--pf-transition-fast);
+}
+
+.pf-tag:hover {
+    background-color: var(--pf-mocha);
+    color: #ffffff;
+}
+
+.pf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pf-space-1);
+    padding: var(--pf-space-1) var(--pf-space-2);
+    border-radius: var(--pf-radius-sm);
+    font-size: 10px;
+    font-weight: var(--pf-font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pf-badge-promoted {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+.pf-badge-verified {
+    background-color: #fef7e7;
+    color: #8d4f21;
+    border: 1px solid #efd6bd;
+}
+
+/* ============================================
+   Form Elements
+   ============================================ */
+
+.pf-input {
+    display: block;
+    width: 100%;
+    padding: var(--pf-space-2) var(--pf-space-3);
+    font-family: var(--pf-font-display);
+    font-size: var(--pf-font-size-sm);
+    color: var(--pf-espresso);
+    background-color: var(--pf-background-light);
+    border: 1px solid rgba(166, 137, 102, 0.3);
+    border-radius: var(--pf-radius-md);
+    outline: none;
+    transition: all var(--pf-transition-fast);
+}
+
+.pf-input:focus {
+    border-color: var(--pf-mocha);
+    box-shadow: 0 0 0 3px rgba(166, 137, 102, 0.1);
+}
+
+.pf-input::placeholder {
+    color: rgba(166, 137, 102, 0.6);
+}
+
+.pf-label {
+    display: block;
+    font-size: var(--pf-font-size-sm);
+    font-weight: var(--pf-font-weight-medium);
+    color: var(--pf-espresso);
+    margin-bottom: var(--pf-space-2);
+}
+
+.pf-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* ============================================
+   Notification Panel
+   ============================================ */
+
+.pf-notification-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: var(--pf-z-overlay);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--pf-transition-normal);
+}
+
+.pf-notification-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.pf-notification-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 20rem;
+    background-color: #ffffff;
+    box-shadow: var(--pf-shadow-xl);
+    z-index: var(--pf-z-modal);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform var(--pf-transition-normal);
+}
+
+.pf-notification-panel.open {
+    transform: translateX(0);
+}
+
+.pf-notification-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--pf-space-4);
+    border-bottom: 1px solid rgba(166, 137, 102, 0.2);
+}
+
+.pf-notification-title {
+    font-weight: var(--pf-font-weight-bold);
+    font-size: var(--pf-font-size-lg);
+    color: var(--pf-espresso);
+    margin: 0;
+}
+
+.pf-notification-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--pf-space-8);
+    text-align: center;
+}
+
+.pf-notification-empty-icon {
+    width: 4rem;
+    height: 4rem;
+    background-color: rgba(245, 230, 211, 0.5);
+    border-radius: var(--pf-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--pf-space-4);
+    color: rgba(166, 137, 102, 0.5);
+}
+
+/* ============================================
+   User Avatar
+   ============================================ */
+
+.pf-avatar {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: var(--pf-radius-full);
+    border: 2px solid rgba(166, 137, 102, 0.2);
+}
+
+.pf-avatar-sm {
+    width: 2rem;
+    height: 2rem;
+}
+
+.pf-avatar-md {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.pf-avatar-lg {
+    width: 3rem;
+    height: 3rem;
+}
+
+.pf-avatar-xl {
+    width: 4rem;
+    height: 4rem;
+}
+
+/* ============================================
+   Feed Tabs
+   ============================================ */
+
+.pf-tabs {
+    display: flex;
+    padding: 0 var(--pf-space-4);
+    gap: var(--pf-space-8);
+    background-color: #ffffff;
+    border-radius: var(--pf-radius-xl) var(--pf-radius-xl) 0 0;
+    border: 1px solid rgba(166, 137, 102, 0.2);
+    border-bottom: none;
+}
+
+.pf-tab {
+    display: flex;
+    align-items: center;
+    gap: var(--pf-space-2);
+    padding: var(--pf-space-4) 0 var(--pf-space-3) 0;
+    border-bottom: 2px solid transparent;
+    color: var(--pf-mocha);
+    font-size: var(--pf-font-size-sm);
+    font-weight: var(--pf-font-weight-bold);
+    background: transparent;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    cursor: pointer;
+    transition: all var(--pf-transition-fast);
+}
+
+.pf-tab:hover {
+    color: var(--pf-coffee-roast);
+}
+
+.pf-tab.active {
+    color: var(--pf-coffee-roast);
+    border-bottom-color: var(--pf-coffee-roast);
+}
+
+/* ============================================
+   Sidebar Widgets
+   ============================================ */
+
+.pf-widget {
+    background-color: #ffffff;
+    border: 1px solid rgba(166, 137, 102, 0.2);
+    border-radius: var(--pf-radius-xl);
+    padding: var(--pf-space-5);
+}
+
+.pf-widget-title {
+    font-size: var(--pf-font-size-sm);
+    font-weight: var(--pf-font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(111, 78, 55, 0.6);
+    margin: 0 0 var(--pf-space-4) 0;
+}
+
+.pf-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--pf-space-2) 0;
+}
+
+.pf-stat-label {
+    font-size: var(--pf-font-size-sm);
+    color: var(--pf-mocha);
+}
+
+.pf-stat-value {
+    font-size: var(--pf-font-size-sm);
+    font-weight: var(--pf-font-weight-bold);
+    color: var(--pf-espresso);
+}
+
+/* ============================================
+   Code Blocks
+   ============================================ */
+
+.pf-code-block {
+    background-color: var(--pf-espresso);
+    border: 1px solid var(--pf-coffee-roast);
+    border-radius: var(--pf-radius-lg);
+    overflow: hidden;
+}
+
+.pf-code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--pf-space-3) var(--pf-space-5);
+    background-color: rgba(26, 15, 10, 0.6);
+    border-bottom: 1px solid rgba(75, 54, 33, 0.2);
+}
+
+.pf-code-filename {
+    font-family: var(--pf-font-mono);
+    font-size: var(--pf-font-size-xs);
+    color: var(--pf-mocha);
+}
+
+.pf-code-copy {
+    display: flex;
+    align-items: center;
+    gap: var(--pf-space-1);
+    color: var(--pf-mocha);
+    font-size: var(--pf-font-size-xs);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color var(--pf-transition-fast);
+}
+
+.pf-code-copy:hover {
+    color: var(--pf-cream-dark);
+}
+
+.pf-code-content {
+    padding: var(--pf-space-8);
+    font-family: var(--pf-font-mono);
+    font-size: var(--pf-font-size-sm);
+    line-height: 1.6;
+    color: var(--pf-cream-dark);
+    overflow-x: auto;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+
+.pf-footer {
+    padding: var(--pf-space-8) 0;
+    border-top: 1px solid rgba(166, 137, 102, 0.2);
+    background-color: rgba(242, 239, 233, 0.3);
+}
+
+.pf-footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pf-space-4);
+    justify-content: center;
+    font-size: 10px;
+    font-weight: var(--pf-font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(166, 137, 102, 0.6);
+}
+
+.pf-footer-link {
+    color: inherit;
+    transition: color var(--pf-transition-fast);
+}
+
+.pf-footer-link:hover {
+    color: var(--pf-coffee-roast);
+}
+
+/* ============================================
+   Responsive Utilities
+   ============================================ */
+
+.pf-hidden {
+    display: none !important;
+}
+
+@media (min-width: 640px) {
+    .pf-sm-block {
+        display: block !important;
+    }
+
+    .pf-sm-flex {
+        display: flex !important;
+    }
+
+    .pf-sm-hidden {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .pf-md-block {
+        display: block !important;
+    }
+
+    .pf-md-flex {
+        display: flex !important;
+    }
+
+    .pf-md-hidden {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .pf-lg-block {
+        display: block !important;
+    }
+
+    .pf-lg-flex {
+        display: flex !important;
+    }
+
+    .pf-lg-hidden {
+        display: none !important;
+    }
+}

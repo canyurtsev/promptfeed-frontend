@@ -1,0 +1,994 @@
+/**
+ * PromptFeed Payment Backend
+ * Handles marketplace, subscriptions, bounties, and payment processing
+ * Supports both DEMO and PRODUCTION modes
+ */
+
+// ============================================
+// CONFIGURATION
+// ============================================
+const PAYMENT_CONFIG = {
+    mode: 'demo', // 'demo' or 'production'
+    useMockData: true,
+    currency: 'USD',
+    stripePublicKey: 'pk_test_demo_key', // Replace with real key in production
+    platformFee: 0.15, // 15% platform fee
+    payoutThreshold: 50.00, // Minimum balance for payout
+};
+
+// ============================================
+// SUBSCRIPTION PLANS
+// ============================================
+const SUBSCRIPTION_PLANS = {
+    free: {
+        id: 'plan_free',
+        name: 'Free',
+        price: 0,
+        interval: 'month',
+        features: [
+            'Browse public prompts',
+            'Create up to 5 prompts',
+            'Basic analytics',
+            'Community support'
+        ],
+        limits: {
+            maxPrompts: 5,
+            maxPurchases: 3,
+            canSell: false
+        }
+    },
+    pro: {
+        id: 'plan_pro',
+        name: 'Pro',
+        price: 9.99,
+        interval: 'month',
+        features: [
+            'Everything in Free',
+            'Unlimited prompts',
+            'Sell premium prompts',
+            'Advanced analytics',
+            'Priority support',
+            'No marketplace fees for first 10 sales'
+        ],
+        limits: {
+            maxPrompts: -1, // unlimited
+            maxPurchases: -1,
+            canSell: true,
+            freeMarketplaceSales: 10
+        }
+    },
+    enterprise: {
+        id: 'plan_enterprise',
+        name: 'Enterprise',
+        price: 29.99,
+        interval: 'month',
+        features: [
+            'Everything in Pro',
+            'Team collaboration (up to 10 users)',
+            'API access',
+            'Custom branding',
+            'Dedicated account manager',
+            'Zero marketplace fees',
+            'Advanced security features'
+        ],
+        limits: {
+            maxPrompts: -1,
+            maxPurchases: -1,
+            canSell: true,
+            teamMembers: 10,
+            apiAccess: true,
+            zeroFees: true
+        }
+    }
+};
+
+// ============================================
+// MOCK DATA - DEMO MODE
+// ============================================
+const MOCK_PRODUCTS = [
+    {
+        id: 'prod_001',
+        promptId: 'prompt_sql_001',
+        title: 'Advanced SQL Query Generator',
+        description: 'Professional-grade SQL prompt optimized for PostgreSQL, MySQL, and SQLite. Includes schema analysis and query optimization.',
+        price: 9.99,
+        currency: 'USD',
+        sellerId: 'user_001',
+        sellerName: 'Alex.dev',
+        category: 'SQL',
+        tags: ['sql', 'database', 'postgresql', 'optimization'],
+        licenseType: 'unlimited',
+        salesCount: 145,
+        rating: 4.8,
+        reviewCount: 42,
+        previewLines: 3,
+        aiModels: ['GPT-4', 'Claude 3.5'],
+        createdAt: '2024-01-10T10:00:00Z',
+        featured: true
+    },
+    {
+        id: 'prod_002',
+        promptId: 'prompt_image_001',
+        title: 'DALL-E 3 Image Generation Master',
+        description: 'Create stunning, photorealistic images with this carefully crafted prompt. Perfect for marketing and creative projects.',
+        price: 14.99,
+        currency: 'USD',
+        sellerId: 'user_002',
+        sellerName: 'CreativeAI',
+        category: 'Image Generation',
+        tags: ['dalle', 'image', 'creative', 'marketing'],
+        licenseType: 'unlimited',
+        salesCount: 89,
+        rating: 4.9,
+        reviewCount: 28,
+        previewLines: 3,
+        aiModels: ['DALL-E 3', 'Midjourney'],
+        createdAt: '2024-01-15T14:30:00Z',
+        featured: true
+    },
+    {
+        id: 'prod_003',
+        promptId: 'prompt_code_001',
+        title: 'Python Code Review Assistant',
+        description: 'AI-powered code review prompt that catches bugs, suggests improvements, and ensures best practices.',
+        price: 7.99,
+        currency: 'USD',
+        sellerId: 'user_003',
+        sellerName: 'CodeMaster88',
+        category: 'Code',
+        tags: ['python', 'code-review', 'debugging', 'best-practices'],
+        licenseType: 'unlimited',
+        salesCount: 203,
+        rating: 4.7,
+        reviewCount: 67,
+        previewLines: 3,
+        aiModels: ['GPT-4', 'Claude 3.5'],
+        createdAt: '2024-01-05T09:15:00Z',
+        featured: false
+    },
+    {
+        id: 'prod_004',
+        promptId: 'prompt_content_001',
+        title: 'SEO Blog Post Generator',
+        description: 'Generate SEO-optimized blog posts that rank. Includes keyword research and meta descriptions.',
+        price: 12.99,
+        currency: 'USD',
+        sellerId: 'user_001',
+        sellerName: 'Alex.dev',
+        category: 'Content',
+        tags: ['seo', 'blog', 'content', 'marketing'],
+        licenseType: 'unlimited',
+        salesCount: 67,
+        rating: 4.6,
+        reviewCount: 19,
+        previewLines: 3,
+        aiModels: ['GPT-4', 'Claude 3.5'],
+        createdAt: '2024-01-20T11:45:00Z',
+        featured: false
+    },
+    {
+        id: 'prod_005',
+        promptId: 'prompt_security_001',
+        title: 'OWASP Security Audit Prompt',
+        description: 'Comprehensive security review prompt that scans code for OWASP Top 10 vulnerabilities. Supports Node.js, Python, Java, and Go.',
+        price: 19.99,
+        currency: 'USD',
+        sellerId: 'user_004',
+        sellerName: 'SecurityHawk',
+        category: 'Security',
+        tags: ['security', 'owasp', 'audit', 'vulnerability'],
+        licenseType: 'unlimited',
+        salesCount: 312,
+        rating: 4.9,
+        reviewCount: 98,
+        previewLines: 4,
+        aiModels: ['GPT-4', 'Claude 3.5', 'Gemini Pro'],
+        createdAt: '2024-01-08T08:00:00Z',
+        featured: true
+    },
+    {
+        id: 'prod_006',
+        promptId: 'prompt_react_001',
+        title: 'React Component Builder Pro',
+        description: 'Generate production-ready React components with TypeScript, Tailwind CSS, and accessibility. Includes unit test scaffolding.',
+        price: 11.99,
+        currency: 'USD',
+        sellerId: 'user_003',
+        sellerName: 'CodeMaster88',
+        category: 'Code',
+        tags: ['react', 'typescript', 'frontend', 'components'],
+        licenseType: 'unlimited',
+        salesCount: 178,
+        rating: 4.7,
+        reviewCount: 54,
+        previewLines: 3,
+        aiModels: ['GPT-4', 'Claude 3.5'],
+        createdAt: '2024-01-12T16:20:00Z',
+        featured: false
+    },
+    {
+        id: 'prod_007',
+        promptId: 'prompt_data_001',
+        title: 'Data Pipeline Architect',
+        description: 'Design and generate ETL pipeline code for any data source. Supports AWS, GCP, and Azure services with error handling and monitoring.',
+        price: 24.99,
+        currency: 'USD',
+        sellerId: 'user_005',
+        sellerName: 'DataGuru',
+        category: 'Data Engineering',
+        tags: ['etl', 'data-pipeline', 'aws', 'cloud'],
+        licenseType: 'unlimited',
+        salesCount: 56,
+        rating: 4.8,
+        reviewCount: 15,
+        previewLines: 3,
+        aiModels: ['GPT-4', 'Gemini Pro'],
+        createdAt: '2024-01-18T13:00:00Z',
+        featured: true
+    },
+    {
+        id: 'prod_008',
+        promptId: 'prompt_translate_001',
+        title: 'Enterprise Translation Engine',
+        description: 'Context-aware translation between 25+ languages. Preserves tone, idioms, and technical terminology. Perfect for SaaS localization.',
+        price: 16.99,
+        currency: 'USD',
+        sellerId: 'user_006',
+        sellerName: 'LinguistPro',
+        category: 'Language',
+        tags: ['translation', 'localization', 'multilingual', 'saas'],
+        licenseType: 'unlimited',
+        salesCount: 134,
+        rating: 4.5,
+        reviewCount: 41,
+        previewLines: 3,
+        aiModels: ['GPT-4', 'Claude 3.5'],
+        createdAt: '2024-01-22T10:30:00Z',
+        featured: false
+    },
+    {
+        id: 'prod_009',
+        promptId: 'prompt_devops_001',
+        title: 'Kubernetes Troubleshooter',
+        description: 'Diagnose and fix K8s cluster issues in seconds. Covers pod crashes, networking, RBAC, resource limits, and HPA scaling.',
+        price: 8.99,
+        currency: 'USD',
+        sellerId: 'user_007',
+        sellerName: 'DevOpsNinja',
+        category: 'DevOps',
+        tags: ['kubernetes', 'k8s', 'devops', 'troubleshooting'],
+        licenseType: 'unlimited',
+        salesCount: 91,
+        rating: 4.6,
+        reviewCount: 26,
+        previewLines: 3,
+        aiModels: ['GPT-4', 'Claude 3.5'],
+        createdAt: '2024-01-25T09:15:00Z',
+        featured: false
+    }
+];
+
+const MOCK_TRANSACTIONS = [
+    {
+        id: 'txn_001',
+        buyerId: 'user_current',
+        buyerName: 'You',
+        sellerId: 'user_001',
+        sellerName: 'Alex.dev',
+        productId: 'prod_001',
+        productTitle: 'Advanced SQL Query Generator',
+        amount: 9.99,
+        platformFee: 1.50,
+        sellerEarnings: 8.49,
+        currency: 'USD',
+        status: 'completed',
+        paymentMethod: 'stripe',
+        timestamp: '2024-01-25T15:30:00Z'
+    },
+    {
+        id: 'txn_002',
+        buyerId: 'user_005',
+        buyerName: 'DataGuru',
+        sellerId: 'user_current',
+        sellerName: 'You',
+        productId: 'prod_005',
+        productTitle: 'OWASP Security Audit Prompt',
+        amount: 19.99,
+        platformFee: 3.00,
+        sellerEarnings: 16.99,
+        currency: 'USD',
+        status: 'completed',
+        paymentMethod: 'stripe',
+        timestamp: '2024-01-26T10:15:00Z'
+    },
+    {
+        id: 'txn_003',
+        buyerId: 'user_current',
+        buyerName: 'You',
+        sellerId: 'user_002',
+        sellerName: 'CreativeAI',
+        productId: 'prod_002',
+        productTitle: 'DALL-E 3 Image Generation Master',
+        amount: 14.99,
+        platformFee: 2.25,
+        sellerEarnings: 12.74,
+        currency: 'USD',
+        status: 'completed',
+        paymentMethod: 'stripe',
+        timestamp: '2024-01-27T14:45:00Z'
+    },
+    {
+        id: 'txn_004',
+        buyerId: 'user_008',
+        buyerName: 'MLResearcher',
+        sellerId: 'user_current',
+        sellerName: 'You',
+        productId: 'prod_005',
+        productTitle: 'OWASP Security Audit Prompt',
+        amount: 19.99,
+        platformFee: 3.00,
+        sellerEarnings: 16.99,
+        currency: 'USD',
+        status: 'completed',
+        paymentMethod: 'stripe',
+        timestamp: '2024-01-28T09:20:00Z'
+    },
+    {
+        id: 'txn_005',
+        buyerId: 'user_current',
+        buyerName: 'You',
+        sellerId: 'user_004',
+        sellerName: 'SecurityHawk',
+        productId: 'prod_005',
+        productTitle: 'OWASP Security Audit Prompt',
+        amount: 19.99,
+        platformFee: 3.00,
+        sellerEarnings: 16.99,
+        currency: 'USD',
+        status: 'completed',
+        paymentMethod: 'stripe',
+        timestamp: '2024-01-29T11:10:00Z'
+    },
+    {
+        id: 'txn_006',
+        buyerId: 'user_009',
+        buyerName: 'StartupCTO',
+        sellerId: 'user_current',
+        sellerName: 'You',
+        productId: 'prod_005',
+        productTitle: 'OWASP Security Audit Prompt',
+        amount: 19.99,
+        platformFee: 3.00,
+        sellerEarnings: 16.99,
+        currency: 'USD',
+        status: 'pending',
+        paymentMethod: 'stripe',
+        timestamp: '2024-01-30T16:00:00Z'
+    },
+    {
+        id: 'txn_007',
+        buyerId: 'user_010',
+        buyerName: 'FullStackDev',
+        sellerId: 'user_003',
+        sellerName: 'CodeMaster88',
+        productId: 'prod_006',
+        productTitle: 'React Component Builder Pro',
+        amount: 11.99,
+        platformFee: 1.80,
+        sellerEarnings: 10.19,
+        currency: 'USD',
+        status: 'completed',
+        paymentMethod: 'stripe',
+        timestamp: '2024-01-30T18:30:00Z'
+    }
+];
+
+const MOCK_SUBSCRIPTIONS = [
+    {
+        id: 'sub_001',
+        userId: 'user_current',
+        plan: 'pro',
+        status: 'active',
+        startDate: '2024-01-01T00:00:00Z',
+        currentPeriodStart: '2024-01-01T00:00:00Z',
+        currentPeriodEnd: '2024-02-01T00:00:00Z',
+        cancelAtPeriodEnd: false,
+        price: 9.99,
+        currency: 'USD'
+    }
+];
+
+const MOCK_BOUNTIES = [
+    {
+        id: 'bounty_001',
+        creatorId: 'user_006',
+        creatorName: 'StartupFounder',
+        title: 'Need a prompt for automated customer support',
+        description: 'Looking for a prompt that can handle common customer inquiries about SaaS products. Should be able to escalate complex issues.',
+        amount: 50.00,
+        currency: 'USD',
+        status: 'open',
+        category: 'Customer Support',
+        tags: ['customer-service', 'automation', 'saas'],
+        deadline: '2024-02-15T23:59:59Z',
+        createdAt: '2024-01-20T14:00:00Z',
+        submissions: [],
+        viewCount: 234
+    },
+    {
+        id: 'bounty_002',
+        creatorId: 'user_007',
+        creatorName: 'DataScientist',
+        title: 'Python data analysis prompt with visualization',
+        description: 'Need a comprehensive prompt for analyzing CSV datasets and creating matplotlib visualizations.',
+        amount: 75.00,
+        currency: 'USD',
+        status: 'in-progress',
+        category: 'Data Science',
+        tags: ['python', 'data-analysis', 'visualization'],
+        deadline: '2024-02-20T23:59:59Z',
+        createdAt: '2024-01-22T09:30:00Z',
+        submissions: [
+            {
+                id: 'sub_001',
+                userId: 'user_003',
+                userName: 'CodeMaster88',
+                submittedAt: '2024-01-24T16:20:00Z',
+                status: 'pending'
+            },
+            {
+                id: 'sub_002',
+                userId: 'user_005',
+                userName: 'DataGuru',
+                submittedAt: '2024-01-25T10:45:00Z',
+                status: 'pending'
+            }
+        ],
+        viewCount: 342
+    },
+    {
+        id: 'bounty_003',
+        creatorId: 'user_current',
+        creatorName: 'You',
+        title: 'Legal document summarizer',
+        description: 'Create a prompt that can summarize legal documents and extract key clauses.',
+        amount: 100.00,
+        currency: 'USD',
+        status: 'open',
+        category: 'Legal',
+        tags: ['legal', 'summarization', 'document-analysis'],
+        deadline: '2024-03-01T23:59:59Z',
+        createdAt: '2024-01-23T11:00:00Z',
+        submissions: [],
+        viewCount: 156
+    },
+    {
+        id: 'bounty_004',
+        creatorId: 'user_008',
+        creatorName: 'MLResearcher',
+        title: 'Research paper literature review generator',
+        description: 'Need a prompt that generates comprehensive literature reviews from a set of arXiv papers. Should identify trends, gaps, and connections between papers.',
+        amount: 150.00,
+        currency: 'USD',
+        status: 'in-progress',
+        category: 'Research',
+        tags: ['research', 'academic', 'arxiv', 'literature-review'],
+        deadline: '2024-02-28T23:59:59Z',
+        createdAt: '2024-01-18T15:00:00Z',
+        submissions: [
+            {
+                id: 'sub_003',
+                userId: 'user_001',
+                userName: 'Alex.dev',
+                submittedAt: '2024-01-22T11:30:00Z',
+                status: 'pending'
+            },
+            {
+                id: 'sub_004',
+                userId: 'user_010',
+                userName: 'FullStackDev',
+                submittedAt: '2024-01-23T14:15:00Z',
+                status: 'pending'
+            },
+            {
+                id: 'sub_005',
+                userId: 'user_current',
+                userName: 'You',
+                submittedAt: '2024-01-24T09:00:00Z',
+                status: 'pending'
+            }
+        ],
+        viewCount: 489
+    },
+    {
+        id: 'bounty_005',
+        creatorId: 'user_009',
+        creatorName: 'StartupCTO',
+        title: 'CI/CD pipeline generator for monorepos',
+        description: 'Create a prompt that generates GitHub Actions workflows for monorepo setups. Must support conditional builds, caching, and parallel jobs.',
+        amount: 80.00,
+        currency: 'USD',
+        status: 'open',
+        category: 'DevOps',
+        tags: ['ci-cd', 'github-actions', 'monorepo', 'devops'],
+        deadline: '2024-03-15T23:59:59Z',
+        createdAt: '2024-01-26T10:00:00Z',
+        submissions: [],
+        viewCount: 201
+    },
+    {
+        id: 'bounty_006',
+        creatorId: 'user_002',
+        creatorName: 'CreativeAI',
+        title: 'Brand identity generator with style guide',
+        description: 'A prompt that creates complete brand identity packages: logo concepts, color palettes, typography, and usage guidelines from a brief.',
+        amount: 120.00,
+        currency: 'USD',
+        status: 'completed',
+        category: 'Design',
+        tags: ['branding', 'design', 'identity', 'creative'],
+        deadline: '2024-02-10T23:59:59Z',
+        createdAt: '2024-01-10T08:30:00Z',
+        submissions: [
+            {
+                id: 'sub_006',
+                userId: 'user_010',
+                userName: 'FullStackDev',
+                submittedAt: '2024-01-15T12:00:00Z',
+                status: 'rejected'
+            },
+            {
+                id: 'sub_007',
+                userId: 'user_004',
+                userName: 'SecurityHawk',
+                submittedAt: '2024-01-18T14:30:00Z',
+                status: 'accepted'
+            }
+        ],
+        viewCount: 567
+    }
+];
+
+const MOCK_WALLETS = {
+    user_current: {
+        userId: 'user_current',
+        balance: 387.45,
+        totalEarnings: 2150.00,
+        totalSpent: 124.96,
+        pendingPayouts: 85.00,
+        lifetimePayouts: 1552.59,
+        payoutMethod: 'stripe',
+        payoutDetails: {
+            type: 'bank_account',
+            last4: '4242',
+            bankName: 'Chase Bank'
+        },
+        currency: 'USD'
+    }
+};
+
+// ============================================
+// PAYMENT BACKEND CLASS
+// ============================================
+class PaymentBackend {
+    constructor() {
+        this.config = PAYMENT_CONFIG;
+        this.products = PAYMENT_CONFIG.useMockData ? [...MOCK_PRODUCTS] : [];
+        this.transactions = PAYMENT_CONFIG.useMockData ? [...MOCK_TRANSACTIONS] : [];
+        this.subscriptions = PAYMENT_CONFIG.useMockData ? [...MOCK_SUBSCRIPTIONS] : [];
+        this.bounties = PAYMENT_CONFIG.useMockData ? [...MOCK_BOUNTIES] : [];
+        this.wallets = PAYMENT_CONFIG.useMockData ? { ...MOCK_WALLETS } : {};
+    }
+
+    // ============================================
+    // CONFIGURATION METHODS
+    // ============================================
+    setMode(mode) {
+        this.config.mode = mode;
+        this.config.useMockData = (mode === 'demo');
+        if (mode === 'production') {
+            this.resetProductionData();
+        } else {
+            this.loadMockData();
+        }
+    }
+
+    resetProductionData() {
+        this.products = [];
+        this.transactions = [];
+        this.subscriptions = [];
+        this.bounties = [];
+        this.wallets = {};
+    }
+
+    loadMockData() {
+        this.products = [...MOCK_PRODUCTS];
+        this.transactions = [...MOCK_TRANSACTIONS];
+        this.subscriptions = [...MOCK_SUBSCRIPTIONS];
+        this.bounties = [...MOCK_BOUNTIES];
+        this.wallets = { ...MOCK_WALLETS };
+    }
+
+    // ============================================
+    // PRODUCT/MARKETPLACE METHODS
+    // ============================================
+    getProducts(filters = {}) {
+        let products = [...this.products];
+
+        // Filter by category
+        if (filters.category) {
+            products = products.filter(p => p.category === filters.category);
+        }
+
+        // Filter by price range
+        if (filters.minPrice !== undefined) {
+            products = products.filter(p => p.price >= filters.minPrice);
+        }
+        if (filters.maxPrice !== undefined) {
+            products = products.filter(p => p.price <= filters.maxPrice);
+        }
+
+        // Filter by tags
+        if (filters.tags && filters.tags.length > 0) {
+            products = products.filter(p =>
+                filters.tags.some(tag => p.tags.includes(tag))
+            );
+        }
+
+        // Search by title/description
+        if (filters.search) {
+            const searchLower = filters.search.toLowerCase();
+            products = products.filter(p =>
+                p.title.toLowerCase().includes(searchLower) ||
+                p.description.toLowerCase().includes(searchLower)
+            );
+        }
+
+        // Sort
+        if (filters.sortBy) {
+            switch (filters.sortBy) {
+                case 'price-asc':
+                    products.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-desc':
+                    products.sort((a, b) => b.price - a.price);
+                    break;
+                case 'popular':
+                    products.sort((a, b) => b.salesCount - a.salesCount);
+                    break;
+                case 'rating':
+                    products.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'newest':
+                    products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    break;
+            }
+        }
+
+        return products;
+    }
+
+    getProductById(productId) {
+        return this.products.find(p => p.id === productId);
+    }
+
+    getFeaturedProducts() {
+        return this.products.filter(p => p.featured);
+    }
+
+    createProduct(productData) {
+        const newProduct = {
+            id: `prod_${Date.now()}`,
+            ...productData,
+            salesCount: 0,
+            rating: 0,
+            reviewCount: 0,
+            createdAt: new Date().toISOString()
+        };
+        this.products.push(newProduct);
+        return newProduct;
+    }
+
+    // ============================================
+    // TRANSACTION METHODS
+    // ============================================
+    createTransaction(transactionData) {
+        const product = this.getProductById(transactionData.productId);
+        if (!product) {
+            throw new Error('Product not found');
+        }
+
+        const platformFee = product.price * this.config.platformFee;
+        const sellerEarnings = product.price - platformFee;
+
+        const transaction = {
+            id: `txn_${Date.now()}`,
+            ...transactionData,
+            amount: product.price,
+            platformFee: platformFee,
+            sellerEarnings: sellerEarnings,
+            currency: this.config.currency,
+            status: 'pending',
+            timestamp: new Date().toISOString()
+        };
+
+        this.transactions.push(transaction);
+        return transaction;
+    }
+
+    completeTransaction(transactionId) {
+        const transaction = this.transactions.find(t => t.id === transactionId);
+        if (!transaction) {
+            throw new Error('Transaction not found');
+        }
+
+        transaction.status = 'completed';
+
+        // Update product sales count
+        const product = this.getProductById(transaction.productId);
+        if (product) {
+            product.salesCount++;
+        }
+
+        // Update seller wallet
+        this.addToWallet(transaction.sellerId, transaction.sellerEarnings);
+
+        return transaction;
+    }
+
+    getUserTransactions(userId, type = 'all') {
+        let transactions = [...this.transactions];
+
+        if (type === 'purchases') {
+            transactions = transactions.filter(t => t.buyerId === userId);
+        } else if (type === 'sales') {
+            transactions = transactions.filter(t => t.sellerId === userId);
+        } else {
+            transactions = transactions.filter(t =>
+                t.buyerId === userId || t.sellerId === userId
+            );
+        }
+
+        return transactions.sort((a, b) =>
+            new Date(b.timestamp) - new Date(a.timestamp)
+        );
+    }
+
+    // ============================================
+    // SUBSCRIPTION METHODS
+    // ============================================
+    getSubscriptionPlans() {
+        return SUBSCRIPTION_PLANS;
+    }
+
+    getUserSubscription(userId) {
+        return this.subscriptions.find(s => s.userId === userId && s.status === 'active');
+    }
+
+    createSubscription(userId, planId) {
+        const plan = SUBSCRIPTION_PLANS[planId];
+        if (!plan) {
+            throw new Error('Invalid plan');
+        }
+
+        // Cancel existing subscription
+        const existing = this.getUserSubscription(userId);
+        if (existing) {
+            existing.status = 'cancelled';
+        }
+
+        const subscription = {
+            id: `sub_${Date.now()}`,
+            userId: userId,
+            plan: planId,
+            status: 'active',
+            startDate: new Date().toISOString(),
+            currentPeriodStart: new Date().toISOString(),
+            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            cancelAtPeriodEnd: false,
+            price: plan.price,
+            currency: this.config.currency
+        };
+
+        this.subscriptions.push(subscription);
+        return subscription;
+    }
+
+    cancelSubscription(subscriptionId) {
+        const subscription = this.subscriptions.find(s => s.id === subscriptionId);
+        if (!subscription) {
+            throw new Error('Subscription not found');
+        }
+
+        subscription.cancelAtPeriodEnd = true;
+        return subscription;
+    }
+
+    // ============================================
+    // BOUNTY METHODS
+    // ============================================
+    getBounties(filters = {}) {
+        let bounties = [...this.bounties];
+
+        if (filters.status) {
+            bounties = bounties.filter(b => b.status === filters.status);
+        }
+
+        if (filters.category) {
+            bounties = bounties.filter(b => b.category === filters.category);
+        }
+
+        if (filters.sortBy === 'amount') {
+            bounties.sort((a, b) => b.amount - a.amount);
+        } else if (filters.sortBy === 'deadline') {
+            bounties.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        } else {
+            bounties.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+
+        return bounties;
+    }
+
+    getBountyById(bountyId) {
+        return this.bounties.find(b => b.id === bountyId);
+    }
+
+    createBounty(bountyData) {
+        const bounty = {
+            id: `bounty_${Date.now()}`,
+            ...bountyData,
+            status: 'open',
+            createdAt: new Date().toISOString(),
+            submissions: [],
+            viewCount: 0
+        };
+
+        this.bounties.push(bounty);
+        return bounty;
+    }
+
+    submitBountyProposal(bountyId, userId, userName) {
+        const bounty = this.getBountyById(bountyId);
+        if (!bounty) {
+            throw new Error('Bounty not found');
+        }
+
+        const submission = {
+            id: `sub_${Date.now()}`,
+            userId: userId,
+            userName: userName,
+            submittedAt: new Date().toISOString(),
+            status: 'pending'
+        };
+
+        bounty.submissions.push(submission);
+        bounty.status = 'in-progress';
+        return submission;
+    }
+
+    awardBounty(bountyId, submissionId) {
+        const bounty = this.getBountyById(bountyId);
+        if (!bounty) {
+            throw new Error('Bounty not found');
+        }
+
+        const submission = bounty.submissions.find(s => s.id === submissionId);
+        if (!submission) {
+            throw new Error('Submission not found');
+        }
+
+        submission.status = 'accepted';
+        bounty.status = 'completed';
+
+        // Transfer bounty amount to winner
+        this.addToWallet(submission.userId, bounty.amount);
+
+        return bounty;
+    }
+
+    // ============================================
+    // WALLET METHODS
+    // ============================================
+    getWallet(userId) {
+        if (!this.wallets[userId]) {
+            this.wallets[userId] = {
+                userId: userId,
+                balance: 0,
+                totalEarnings: 0,
+                totalSpent: 0,
+                pendingPayouts: 0,
+                lifetimePayouts: 0,
+                payoutMethod: null,
+                payoutDetails: null,
+                currency: this.config.currency
+            };
+        }
+        return this.wallets[userId];
+    }
+
+    addToWallet(userId, amount) {
+        const wallet = this.getWallet(userId);
+        wallet.balance += amount;
+        wallet.totalEarnings += amount;
+        return wallet;
+    }
+
+    deductFromWallet(userId, amount) {
+        const wallet = this.getWallet(userId);
+        if (wallet.balance < amount) {
+            throw new Error('Insufficient balance');
+        }
+        wallet.balance -= amount;
+        wallet.totalSpent += amount;
+        return wallet;
+    }
+
+    requestPayout(userId, amount) {
+        const wallet = this.getWallet(userId);
+
+        if (amount < this.config.payoutThreshold) {
+            throw new Error(`Minimum payout amount is ${this.config.currency} ${this.config.payoutThreshold}`);
+        }
+
+        if (wallet.balance < amount) {
+            throw new Error('Insufficient balance');
+        }
+
+        wallet.balance -= amount;
+        wallet.pendingPayouts += amount;
+
+        return {
+            success: true,
+            message: 'Payout request submitted',
+            amount: amount,
+            estimatedArrival: '3-5 business days'
+        };
+    }
+
+    // ============================================
+    // ANALYTICS METHODS
+    // ============================================
+    getSellerAnalytics(userId) {
+        const sales = this.transactions.filter(t =>
+            t.sellerId === userId && t.status === 'completed'
+        );
+
+        const totalRevenue = sales.reduce((sum, t) => sum + t.sellerEarnings, 0);
+        const totalSales = sales.length;
+
+        // Group by product
+        const productSales = {};
+        sales.forEach(sale => {
+            if (!productSales[sale.productId]) {
+                productSales[sale.productId] = {
+                    productTitle: sale.productTitle,
+                    count: 0,
+                    revenue: 0
+                };
+            }
+            productSales[sale.productId].count++;
+            productSales[sale.productId].revenue += sale.sellerEarnings;
+        });
+
+        // Sales over time (last 30 days)
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const recentSales = sales.filter(s => new Date(s.timestamp) > thirtyDaysAgo);
+
+        return {
+            totalRevenue,
+            totalSales,
+            averageOrderValue: totalSales > 0 ? totalRevenue / totalSales : 0,
+            productSales: Object.values(productSales),
+            recentSales: recentSales.length,
+            wallet: this.getWallet(userId)
+        };
+    }
+}
+
+// ============================================
+// INITIALIZE GLOBAL INSTANCE
+// ============================================
+if (typeof window !== 'undefined') {
+    window.paymentBackend = new PaymentBackend();
+    console.log('💳 Payment Backend initialized in', PAYMENT_CONFIG.mode, 'mode');
+}

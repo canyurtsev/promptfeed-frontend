@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Skill Library — PromptFeed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<link rel="stylesheet" href="pf-layout.css"/>
+<style>
+.sk-card {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.sk-card:hover {
+  border-color: var(--pf-accent);
+  transform: translateY(-2px);
+}
+.sk-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.sk-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--pf-text-primary);
+  margin-bottom: 4px;
+}
+.sk-card__author {
+  font-size: 12px;
+  color: var(--pf-text-secondary);
+}
+.sk-card__desc {
+  font-size: 13px;
+  color: var(--pf-text-primary);
+  line-height: 1.5;
+}
+.sk-card__meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--pf-text-muted);
+}
+.sk-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-radius: 4px;
+  font-weight: 600;
+  color: var(--pf-text-secondary);
+}
+.sk-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  border-top: 1px solid var(--pf-border);
+  padding-top: 12px;
+}
+</style>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+</head>
+<body>
+
+<!-- Gate Modal -->
+<div id="pf-gate" class="pf-gate-overlay">
+  <div class="pf-gate-modal">
+    <div class="pf-gate-modal__icon">🔒</div>
+    <div class="pf-gate-modal__title">Sign in required</div>
+    <div class="pf-gate-modal__desc" id="gate-desc">Sign in to perform this action.</div>
+    <div class="pf-gate-modal__actions">
+      <button class="pf-btn pf-btn--ghost" id="btn-close-gate">Cancel</button>
+      <button class="pf-btn pf-btn--primary" id="btn-goto-signin">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<header class="pf-topnav">
+  <div class="pf-topnav__inner">
+    <a href="index.html" class="pf-topnav__logo">
+      <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
+    </a>
+    <nav class="pf-topnav__nav" aria-label="Main">
+      <a href="index.html" class="pf-topnav__nav-link">News</a>
+      <a href="community.html" class="pf-topnav__nav-link">Community</a>
+      <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
+      <a href="benchmarks.html" class="pf-topnav__nav-link">Benchmarks</a>
+      <a href="skill-library.html" class="pf-topnav__nav-link active" aria-current="page">Skills</a>
+      <a href="bounty-board.html" class="pf-topnav__nav-link">Bounties</a>
+      <a href="subscription.html" class="pf-topnav__nav-link">Pricing</a>
+    </nav>
+    <div class="pf-topnav__search">
+      <span class="material-symbols-outlined pf-topnav__search-icon">search</span>
+      <input id="search-input" type="search" placeholder="Search skills..." autocomplete="off"/>
+    </div>
+    <div class="pf-topnav__actions" id="nav-auth-area"></div>
+  </div>
+</header>
+
+<!-- AD BANNER -->
+<div id="top-ad-banner" class="pf-ad-banner pf-ad-banner--hidden">
+  <span class="pf-ad-banner__label">AD</span>
+  Advertisement — <a href="subscription.html" style="color:var(--pf-accent)">Upgrade to Pro</a> to remove ads
+</div>
+
+<div class="pf-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="pf-sidebar-left">
+    <div class="pf-sidebar-label">Categories</div>
+    <button class="pf-sidebar-link active" data-action="setCategory" data-val="">
+      <span class="material-symbols-outlined" style="font-size:16px">apps</span> All Skills
+    </button>
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Agent Behavior">
+      <span class="pf-sidebar-link__dot" style="background:#00c2ff"></span>Agent Behavior
+    </button>
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Tool Use">
+      <span class="pf-sidebar-link__dot" style="background:#a371f7"></span>Tool Use
+    </button>
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Reasoning">
+      <span class="pf-sidebar-link__dot" style="background:#3fb950"></span>Reasoning
+    </button>
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Security">
+      <span class="pf-sidebar-link__dot" style="background:#f85149"></span>Security
+    </button>
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Automation">
+      <span class="pf-sidebar-link__dot" style="background:#ffa657"></span>Automation
+    </button>
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Data">
+      <span class="pf-sidebar-link__dot" style="background:#79c0ff"></span>Data
+    </button>
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Coding">
+      <span class="pf-sidebar-link__dot" style="background:#d29922"></span>Coding
+    </button>
+  </aside>
+
+  <!-- CENTER: Feed -->
+  <main class="pf-feed" role="main">
+    <div style="margin-bottom:16px">
+      <h1 style="font-size:22px;font-weight:800;color:var(--pf-text-primary);margin-bottom:4px">Skill Library</h1>
+      <p style="font-size:13px;color:var(--pf-text-secondary)">Discover and download reusable skill.md modules for your AI agents.</p>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <span id="skill-count" style="font-size:12px;color:var(--pf-text-muted)"></span>
+    </div>
+
+    <div id="skills-container" style="display:flex;flex-direction:column;gap:16px" aria-live="polite">
+      <!-- Loading state -->
+      <div class="pf-loading"><div class="pf-spinner"></div></div>
+    </div>
+  </main>
+
+  <!-- RIGHT RAIL -->
+  <aside class="pf-sidebar-right">
+    <div id="right-ad-slot" class="pf-ad-slot pf-ad-banner--hidden">
+      <span class="pf-ad-slot__label">Advertisement</span>
+      Sponsor slot available
+    </div>
+
+    <div class="pf-rail-widget">
+      <div class="pf-rail-widget__header">⚡ Popular Skills</div>
+      <div class="pf-rail-widget__body" style="font-size:12px;color:var(--pf-text-muted)">
+        <span class="pf-stub-badge">Coming Soon</span>
+      </div>
+    </div>
+
+    <div id="pro-box" class="pf-pro-box pf-ad-banner--hidden">
+      <span class="pf-pro-box__badge">🚀 Creator</span>
+      <div class="pf-pro-box__title">Publish Skills</div>
+      <ul class="pf-pro-box__list">
+        <li>Share your agent modules</li>
+        <li>Build your reputation</li>
+        <li>Get community feedback</li>
+      </ul>
+      <a href="subscription.html" class="pf-pro-btn">Become a Creator</a>
+    </div>
+  </aside>
+
+</div>
+
+<script src="js/pages/skills.js" defer></script>
+</body>
+</html>

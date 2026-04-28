@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Skill Detail — PromptFeed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<link rel="stylesheet" href="pf-layout.css"/>
+<style>
+/* ── Detail Page Specifics ── */
+.sd-container {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  max-width: var(--pf-max-w);
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+@media (max-width: 900px) {
+  .sd-container { grid-template-columns: 1fr; }
+}
+
+.sd-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sd-header {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 24px;
+}
+
+.sd-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--pf-text-primary);
+  margin-bottom: 8px;
+}
+
+.sd-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--pf-text-secondary);
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.sd-desc {
+  font-size: 14px;
+  color: var(--pf-text-primary);
+  line-height: 1.6;
+  padding-top: 16px;
+  border-top: 1px solid var(--pf-border);
+}
+
+.sd-content-box {
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  font-family: var(--pf-font-mono);
+  font-size: 13px;
+  color: var(--pf-text-primary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 16px;
+  margin: 0;
+}
+
+/* ── Panels ── */
+.sd-panel {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sd-panel__header {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--pf-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--pf-border);
+  padding-bottom: 12px;
+}
+
+.sd-stat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--pf-text-secondary);
+}
+.sd-stat-list__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sd-stat-list__item strong {
+  color: var(--pf-text-primary);
+  font-weight: 600;
+}
+
+.sd-files {
+  background: var(--pf-bg);
+  border: 1px dashed var(--pf-border);
+  border-radius: var(--pf-radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sd-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--pf-font-mono);
+  font-size: 12px;
+  color: var(--pf-text-primary);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--pf-surface) 25%, var(--pf-border) 50%, var(--pf-surface) 75%);
+  background-size: 400% 100%;
+  animation: skel 1.5s infinite;
+  border-radius: 4px;
+}
+@keyframes skel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--pf-border);
+  margin-bottom: 16px;
+}
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pf-text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.tab-btn.active {
+  color: var(--pf-text-primary);
+  border-bottom-color: var(--pf-accent);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.sd-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.sd-badge--free { background: #3fb95020; color: var(--pf-success); border: 1px solid #3fb95030; }
+.sd-badge--premium { background: #a371f720; color: var(--pf-pro); border: 1px solid #a371f730; }
+</style>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+</head>
+<body>
+
+<!-- Gate Modal -->
+<div id="pf-gate" class="pf-gate-overlay">
+  <div class="pf-gate-modal">
+    <div class="pf-gate-modal__icon">🔒</div>
+    <div class="pf-gate-modal__title">Sign in required</div>
+    <div class="pf-gate-modal__desc" id="gate-desc">Sign in to perform this action.</div>
+    <div class="pf-gate-modal__actions">
+      <button class="pf-btn pf-btn--ghost" data-action="close-gate">Cancel</button>
+      <button class="pf-btn pf-btn--primary" data-action="goto-signin">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<header class="pf-topnav">
+  <div class="pf-topnav__inner">
+    <a href="index.html" class="pf-topnav__logo">
+      <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
+    </a>
+    <nav class="pf-topnav__nav" aria-label="Main">
+      <a href="index.html" class="pf-topnav__nav-link">News</a>
+      <a href="community.html" class="pf-topnav__nav-link">Community</a>
+      <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
+      <a href="benchmarks.html" class="pf-topnav__nav-link">Benchmarks</a>
+      <a href="skill-library.html" class="pf-topnav__nav-link active">Skills</a>
+      <a href="bounty-board.html" class="pf-topnav__nav-link">Bounties</a>
+      <a href="subscription.html" class="pf-topnav__nav-link">Pricing</a>
+    </nav>
+    <div class="pf-topnav__search">
+      <span class="material-symbols-outlined pf-topnav__search-icon">search</span>
+      <input id="search-input" type="search" placeholder="Search skills..." autocomplete="off"/>
+    </div>
+    <div class="pf-topnav__actions" id="nav-auth-area"></div>
+  </div>
+</header>
+
+<div class="sd-container" id="page-content">
+  <!-- Loading State by Default -->
+  <div class="sd-main" id="loading-main">
+    <div class="sd-header skeleton" style="height:200px"></div>
+    <div class="skeleton" style="height:300px"></div>
+  </div>
+  <aside class="pd-sidebar" id="loading-side">
+    <div class="sd-panel skeleton" style="height:400px"></div>
+  </aside>
+</div>
+
+<script src="js/pages/skill-detail.js"></script>
+</body>
+</html>

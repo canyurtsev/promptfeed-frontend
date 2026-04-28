@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Skill Library — PromptFeed</title>
+  <link href="css/styles.css" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .hero-banner {
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, rgba(124, 114, 255, 0.1) 0%, transparent 100%);
+      border-radius: 12px;
+      margin-bottom: 3rem;
+      border: 1px solid var(--border-default);
+    }
+    .skill-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+    .skill-card {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .skill-card:hover {
+      border-color: var(--accent-purple);
+      box-shadow: var(--pf-glow);
+      transform: translateY(-4px);
+    }
+    .skill-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--bg-subtle);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-purple);
+    }
+  </style>
+</head>
+<body class="pf-main">
+  <header class="pf-header"></header>
+
+  <main class="pf-main">
+    <div style="width: 100%;">
+      <section class="hero-banner">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Modular Skill Library</h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 700px;">
+          Plug-and-play AI capabilities. Verified architectural units designed for integration into complex autonomous workflows.
+        </p>
+      </section>
+
+      <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.5rem;">Verified Modules</h2>
+        <div style="display: flex; gap: 1rem;">
+          <button class="btn btn-ghost">All</button>
+          <button class="btn btn-ghost">Featured</button>
+          <button class="btn btn-ghost">Trending</button>
+        </div>
+      </div>
+
+      <div id="skill-library-grid" class="skill-grid">
+        <!-- Loaded via JS -->
+      </div>
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui-components.js"></script>
+  <script src="js/pages/skill-library.js"></script>
+</body>
+</html>

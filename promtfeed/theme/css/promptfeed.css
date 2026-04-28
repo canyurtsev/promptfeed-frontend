@@ -1,0 +1,260 @@
+/**
+ * PromptFeed Coffee Theme - Main Stylesheet
+ * A phpBB 3.3 Prosilver child theme
+ * 
+ * This stylesheet provides CSS custom properties (variables) and base styles
+ * for the PromptFeed coffee-themed forum UI.
+ */
+
+/* ============================================
+   CSS Custom Properties (Theme Variables)
+   ============================================ */
+
+:root {
+    /* ----------------
+       Color Palette
+       ---------------- */
+    /* Primary Coffee Colors */
+    --pf-coffee-roast: #4B3621;
+    --pf-espresso: #2D1E12;
+    --pf-mocha: #A68966;
+    --pf-latte: #FDFCF0;
+    --pf-tan: #F5E6D3;
+    --pf-cream-dark: #F2EFE9;
+    --pf-primary: #6F4E37;
+    --pf-background-light: #FAF9F6;
+    
+    /* Alternative/Extended Coffee Palette */
+    --pf-coffee-dark: #2C1B18;
+    --pf-coffee-mocha: #4E342E;
+    --pf-coffee-latte: #D7CCC8;
+    --pf-coffee-espresso: #3E2723;
+    --pf-coffee-bean: #6D4C41;
+    --pf-coffee-cream: #F5F5F1;
+    
+    /* Semantic Colors */
+    --pf-success: #22c55e;
+    --pf-warning: #f59e0b;
+    --pf-error: #ef4444;
+    --pf-info: #3b82f6;
+    
+    /* ----------------
+       Typography
+       ---------------- */
+    --pf-font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --pf-font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    
+    --pf-font-size-xs: 0.625rem;    /* 10px */
+    --pf-font-size-sm: 0.75rem;     /* 12px */
+    --pf-font-size-base: 0.875rem;  /* 14px */
+    --pf-font-size-md: 1rem;        /* 16px */
+    --pf-font-size-lg: 1.125rem;    /* 18px */
+    --pf-font-size-xl: 1.25rem;     /* 20px */
+    --pf-font-size-2xl: 1.5rem;     /* 24px */
+    --pf-font-size-3xl: 1.875rem;   /* 30px */
+    
+    --pf-font-weight-normal: 400;
+    --pf-font-weight-medium: 500;
+    --pf-font-weight-semibold: 600;
+    --pf-font-weight-bold: 700;
+    --pf-font-weight-black: 900;
+    
+    /* ----------------
+       Spacing
+       ---------------- */
+    --pf-space-1: 0.25rem;   /* 4px */
+    --pf-space-2: 0.5rem;    /* 8px */
+    --pf-space-3: 0.75rem;   /* 12px */
+    --pf-space-4: 1rem;      /* 16px */
+    --pf-space-5: 1.25rem;   /* 20px */
+    --pf-space-6: 1.5rem;    /* 24px */
+    --pf-space-8: 2rem;      /* 32px */
+    --pf-space-10: 2.5rem;   /* 40px */
+    --pf-space-12: 3rem;     /* 48px */
+    
+    /* ----------------
+       Border Radius
+       ---------------- */
+    --pf-radius-sm: 0.25rem;   /* 4px */
+    --pf-radius-md: 0.375rem;  /* 6px */
+    --pf-radius-lg: 0.5rem;    /* 8px */
+    --pf-radius-xl: 0.75rem;   /* 12px */
+    --pf-radius-2xl: 1rem;     /* 16px */
+    --pf-radius-full: 9999px;
+    
+    /* ----------------
+       Shadows
+       ---------------- */
+    --pf-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --pf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --pf-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --pf-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    
+    /* ----------------
+       Transitions
+       ---------------- */
+    --pf-transition-fast: 150ms ease;
+    --pf-transition-normal: 300ms ease;
+    --pf-transition-slow: 500ms ease;
+    
+    /* ----------------
+       Z-Index Scale
+       ---------------- */
+    --pf-z-dropdown: 50;
+    --pf-z-sticky: 100;
+    --pf-z-fixed: 200;
+    --pf-z-overlay: 300;
+    --pf-z-modal: 400;
+    --pf-z-popover: 500;
+    --pf-z-tooltip: 600;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--pf-font-display);
+    font-size: var(--pf-font-size-base);
+    font-weight: var(--pf-font-weight-normal);
+    line-height: 1.5;
+    color: var(--pf-espresso);
+    background-color: var(--pf-background-light);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Links */
+a {
+    color: var(--pf-coffee-roast);
+    text-decoration: none;
+    transition: color var(--pf-transition-fast);
+}
+
+a:hover {
+    color: var(--pf-primary);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--pf-font-display);
+    font-weight: var(--pf-font-weight-bold);
+    color: var(--pf-espresso);
+    margin: 0 0 var(--pf-space-4) 0;
+    line-height: 1.25;
+}
+
+h1 { font-size: var(--pf-font-size-3xl); }
+h2 { font-size: var(--pf-font-size-2xl); }
+h3 { font-size: var(--pf-font-size-xl); }
+h4 { font-size: var(--pf-font-size-lg); }
+h5 { font-size: var(--pf-font-size-md); }
+h6 { font-size: var(--pf-font-size-base); }
+
+/* Code */
+code, pre {
+    font-family: var(--pf-font-mono);
+}
+
+code {
+    background-color: var(--pf-tan);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--pf-radius-sm);
+    font-size: 0.875em;
+    color: var(--pf-coffee-roast);
+}
+
+pre {
+    background-color: var(--pf-espresso);
+    color: var(--pf-cream-dark);
+    padding: var(--pf-space-4);
+    border-radius: var(--pf-radius-lg);
+    overflow-x: auto;
+    font-size: var(--pf-font-size-sm);
+    line-height: 1.6;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+
+/* Selection */
+::selection {
+    background-color: var(--pf-mocha);
+    color: var(--pf-latte);
+}
+
+/* Focus Styles */
+:focus-visible {
+    outline: 2px solid var(--pf-primary);
+    outline-offset: 2px;
+}
+
+/* ============================================
+   Layout Utilities
+   ============================================ */
+
+.pf-container {
+    width: 100%;
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--pf-space-4);
+    padding-right: var(--pf-space-4);
+}
+
+@media (min-width: 768px) {
+    .pf-container {
+        padding-left: var(--pf-space-10);
+        padding-right: var(--pf-space-10);
+    }
+}
+
+/* Flex Utilities */
+.pf-flex { display: flex; }
+.pf-flex-col { flex-direction: column; }
+.pf-flex-wrap { flex-wrap: wrap; }
+.pf-items-center { align-items: center; }
+.pf-items-start { align-items: flex-start; }
+.pf-justify-center { justify-content: center; }
+.pf-justify-between { justify-content: space-between; }
+.pf-justify-end { justify-content: flex-end; }
+
+.pf-gap-1 { gap: var(--pf-space-1); }
+.pf-gap-2 { gap: var(--pf-space-2); }
+.pf-gap-3 { gap: var(--pf-space-3); }
+.pf-gap-4 { gap: var(--pf-space-4); }
+.pf-gap-6 { gap: var(--pf-space-6); }
+.pf-gap-8 { gap: var(--pf-space-8); }
+
+/* Grid */
+.pf-grid {
+    display: grid;
+}
+
+.pf-grid-cols-12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+/* ============================================
+   Responsive Breakpoints Reference
+   ============================================
+   sm: 640px
+   md: 768px
+   lg: 1024px
+   xl: 1280px
+   2xl: 1536px
+   ============================================ */
