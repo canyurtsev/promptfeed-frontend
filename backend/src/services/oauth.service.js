@@ -150,6 +150,7 @@ class OAuthService {
      */
     async exchangeCodeForToken(provider, code, config) {
         const params = new URLSearchParams({
+            grant_type: 'authorization_code',
             client_id: config.clientId,
             client_secret: config.clientSecret,
             code,
@@ -296,7 +297,7 @@ class OAuthService {
                 emailVerified: true
             });
 
-            const walletRepository = (await import('./wallet.repository.js')).default;
+            const walletRepository = (await import('../repositories/wallet.repository.js')).default;
             await walletRepository.create({
                 userId: user.id,
                 balance: 0,
@@ -366,7 +367,7 @@ class OAuthService {
      * Internal: Generate JWT tokens for user
      */
     async generateTokensForUser(userId) {
-        const userRepo = (await import('./user.repository.js')).default;
+        const userRepo = (await import('../repositories/user.repository.js')).default;
         const user = await userRepo.findByIdPublic(userId);
 
         if (!user) {
