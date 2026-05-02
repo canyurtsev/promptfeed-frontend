@@ -124,10 +124,15 @@ class PromptService {
 
         // Batch-fetch user's votes for these prompts (if authenticated)
         let userVotes = {};
+        let userSaves = {};
         if (currentUserId && prompts.length > 0) {
             const promptIds = prompts.map(p => p.id);
-            const votes = await promptRepository.findUserVotesForPrompts(currentUserId, promptIds);
+            const [votes, saves] = await Promise.all([
+                promptRepository.findUserVotesForPrompts(currentUserId, promptIds),
+                promptRepository.findUserSavesForPrompts(currentUserId, promptIds)
+            ]);
             votes.forEach(v => { userVotes[v.promptId] = v.value; });
+            saves.forEach(s => { userSaves[s.promptId] = true; });
         }
 
         // Attach userVote, normalize tags, remove internal scores
@@ -136,6 +141,7 @@ class PromptService {
             return {
                 ...rest,
                 userVote: userVotes[p.id] || 0,
+                isSaved: Boolean(userSaves[p.id]),
                 tags: typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean) : (p.tags || [])
             };
         });
@@ -170,21 +176,25 @@ class PromptService {
         // Add user-specific status if logged in
         let userVote = 0;
         let isBookmarked = false;
+        let isSaved = false;
 
         if (currentUserId) {
-            const [vote, bookmark] = await Promise.all([
+            const [vote, bookmark, save] = await Promise.all([
                 promptRepository.findVote(id, currentUserId),
-                promptRepository.findBookmark(id, currentUserId)
+                promptRepository.findBookmark(id, currentUserId),
+                promptRepository.findSave(id, currentUserId)
             ]);
 
             if (vote) userVote = vote.value;
             if (bookmark) isBookmarked = true;
+            if (save) isSaved = true;
         }
 
         return serializeDecimals({
             ...prompt,
             userVote,
-            isBookmarked
+            isBookmarked,
+            isSaved
         });
     }
 
@@ -318,6 +328,22 @@ class PromptService {
             await promptRepository.updateBookmarkCount(promptId, true);
             return { bookmarked: true };
         }
+    }
+
+    async save(promptId, userId) {
+        const prompt = await promptRepository.findByIdSimple(promptId);
+        if (!prompt) throw new NotFoundError('Prompt not found');
+
+        await promptRepository.createSave({ promptId, userId });
+        return { saved: true };
+    }
+
+    async unsave(promptId, userId) {
+        const prompt = await promptRepository.findByIdSimple(promptId);
+        if (!prompt) throw new NotFoundError('Prompt not found');
+
+        await promptRepository.deleteSave(promptId, userId);
+        return { saved: false };
     }
 }
 
