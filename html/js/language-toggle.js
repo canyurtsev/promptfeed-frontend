@@ -5,6 +5,8 @@
 'use strict';
 
 (function () {
+  if (window.PromptFeedLanguage?.initialized) return;
+
   const LANGUAGE_KEY = 'appLanguage';
   const SUPPORTED_LANGUAGES = new Set(['en', 'tr']);
   const NAV_COPY = {
@@ -16,11 +18,13 @@
     },
     tr: {
       community: 'Topluluk',
-      create: 'Oluştur',
+      create: 'Olu\u015ftur',
       profile: 'Profil',
-      pricing: 'Fiyatlandırma'
+      pricing: 'Fiyatland\u0131rma'
     }
   };
+
+  let initialized = false;
 
   function normalizeLanguage(value) {
     return SUPPORTED_LANGUAGES.has(value) ? value : 'en';
@@ -38,14 +42,14 @@
 
   function setText(selector, text) {
     document.querySelectorAll(selector).forEach(el => {
-      el.textContent = text;
+      if (el.textContent !== text) el.textContent = text;
     });
   }
 
   function setTitle(selector, text) {
     document.querySelectorAll(selector).forEach(el => {
-      el.title = text;
-      el.setAttribute('aria-label', text);
+      if (el.title !== text) el.title = text;
+      if (el.getAttribute('aria-label') !== text) el.setAttribute('aria-label', text);
     });
   }
 
@@ -53,7 +57,10 @@
     const normalized = normalizeLanguage(language);
     const copy = NAV_COPY[normalized];
 
-    document.documentElement.lang = normalized;
+    if (document.documentElement.lang !== normalized) {
+      document.documentElement.lang = normalized;
+    }
+
     setText('.pf-topnav__nav a[href="community.html"], .nav a[href="community.html"]', copy.community);
     setText('.pf-topnav__nav a[href="create.html"], .nav a[href="create.html"]', copy.create);
     setText('.pf-topnav__nav a[href="subscription.html"], .nav a[href="subscription.html"]', copy.pricing);
@@ -62,16 +69,23 @@
 
     document.querySelectorAll('.pf-language-toggle__option').forEach(option => {
       const isActive = option.dataset.language === normalized;
-      option.classList.toggle('active', isActive);
-      option.setAttribute('aria-pressed', String(isActive));
+      const pressed = String(isActive);
+
+      if (option.classList.contains('active') !== isActive) {
+        option.classList.toggle('active', isActive);
+      }
+      if (option.getAttribute('aria-pressed') !== pressed) {
+        option.setAttribute('aria-pressed', pressed);
+      }
     });
   }
 
   function ensureToggle() {
-    if (document.getElementById('language-toggle')) return;
+    const existing = document.getElementById('language-toggle');
+    if (existing) return existing;
 
     const topnav = document.querySelector('.pf-topnav__inner') || document.querySelector('.nav');
-    if (!topnav) return;
+    if (!topnav) return null;
 
     const toggle = document.createElement('div');
     toggle.id = 'language-toggle';
@@ -84,6 +98,7 @@
     ].join('');
 
     topnav.appendChild(toggle);
+    return toggle;
   }
 
   function handleClick(event) {
@@ -96,21 +111,26 @@
   }
 
   function init() {
-    ensureToggle();
-    applyNavbarLanguage(getLanguage());
-    document.addEventListener('click', handleClick);
+    if (initialized) return;
+    initialized = true;
 
-    const observer = new MutationObserver(() => applyNavbarLanguage(getLanguage()));
-    observer.observe(document.body, { childList: true, subtree: true });
+    const toggle = ensureToggle();
+    applyNavbarLanguage(getLanguage());
+    toggle?.addEventListener('click', handleClick);
   }
 
   window.PromptFeedLanguage = {
     key: LANGUAGE_KEY,
+    initialized: true,
     normalizeLanguage,
     getLanguage,
     setLanguage,
     applyNavbarLanguage
   };
 
-  document.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
 })();
