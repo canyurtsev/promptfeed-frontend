@@ -51,10 +51,12 @@ function normalizeLanguage(value) {
 }
 
 function getStoredLanguage() {
+  if (window.PromptFeedLanguage) return window.PromptFeedLanguage.getLanguage();
   return normalizeLanguage(localStorage.getItem(LANGUAGE_KEY));
 }
 
 function setStoredLanguage(language) {
+  if (window.PromptFeedLanguage) return window.PromptFeedLanguage.setLanguage(language);
   const normalized = normalizeLanguage(language);
   localStorage.setItem(LANGUAGE_KEY, normalized);
   return normalized;
@@ -90,5 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
   select?.addEventListener('change', e => {
     const savedLanguage = setStoredLanguage(e.target.value);
     applyLanguage(savedLanguage, true);
+    window.PromptFeedLanguage?.applyNavbarLanguage(savedLanguage);
+  });
+
+  window.addEventListener('app-language-change', e => {
+    applyLanguage(e.detail?.language, true);
   });
 });

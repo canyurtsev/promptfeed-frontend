@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Create Prompt - PromptFeed</title>
+<meta name="description" content="Create and publish a prompt to the PromptFeed community."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<link rel="stylesheet" href="pf-layout.css"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+</head>
+<body>
+
+<header class="pf-topnav">
+  <div class="pf-topnav__inner">
+    <a href="index.html" class="pf-topnav__logo">
+      <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
+    </a>
+    <nav class="pf-topnav__nav" aria-label="Main navigation">
+      <a href="index.html" class="pf-topnav__nav-link">News</a>
+      <a href="community.html" class="pf-topnav__nav-link">Community</a>
+      <a href="create.html" class="pf-topnav__nav-link active" aria-current="page">Create</a>
+      <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
+      <a href="benchmarks.html" class="pf-topnav__nav-link">Benchmarks</a>
+      <a href="skill-library.html" class="pf-topnav__nav-link">Skills</a>
+      <a href="bounty-board.html" class="pf-topnav__nav-link">Bounties</a>
+      <a href="subscription.html" class="pf-topnav__nav-link">Pricing</a>
+    </nav>
+    <div class="pf-topnav__actions" id="nav-auth-area"></div>
+  </div>
+</header>
+
+<main class="create-shell">
+  <section class="create-panel" aria-labelledby="create-title">
+    <div class="create-panel__header">
+      <span class="material-symbols-outlined create-panel__icon">edit_square</span>
+      <div>
+        <h1 id="create-title" class="create-panel__title">Create Prompt</h1>
+        <p class="create-panel__subtitle">Publish a prompt to the community feed.</p>
+      </div>
+    </div>
+
+    <div id="create-message" class="create-message" role="alert" aria-live="polite"></div>
+
+    <form id="create-form" class="create-form">
+      <div class="create-field">
+        <label class="create-label" for="prompt-title">Title</label>
+        <input id="prompt-title" class="create-input" name="title" type="text" maxlength="200" required autocomplete="off"/>
+      </div>
+
+      <div class="create-field">
+        <label class="create-label" for="prompt-description">Description</label>
+        <textarea id="prompt-description" class="create-textarea create-textarea--description" name="description" maxlength="2000"></textarea>
+      </div>
+
+      <div class="create-field">
+        <label class="create-label" for="prompt-content">Content</label>
+        <textarea id="prompt-content" class="create-textarea create-textarea--content" name="content" required></textarea>
+      </div>
+
+      <div class="create-field">
+        <label class="create-label" for="prompt-tags">Tags</label>
+        <input id="prompt-tags" class="create-input" name="tags" type="text" required autocomplete="off" placeholder="automation, coding, research"/>
+      </div>
+
+      <div class="create-actions">
+        <a class="pf-btn pf-btn--ghost" href="community.html">Cancel</a>
+        <button id="create-submit" class="pf-btn pf-btn--primary" type="submit">
+          <span class="material-symbols-outlined create-submit__icon">publish</span>
+          Publish
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script src="js/language-toggle.js" defer></script>
+<script src="js/pages/create.js" defer></script>
+</body>
+</html>
