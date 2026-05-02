@@ -87,6 +87,7 @@ async function initAuth() {
 
   renderNav();
   renderProfile();
+  loadSavedPrompts();
 }
 
 function renderNav() {
@@ -200,6 +201,54 @@ function renderCreatorState(plan) {
 function renderUpgradeState(plan) {
   if (plan === 'free') {
     document.getElementById('upgrade-box')?.classList.remove('pf-ad-banner--hidden');
+  }
+}
+
+function savedPromptHTML(item) {
+  const prompt = item.prompt || item;
+  const author = prompt.user?.username || prompt.user?.fullName || 'unknown';
+  const tags = Array.isArray(prompt.tags)
+    ? prompt.tags
+    : String(prompt.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+
+  return `
+    <a href="prompt-detail.html?id=${esc(prompt.id)}" class="pf-topic-row pf-topic-row--clickable">
+      <div class="pf-topic-row__body">
+        <div class="pf-topic-row__title">${esc(prompt.title)}</div>
+        <div class="pf-topic-row__meta">
+          <span>by <strong>${esc(author)}</strong></span>
+          ${tags.slice(0, 3).map(tag => `<span class="pf-tag">${esc(tag)}</span>`).join('')}
+        </div>
+      </div>
+    </a>`;
+}
+
+async function loadSavedPrompts() {
+  const el = document.getElementById('saved-prompts-content');
+  if (!el || !token) return;
+
+  try {
+    const r = await fetch(API + '/api/users/me/saved-prompts', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const d = await r.json();
+
+    if (!d.success) throw new Error(d.message || d.error?.message || 'Failed to load saved prompts');
+
+    const items = d.data || [];
+    el.innerHTML = items.length
+      ? items.map(savedPromptHTML).join('')
+      : `<div class="pf-empty-state pd-empty">
+          <div class="pf-empty-state__icon"><span class="material-symbols-outlined">bookmark_border</span></div>
+          <h3>No saved prompts</h3>
+          <p>Prompts you save from the community or detail pages will appear here.</p>
+        </div>`;
+  } catch (err) {
+    el.innerHTML = `<div class="pf-empty-state pd-empty">
+      <div class="pf-empty-state__icon"><span class="material-symbols-outlined">warning</span></div>
+      <h3>Saved prompts unavailable</h3>
+      <p>${esc(err.message)}</p>
+    </div>`;
   }
 }
 

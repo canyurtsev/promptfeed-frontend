@@ -20,6 +20,13 @@ router.get('/me', authenticate, asyncHandler(userController.getMe.bind(userContr
 router.get('/me/bookmarks', authenticate, asyncHandler(userController.getBookmarks.bind(userController)));
 
 /**
+ * @route   GET /api/users/me/saved-prompts
+ * @desc    Get current user's saved prompts
+ * @access  Private
+ */
+router.get('/me/saved-prompts', authenticate, asyncHandler(userController.getSavedPrompts.bind(userController)));
+
+/**
  * @route   PUT /api/users/me
  * @desc    Update current user
  * @access  Private

@@ -87,6 +87,48 @@ class UserRepository {
             data
         });
     }
+
+    async findSavedPrompts(userId) {
+        const rows = await prisma.$queryRaw`
+            SELECT
+                s.id AS "saveId",
+                s."createdAt" AS "savedAt",
+                p.id,
+                p.title,
+                p.description,
+                p.tags,
+                p."createdAt",
+                p.score,
+                u.id AS "userId",
+                u.username,
+                u."fullName",
+                u."avatarUrl"
+            FROM "PromptSave" s
+            JOIN "Prompt" p ON p.id = s."promptId"
+            JOIN "User" u ON u.id = p."userId"
+            WHERE s."userId" = ${userId}
+            ORDER BY s."createdAt" DESC
+        `;
+
+        return rows.map(row => ({
+            id: row.saveId,
+            createdAt: row.savedAt,
+            prompt: {
+                id: row.id,
+                title: row.title,
+                description: row.description,
+                tags: typeof row.tags === 'string' ? row.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+                createdAt: row.createdAt,
+                score: row.score,
+                user: {
+                    id: row.userId,
+                    username: row.username,
+                    fullName: row.fullName,
+                    avatarUrl: row.avatarUrl
+                }
+            }
+        }));
+    }
 }
 
 export default new UserRepository();

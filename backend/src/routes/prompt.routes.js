@@ -65,6 +65,20 @@ router.post('/:id/vote', authenticate, asyncHandler(promptController.vote.bind(p
  */
 router.post('/:id/bookmark', authenticate, asyncHandler(promptController.bookmark.bind(promptController)));
 
+/**
+ * @route   POST /api/prompts/:id/save
+ * @desc    Save a prompt
+ * @access  Private
+ */
+router.post('/:id/save', authenticate, asyncHandler(promptController.save.bind(promptController)));
+
+/**
+ * @route   DELETE /api/prompts/:id/save
+ * @desc    Unsave a prompt
+ * @access  Private
+ */
+router.delete('/:id/save', authenticate, asyncHandler(promptController.unsave.bind(promptController)));
+
 // ── Comment Endpoints ──
 
 /**

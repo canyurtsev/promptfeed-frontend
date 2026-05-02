@@ -19,6 +19,15 @@ class UserController {
         }
     }
 
+    async getSavedPrompts(req, res, next) {
+        try {
+            const saves = await userRepository.findSavedPrompts(req.user.id);
+            res.json({ success: true, data: saves });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async updateMe(req, res, next) {
         try {
             const user = await userRepository.update(req.user.id, req.body);

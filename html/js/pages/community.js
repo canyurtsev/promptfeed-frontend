@@ -170,6 +170,7 @@ function topicRow(p) {
   const author = p.user?.username || p.authorHandle || 'unknown';
   const tags = Array.isArray(p.tags) ? p.tags.slice(0, 3) : [];
   const cmts = p.commentCount ?? p._count?.comments ?? 0;
+  const isSaved = Boolean(p.isSaved);
   return `
   <div class="pf-topic-row">
     <div class="pf-topic-row__vote">
@@ -189,9 +190,9 @@ function topicRow(p) {
     <div class="pf-topic-row__stats">
       <span class="pf-stat"><span class="material-symbols-outlined pf-topic-row__stat-icon">chat_bubble</span><span>${cmts}</span></span>
       <button class="pf-btn pf-btn--ghost pf-topic-row__bookmark"
-        title="Bookmark this prompt"
-        data-action="bookmark" data-id="${esc(p.id)}">
-        <span class="material-symbols-outlined pf-topic-row__bookmark-icon">bookmark</span>
+        title="${isSaved ? 'Unsave this prompt' : 'Save this prompt'}"
+        data-action="save" data-id="${esc(p.id)}" data-saved="${isSaved ? 'true' : 'false'}">
+        <span class="material-symbols-outlined pf-topic-row__bookmark-icon">${isSaved ? 'bookmark_added' : 'bookmark'}</span>
       </button>
     </div>
   </div>`;
@@ -278,16 +279,28 @@ async function handleVote(promptId, value, e) {
   }
 }
 
-async function handleBookmark(promptId, e) {
+async function handleSave(promptId, e, button) {
   e.stopPropagation();
-  if (!requireAuth('bookmark prompts')) return;
+  if (!requireAuth('save prompts')) return;
+  const isSaved = button?.dataset.saved === 'true';
   try {
-    const r = await fetch(API + '/api/prompts/' + promptId + '/bookmark', {
-      method: 'POST',
+    const r = await fetch(API + '/api/prompts/' + promptId + '/save', {
+      method: isSaved ? 'DELETE' : 'POST',
       headers: { Authorization: 'Bearer ' + token }
     });
     const d = await r.json();
-    toast(d.success ? 'Bookmarked' : (d.message || 'Failed'));
+    if (d.success) {
+      const nextSaved = !isSaved;
+      if (button) {
+        button.dataset.saved = nextSaved ? 'true' : 'false';
+        button.title = nextSaved ? 'Unsave this prompt' : 'Save this prompt';
+        const icon = button.querySelector('.material-symbols-outlined');
+        if (icon) icon.textContent = nextSaved ? 'bookmark_added' : 'bookmark';
+      }
+      toast(nextSaved ? 'Saved' : 'Removed from saved prompts');
+    } else {
+      toast(d.message || d.error?.message || 'Failed');
+    }
   } catch {
     toast('Connection error');
   }
@@ -368,10 +381,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const bookmarkBtn = e.target.closest('[data-action="bookmark"]');
-    if (bookmarkBtn) {
+    const saveBtn = e.target.closest('[data-action="save"]');
+    if (saveBtn) {
       e.stopPropagation();
-      handleBookmark(bookmarkBtn.dataset.id, e);
+      handleSave(saveBtn.dataset.id, e, saveBtn);
       return;
     }
 

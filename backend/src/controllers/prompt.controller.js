@@ -70,6 +70,26 @@ class PromptController {
         const result = await promptService.toggleBookmark(id, userId);
         res.json({ success: true, data: result });
     }
+
+    /**
+     * Save prompt
+     */
+    async save(req, res) {
+        const { id } = req.params;
+        const userId = req.user.id;
+        const result = await promptService.save(id, userId);
+        res.status(201).json({ success: true, data: result });
+    }
+
+    /**
+     * Unsave prompt
+     */
+    async unsave(req, res) {
+        const { id } = req.params;
+        const userId = req.user.id;
+        const result = await promptService.unsave(id, userId);
+        res.json({ success: true, data: result });
+    }
 }
 
 export default new PromptController();

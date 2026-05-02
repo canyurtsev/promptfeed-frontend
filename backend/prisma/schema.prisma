@@ -38,6 +38,7 @@ model User {
   bountySubmissions BountySubmission[]
   upvotes           PromptVote[]
   bookmarks         PromptBookmark[]
+  savedPrompts      PromptSave[]
   reviews           Review[]
   comments          Comment[]
   notifications     Notification[]
@@ -115,6 +116,7 @@ model Prompt {
   product           Product?
   votes             PromptVote[]
   bookmarks         PromptBookmark[]
+  saves             PromptSave[]
   bountySubmissions BountySubmission[]
   comments          Comment[]
   versions          PromptVersion[]
@@ -286,6 +288,24 @@ model PromptBookmark {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([promptId, userId])
+}
+
+// ============================================
+// PROMPT SAVE MODEL
+// ============================================
+model PromptSave {
+  id        String   @id @default(uuid())
+  promptId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([promptId, userId])
+  @@index([userId])
+  @@index([promptId])
 }
 
 // ============================================

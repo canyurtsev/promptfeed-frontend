@@ -127,6 +127,7 @@ function renderPage(){
 
   const plan = currentUser ? (currentUser.plan || 'free').toLowerCase() : 'guest';
   const showAd = (plan === 'free' || plan === 'guest');
+  const isSaved = Boolean(p.isSaved);
 
   let metricsHtml = '';
   if(effScore || avgTok || avgCost || avgLat || qScore || sRate){
@@ -213,8 +214,9 @@ function renderPage(){
             <button class="pf-btn pf-btn--ghost" id="run-btn" style="display:flex;align-items:center;justify-content:center;gap:6px">
               <span class="material-symbols-outlined" style="font-size:16px">play_arrow</span> Run Prompt
             </button>
-            <button class="pf-btn pf-btn--ghost" id="bookmark-btn" style="display:flex;align-items:center;justify-content:center;gap:6px">
-              <span class="material-symbols-outlined" style="font-size:16px">bookmark</span> Save
+            <button class="pf-btn pf-btn--ghost" id="save-btn" data-saved="${isSaved ? 'true' : 'false'}" style="display:flex;align-items:center;justify-content:center;gap:6px">
+              <span class="material-symbols-outlined" style="font-size:16px">${isSaved ? 'bookmark_added' : 'bookmark'}</span>
+              <span class="save-label">${isSaved ? 'Saved' : 'Save'}</span>
             </button>
           </div>
         </div>
@@ -276,21 +278,33 @@ function handleRun(){
   window.location.href = `playground.html?promptId=${promptId}`;
 }
 
-async function handleBookmark(){
-  if(!requireAuth('bookmark this prompt')) return;
+async function handleSave(){
+  const btn = document.getElementById('save-btn');
+  const isSaved = btn?.dataset.saved === 'true';
+  if(!requireAuth('save this prompt')) return;
   try {
-    const res = await fetch(API+`/api/prompts/${promptId}/bookmark`, {
-      method: 'POST',
+    const res = await fetch(API+`/api/prompts/${promptId}/save`, {
+      method: isSaved ? 'DELETE' : 'POST',
       headers: { 'Authorization':'Bearer '+token }
     });
     const data = await res.json();
     if(data.success){
-      toast('🔖 Bookmark updated!');
+      const nextSaved = !isSaved;
+      if (btn) {
+        btn.dataset.saved = nextSaved ? 'true' : 'false';
+        const icon = btn.querySelector('.material-symbols-outlined');
+        const label = btn.querySelector('.save-label');
+        if (icon) icon.textContent = nextSaved ? 'bookmark_added' : 'bookmark';
+        if (label) label.textContent = nextSaved ? 'Saved' : 'Save';
+      }
+      if (promptData) promptData.isSaved = nextSaved;
+      toast(nextSaved ? 'Saved' : 'Removed from saved prompts');
+      return;
     } else {
-      toast('⚠ Failed to bookmark.', false);
+      toast('Failed to update saved prompt.', false);
     }
   } catch(err) {
-    toast('⚠ Network error.', false);
+    toast('Network error.', false);
   }
 }
 
@@ -322,8 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (e.target.closest('#bookmark-btn')) {
-      handleBookmark();
+    if (e.target.closest('#save-btn')) {
+      handleSave();
       return;
     }
   });
