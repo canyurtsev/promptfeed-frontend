@@ -3,152 +3,15 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>User Dashboard â€” PromptFeed</title>
+<title>User Dashboard - PromptFeed</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 <link rel="stylesheet" href="pf-layout.css"/>
-<style>
-/* â”€â”€ Profile Specifics â”€â”€ */
-.pd-container {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 24px;
-  max-width: var(--pf-max-w);
-  margin: 0 auto;
-  padding: 32px 24px;
-}
-@media (max-width: 900px) {
-  .pd-container { grid-template-columns: 1fr; }
-}
-
-.pd-main {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.pd-panel {
-  background: var(--pf-card);
-  border: 1px solid var(--pf-border);
-  border-radius: var(--pf-radius-lg);
-  padding: 24px;
-}
-
-.pd-header {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--pf-text-primary);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-bottom: 1px solid var(--pf-border);
-  padding-bottom: 12px;
-}
-
-.profile-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.profile-card__avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--pf-surface);
-  border: 1px solid var(--pf-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: var(--pf-text-muted);
-  background-size: cover;
-  background-position: center;
-}
-.profile-card__info {
-  flex: 1;
-}
-.profile-card__name {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--pf-text-primary);
-  margin-bottom: 4px;
-}
-.profile-card__meta {
-  font-size: 13px;
-  color: var(--pf-text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.plan-badge {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-.plan-badge.free { background: var(--pf-surface); color: var(--pf-text-secondary); border: 1px solid var(--pf-border); }
-.plan-badge.pro { background: #00c2ff15; color: var(--pf-accent); border: 1px solid #00c2ff30; }
-.plan-badge.creator { background: #a371f715; color: var(--pf-pro); border: 1px solid #a371f730; }
-
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 16px;
-}
-.stat-box {
-  background: var(--pf-surface);
-  border: 1px solid var(--pf-border);
-  border-radius: var(--pf-radius);
-  padding: 16px;
-  text-align: center;
-}
-.stat-box__val {
-  font-size: 24px;
-  font-weight: 800;
-  font-family: var(--pf-font-mono);
-  color: var(--pf-text-primary);
-  margin-bottom: 4px;
-}
-.stat-box__label {
-  font-size: 12px;
-  color: var(--pf-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.item-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.item-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  background: var(--pf-surface);
-  border: 1px solid var(--pf-border);
-  border-radius: var(--pf-radius);
-}
-.item-row__title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--pf-text-primary);
-}
-.item-row__meta {
-  font-size: 12px;
-  color: var(--pf-text-muted);
-}
-</style>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 </head>
 <body>
 
-<!-- TOP NAV -->
 <header class="pf-topnav">
   <div class="pf-topnav__inner">
     <a href="index.html" class="pf-topnav__logo">
@@ -165,96 +28,113 @@
     </nav>
     <div class="pf-topnav__search">
       <span class="material-symbols-outlined pf-topnav__search-icon">search</span>
-      <input type="search" placeholder="Search..." disabled/>
+      <input type="search" placeholder="Search..." disabled aria-label="Search"/>
     </div>
     <div class="pf-topnav__actions" id="nav-auth-area"></div>
   </div>
 </header>
 
-<div class="pd-container" id="page-content" style="display:none">
-  <!-- LEFT/MAIN -->
+<div class="pd-loading" id="init-loading">
+  <div class="pf-spinner"></div>
+</div>
+
+<div class="pd-container" id="page-content" hidden>
   <main class="pd-main">
-    <div class="pd-panel">
+    <section class="pd-panel" aria-labelledby="profile-heading">
       <div class="profile-card">
-        <div class="profile-card__avatar" id="prof-avatar">
-          <span class="material-symbols-outlined">person</span>
-        </div>
+        <div class="profile-card__avatar" id="prof-avatar" aria-hidden="true">?</div>
         <div class="profile-card__info">
-          <div class="profile-card__name" id="prof-name">User Name</div>
+          <h1 class="profile-card__name" id="prof-name">Account</h1>
           <div class="profile-card__meta">
-            <span id="prof-email">user@example.com</span>
-            <span>â€¢</span>
+            <span id="prof-email">Email unavailable</span>
+            <span class="profile-card__separator">·</span>
             <span class="plan-badge free" id="prof-plan">Free</span>
-            <span>â€¢</span>
-            <span id="prof-joined">Joined recently</span>
+            <span class="profile-card__separator">·</span>
+            <span id="prof-joined">Joined date unavailable</span>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="pd-panel">
-      <div class="pd-header">
-        <span class="material-symbols-outlined" style="color:var(--pf-accent)">bar_chart</span> Activity Summary
+    <section class="pd-panel" aria-labelledby="account-heading">
+      <div class="pd-header" id="account-heading">
+        <span class="material-symbols-outlined pd-header__icon pd-header__icon--accent">badge</span>
+        Account Details
       </div>
-      <div class="stat-grid" id="activity-grid">
-        <div class="stat-box"><div class="stat-box__val">â€”</div><div class="stat-box__label">Saved Prompts</div></div>
-        <div class="stat-box"><div class="stat-box__val">â€”</div><div class="stat-box__label">Published</div></div>
-        <div class="stat-box"><div class="stat-box__val">â€”</div><div class="stat-box__label">Votes Used</div></div>
-        <div class="stat-box"><div class="stat-box__val">â€”</div><div class="stat-box__label">Playground Runs</div></div>
-      </div>
-    </div>
-
-    <div class="pd-panel" id="creator-panel" style="display:none">
-      <div class="pd-header">
-        <span class="material-symbols-outlined" style="color:var(--pf-pro)">storefront</span> Creator Dashboard
-      </div>
-      <div class="stat-grid" style="margin-bottom:16px">
-        <div class="stat-box"><div class="stat-box__val">$0.00</div><div class="stat-box__label">Earnings</div></div>
-        <div class="stat-box"><div class="stat-box__val">0</div><div class="stat-box__label">Sales</div></div>
-        <div class="stat-box"><div class="stat-box__val">0</div><div class="stat-box__label">Boost Credits</div></div>
-      </div>
-      <div style="font-size:12px;color:var(--pf-text-muted);text-align:center">
-        Creator tools and detailed analytics coming soon.
-      </div>
-    </div>
-
-    <div class="pd-panel">
-      <div class="pd-header">
-        <span class="material-symbols-outlined" style="color:var(--pf-success)">folder</span> My Library
-      </div>
-      <div id="library-content" class="item-list">
-        <div class="pf-empty-state" style="padding:20px;margin:0">
-          <div class="pf-empty-state__icon" style="font-size:24px;margin-bottom:8px">ğŸ“š</div>
-          <h3 style="font-size:14px">Library integration coming soon.</h3>
-          <p style="font-size:12px">Your saved prompts and downloaded modules will appear here.</p>
+      <div class="pd-details-grid">
+        <div class="pd-detail">
+          <div class="pd-detail__label">Username</div>
+          <div class="pd-detail__value" id="detail-username">Unavailable</div>
+        </div>
+        <div class="pd-detail">
+          <div class="pd-detail__label">Email</div>
+          <div class="pd-detail__value" id="detail-email">Unavailable</div>
+        </div>
+        <div class="pd-detail">
+          <div class="pd-detail__label">Plan</div>
+          <div class="pd-detail__value" id="detail-plan">Free</div>
+        </div>
+        <div class="pd-detail">
+          <div class="pd-detail__label">Wallet</div>
+          <div class="pd-detail__value" id="detail-wallet">Unavailable</div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <section class="pd-panel" aria-labelledby="activity-heading">
+      <div class="pd-header" id="activity-heading">
+        <span class="material-symbols-outlined pd-header__icon pd-header__icon--accent">bar_chart</span>
+        Activity Summary
+      </div>
+      <div class="stat-grid" id="activity-grid"></div>
+      <p class="pd-muted">Only fields returned by your account API are shown.</p>
+    </section>
+
+    <section class="pd-panel" id="creator-panel" aria-labelledby="creator-heading">
+      <div class="pd-header" id="creator-heading">
+        <span class="material-symbols-outlined pd-header__icon pd-header__icon--pro">storefront</span>
+        Creator Dashboard
+      </div>
+      <div id="creator-content"></div>
+    </section>
+
+    <section class="pd-panel" aria-labelledby="library-heading">
+      <div class="pd-header" id="library-heading">
+        <span class="material-symbols-outlined pd-header__icon pd-header__icon--success">folder</span>
+        My Library
+      </div>
+      <div id="library-content" class="item-list">
+        <div class="pf-empty-state pd-empty">
+          <div class="pf-empty-state__icon">
+            <span class="material-symbols-outlined">folder_off</span>
+          </div>
+          <h3>No library data available</h3>
+          <p>Saved prompts or downloads will appear here when the API returns them.</p>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <!-- RIGHT RAIL -->
-  <aside>
-    <div class="pd-panel" style="margin-bottom:24px;padding:20px">
-      <div class="pd-header" style="margin-bottom:12px;border:none;padding:0">
-        <span class="material-symbols-outlined" style="font-size:18px">account_balance_wallet</span> Wallet
+  <aside class="pd-rail">
+    <section class="pd-panel pd-panel--rail" aria-labelledby="wallet-heading">
+      <div class="pd-header pd-header--compact" id="wallet-heading">
+        <span class="material-symbols-outlined pd-header__icon">account_balance_wallet</span>
+        Wallet
       </div>
-      <div style="font-size:28px;font-weight:800;font-family:var(--pf-font-mono);color:var(--pf-text-primary);margin-bottom:16px" id="wallet-display">
-        $0.00
-      </div>
-      <button class="pf-btn pf-btn--ghost" style="width:100%;font-size:13px" disabled title="Coming soon">Add Funds</button>
-    </div>
+      <div class="pd-wallet" id="wallet-display">Unavailable</div>
+      <button class="pf-btn pf-btn--ghost pd-full-btn" disabled title="Wallet funding is not available yet">Add Funds</button>
+    </section>
 
-    <div class="pd-panel" style="margin-bottom:24px;padding:20px">
-      <div class="pd-header" style="margin-bottom:12px;border:none;padding:0">
-        <span class="material-symbols-outlined" style="font-size:18px">settings</span> Settings
+    <section class="pd-panel pd-panel--rail" aria-labelledby="settings-heading">
+      <div class="pd-header pd-header--compact" id="settings-heading">
+        <span class="material-symbols-outlined pd-header__icon">settings</span>
+        Settings
       </div>
-      <div style="font-size:13px;color:var(--pf-text-secondary);line-height:1.5;margin-bottom:16px">
-        Account settings, API keys, and notification preferences.
-      </div>
-      <button class="pf-btn pf-btn--ghost" style="width:100%;font-size:13px" disabled title="Coming soon">Manage Account</button>
-    </div>
+      <p class="pd-muted pd-muted--block">Account settings, API keys, and notification preferences are not available on this page yet.</p>
+      <button class="pf-btn pf-btn--ghost pd-full-btn" disabled title="Account settings are not available yet">Manage Account</button>
+    </section>
 
-    <div id="upgrade-box" class="pf-pro-box pf-ad-banner--hidden">
+    <section id="upgrade-box" class="pf-pro-box pf-ad-banner--hidden">
       <span class="pf-pro-box__badge">Upgrade</span>
       <div class="pf-pro-box__title">Unlock PromptFeed</div>
       <ul class="pf-pro-box__list">
@@ -263,20 +143,18 @@
         <li>Remove all ads</li>
       </ul>
       <a href="subscription.html" class="pf-pro-btn">View Plans</a>
-    </div>
+    </section>
 
-    <div id="right-ad-slot" class="pf-ad-slot pf-ad-banner--hidden" style="margin-top:24px">
-      <span class="pf-ad-slot__label">Advertisement</span>
-      Sponsor slot available
-    </div>
+    <section class="pd-panel pd-panel--rail">
+      <div class="pd-header pd-header--compact">
+        <span class="material-symbols-outlined pd-header__icon">logout</span>
+        Session
+      </div>
+      <button class="pf-btn pf-btn--ghost pd-full-btn" id="btn-logout">Log Out</button>
+    </section>
   </aside>
 </div>
 
-<!-- Loading overlay -->
-<div id="init-loading" style="display:flex;justify-content:center;align-items:center;min-height:400px">
-  <div class="pf-spinner"></div>
-</div>
-
-<script src="js/pages/profile.js"></script>
+<script src="js/pages/profile.js" defer></script>
 </body>
 </html>

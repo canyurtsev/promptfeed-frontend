@@ -1,112 +1,215 @@
 /* ================================================================
-   profile.html — Controller
-   Honest User Dashboard without Mock Data
+   profile.html - Controller
+   Honest user dashboard without mock data.
    ================================================================ */
 'use strict';
 
 const API = 'http://localhost:5000';
+const AUTH_ENDPOINTS = ['/api/users/me', '/api/auth/me'];
 const token = localStorage.getItem('accessToken');
 let currentUser = null;
+let userSource = null;
 
-function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-
-function requireAuth() {
-  window.location.href = 'signin.html?returnUrl=profile.html';
+function esc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-/* —— Auth & Load —— */
+function text(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function redirectToSignin() {
+  window.location.href = 'signin.html?returnUrl=/profile.html';
+}
+
+function displayName(user) {
+  return user?.username || user?.fullName || user?.name || user?.email || 'Account';
+}
+
+function initials(name) {
+  const cleaned = String(name || '').trim();
+  if (!cleaned) return '?';
+  const parts = cleaned.split(/\s+/).filter(Boolean);
+  if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return cleaned.slice(0, 2).toUpperCase();
+}
+
+function formatPlan(plan) {
+  return String(plan || 'free').toLowerCase();
+}
+
+function formatMoney(value) {
+  if (value == null || value === '') return 'Unavailable';
+  const n = Number(value);
+  if (!Number.isFinite(n)) return String(value);
+  return '$' + n.toFixed(2);
+}
+
+function formatDate(value) {
+  if (!value) return 'Joined date unavailable';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Joined date unavailable';
+  return 'Joined ' + date.toLocaleDateString();
+}
+
+async function fetchCurrentUser() {
+  for (const endpoint of AUTH_ENDPOINTS) {
+    try {
+      const r = await fetch(API + endpoint, { headers: { Authorization: 'Bearer ' + token } });
+      if (r.status === 401 || r.status === 403) continue;
+      if (!r.ok) continue;
+
+      const d = await r.json();
+      const user = d.data?.user || d.data || d.user;
+      if (d.success !== false && user) {
+        userSource = endpoint;
+        return user;
+      }
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
 async function initAuth() {
-  const area = document.getElementById('nav-auth-area');
   if (!token) {
-    requireAuth();
+    redirectToSignin();
     return;
   }
 
-  try {
-    const r = await fetch(API + '/api/users/me', { headers: { Authorization: 'Bearer ' + token } });
-    const d = await r.json();
-    if (d.success && d.data) {
-      currentUser = d.data;
-
-      area.innerHTML = `
-        <div class="pf-wallet-chip" title="Wallet balance">
-          <span class="material-symbols-outlined pf-wallet-chip__icon">toll</span>
-          <span>${esc(String(currentUser.walletBalance ?? '—'))}</span>
-        </div>
-        <div class="pf-avatar" id="user-avatar" title="Profile"
-          style="${currentUser.avatarUrl ? 'background-image:url(' + esc(currentUser.avatarUrl) + ')' : ''}"
-          data-action="goto-signin"></div>`;
-
-      renderProfile();
-    } else {
-      requireAuth();
-    }
-  } catch {
-    requireAuth();
+  currentUser = await fetchCurrentUser();
+  if (!currentUser) {
+    redirectToSignin();
+    return;
   }
+
+  renderNav();
+  renderProfile();
+}
+
+function renderNav() {
+  const area = document.getElementById('nav-auth-area');
+  if (!area) return;
+
+  const plan = formatPlan(currentUser.plan);
+  const name = displayName(currentUser);
+  const wallet = currentUser.walletBalance ?? currentUser.balance;
+
+  area.innerHTML = `
+    ${wallet == null ? '' : `
+      <a href="profile.html" class="pf-wallet-chip" title="Wallet balance">
+        <span class="material-symbols-outlined pf-wallet-chip__icon">toll</span>
+        <span>${esc(formatMoney(wallet))}</span>
+      </a>`}
+    <a href="profile.html" class="pf-user-chip" title="Profile">
+      <span class="pf-avatar" id="user-avatar">${esc(initials(name))}</span>
+      <span class="pf-user-chip__body">
+        <span class="pf-user-chip__name">${esc(name)}</span>
+        <span class="pf-user-chip__plan">${esc(plan)}</span>
+      </span>
+    </a>`;
+
+  applyAvatar('user-avatar', currentUser.avatarUrl, name);
+}
+
+function applyAvatar(id, avatarUrl, name) {
+  const avatar = document.getElementById(id);
+  if (!avatar) return;
+
+  if (avatarUrl) {
+    avatar.textContent = '';
+    avatar.style.backgroundImage = 'url("' + String(avatarUrl).replace(/"/g, '%22') + '")';
+    return;
+  }
+
+  avatar.style.backgroundImage = '';
+  avatar.textContent = initials(name);
+}
+
+function statHTML(label, value) {
+  const rendered = value == null || value === '' ? 'Unavailable' : String(value);
+  return `<div class="stat-box"><div class="stat-box__val">${esc(rendered)}</div><div class="stat-box__label">${esc(label)}</div></div>`;
 }
 
 function renderProfile() {
   const c = currentUser;
-  const plan = (c.plan || 'free').toLowerCase();
+  const plan = formatPlan(c.plan);
+  const name = displayName(c);
+  const email = c.email || 'Email unavailable';
+  const wallet = c.walletBalance ?? c.balance;
 
-  document.getElementById('prof-name').textContent = c.username || 'Anonymous User';
-  document.getElementById('prof-email').textContent = c.email || '';
+  text('prof-name', name);
+  text('prof-email', email);
+  text('prof-joined', formatDate(c.createdAt));
+  text('detail-username', c.username || 'Unavailable');
+  text('detail-email', c.email || 'Unavailable');
+  text('detail-plan', plan);
+  text('detail-wallet', formatMoney(wallet));
+  text('wallet-display', formatMoney(wallet));
 
-  if (c.avatarUrl) {
-    document.getElementById('prof-avatar').style.backgroundImage = 'url(' + esc(c.avatarUrl) + ')';
-    document.getElementById('prof-avatar').innerHTML = '';
-  }
+  applyAvatar('prof-avatar', c.avatarUrl, name);
 
   const planBadge = document.getElementById('prof-plan');
-  planBadge.textContent = plan;
-  planBadge.className = 'plan-badge ' + plan;
-
-  if (c.createdAt) {
-    document.getElementById('prof-joined').textContent = 'Joined ' + new Date(c.createdAt).toLocaleDateString();
+  if (planBadge) {
+    planBadge.textContent = plan;
+    planBadge.className = 'plan-badge ' + esc(plan);
   }
 
-  let wb = c.walletBalance ?? 0;
-  let wbStr = String(wb);
-  if (!isNaN(parseFloat(wbStr))) wbStr = '$' + parseFloat(wbStr).toFixed(2);
-  document.getElementById('wallet-display').textContent = wbStr;
+  document.getElementById('activity-grid').innerHTML = [
+    statHTML('Saved Prompts', c._count?.savedPrompts ?? c.savedPromptsCount),
+    statHTML('Published', c._count?.prompts ?? c.promptsCount),
+    statHTML('Votes Used', c.votesUsedToday),
+    statHTML('Playground Runs', c.playgroundRuns)
+  ].join('');
 
-  const saved = c._count?.savedPrompts ?? c.savedPromptsCount ?? '—';
-  const published = c._count?.prompts ?? c.promptsCount ?? '—';
-  const votes = c.votesUsedToday ?? '—';
-  const runs = c.playgroundRuns ?? '—';
+  renderCreatorState(plan);
+  renderUpgradeState(plan);
 
-  document.getElementById('activity-grid').innerHTML = `
-    <div class="stat-box"><div class="stat-box__val">${esc(String(saved))}</div><div class="stat-box__label">Saved Prompts</div></div>
-    <div class="stat-box"><div class="stat-box__val">${esc(String(published))}</div><div class="stat-box__label">Published</div></div>
-    <div class="stat-box"><div class="stat-box__val">${esc(String(votes))}</div><div class="stat-box__label">Votes Used</div></div>
-    <div class="stat-box"><div class="stat-box__val">${esc(String(runs))}</div><div class="stat-box__label">Playground Runs</div></div>
-  `;
+  document.getElementById('init-loading').hidden = true;
+  document.getElementById('page-content').hidden = false;
 
-  if (plan === 'creator') {
-    document.getElementById('creator-panel').style.display = 'block';
-  } else {
-    document.getElementById('upgrade-box').classList.remove('pf-ad-banner--hidden');
+  if (userSource) {
+    document.body.dataset.profileSource = userSource;
   }
-
-  if (plan === 'free') {
-    document.getElementById('right-ad-slot').classList.remove('pf-ad-banner--hidden');
-  }
-
-  document.getElementById('init-loading').style.display = 'none';
-  document.getElementById('page-content').style.display = 'grid';
 }
 
-/* —— Event Delegation + Init —— */
-document.addEventListener('click', e => {
-  const actionEl = e.target.closest('[data-action]');
-  if (!actionEl) return;
+function renderCreatorState(plan) {
+  const el = document.getElementById('creator-content');
+  if (!el) return;
 
-  if (actionEl.dataset.action === 'goto-signin') {
-    window.location.href = 'signin.html';
+  if (plan === 'creator') {
+    el.innerHTML = `
+      <div class="pf-empty-state pd-empty">
+        <div class="pf-empty-state__icon"><span class="material-symbols-outlined">query_stats</span></div>
+        <h3>Creator analytics unavailable</h3>
+        <p>This account has creator access, but no creator dashboard data was returned by the account API.</p>
+      </div>`;
+    return;
   }
-});
+
+  el.innerHTML = `
+    <div class="pf-empty-state pd-empty">
+      <div class="pf-empty-state__icon"><span class="material-symbols-outlined">lock</span></div>
+      <h3>Creator tools locked</h3>
+      <p>Creator sections require a creator plan.</p>
+    </div>`;
+}
+
+function renderUpgradeState(plan) {
+  if (plan === 'free') {
+    document.getElementById('upgrade-box')?.classList.remove('pf-ad-banner--hidden');
+  }
+}
+
+function logout() {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  window.location.href = 'signin.html?returnUrl=/profile.html';
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('btn-logout')?.addEventListener('click', logout);
   await initAuth();
 });
