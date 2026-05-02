@@ -3,39 +3,28 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PromptFeed — AI Workflow Community</title>
+<title>PromptFeed - AI Workflow Community</title>
 <meta name="description" content="Community hub for prompt engineers. Browse, vote and share AI prompts, skills and bounties."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 <link rel="stylesheet" href="pf-layout.css"/>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 </head>
 <body>
 
 <!-- Sign-in Gate Modal -->
 <div id="pf-gate" class="pf-gate-overlay">
   <div class="pf-gate-modal">
-    <div class="pf-gate-modal__icon">🔒</div>
+    <div class="pf-gate-modal__icon">
+      <span class="material-symbols-outlined">lock</span>
+    </div>
     <div class="pf-gate-modal__title">Sign in required</div>
     <div class="pf-gate-modal__desc" id="gate-desc">You need an account to perform this action.</div>
     <div class="pf-gate-modal__actions">
       <button class="pf-btn pf-btn--ghost" id="btn-close-gate">Cancel</button>
       <button class="pf-btn pf-btn--primary" id="btn-goto-signin">Sign In</button>
     </div>
-  </div>
-</div>
-
-<!-- Notification Panel -->
-<div id="notif-overlay" class="pf-panel-overlay"></div>
-<div id="notif-panel" class="pf-panel">
-  <div class="pf-panel__header">
-    <span>Notifications</span>
-    <button class="pf-btn--icon" id="btn-close-notif"><span class="material-symbols-outlined" style="font-size:18px">close</span></button>
-  </div>
-  <div class="pf-panel__body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 16px;text-align:center">
-    <span class="material-symbols-outlined" style="font-size:40px;color:var(--pf-text-muted);margin-bottom:12px">notifications_off</span>
-    <p style="font-size:13px;color:var(--pf-text-muted)">No notifications yet</p>
   </div>
 </div>
 
@@ -62,10 +51,10 @@
   </div>
 </header>
 
-<!-- AD BANNER (free users only — JS-controlled) -->
+<!-- AD BANNER (free users only, JS-controlled) -->
 <div id="top-ad-banner" class="pf-ad-banner pf-ad-banner--hidden" aria-label="Advertisement">
   <span class="pf-ad-banner__label">AD</span>
-  Advertisement &mdash; <a href="subscription.html" style="color:var(--pf-accent)">Upgrade to Pro</a> to remove ads
+  Advertisement - <a href="subscription.html" class="pf-ad-banner__link">Upgrade to Pro</a> to remove ads
 </div>
 
 <!-- 3-COLUMN LAYOUT -->
@@ -73,32 +62,6 @@
 
   <!-- LEFT SIDEBAR -->
   <aside class="pf-sidebar-left" aria-label="Sidebar navigation">
-
-    <div class="pf-stub-widget">
-      <div class="pf-stub-widget__title">
-        <span class="material-symbols-outlined" style="font-size:15px;color:var(--pf-warning)">emoji_events</span>
-        Daily Challenge
-      </div>
-      <div class="pf-stub-widget__body"><span class="pf-stub-badge">Coming Soon</span></div>
-    </div>
-
-    <div class="pf-stub-widget">
-      <div class="pf-stub-widget__title">
-        <span class="material-symbols-outlined" style="font-size:15px;color:var(--pf-accent)">help_outline</span>
-        Unanswered
-      </div>
-      <div class="pf-stub-widget__body"><span class="pf-stub-badge">Coming Soon</span></div>
-    </div>
-
-    <div class="pf-stub-widget">
-      <div class="pf-stub-widget__title">
-        <span class="material-symbols-outlined" style="font-size:15px;color:var(--pf-success)">leaderboard</span>
-        Leaderboard
-      </div>
-      <div class="pf-stub-widget__body"><span class="pf-stub-badge">Coming Soon</span></div>
-    </div>
-
-    <div class="pf-sidebar-divider"></div>
     <div class="pf-sidebar-label">Categories</div>
     <div id="sidebar-cats"></div>
 
@@ -108,10 +71,10 @@
 
     <div class="pf-sidebar-divider"></div>
     <a href="guidelines.html" class="pf-sidebar-link">
-      <span class="material-symbols-outlined" style="font-size:16px">gavel</span>Guidelines
+      <span class="material-symbols-outlined pf-sidebar-link__icon">gavel</span>Guidelines
     </a>
     <a href="tags.html" class="pf-sidebar-link">
-      <span class="material-symbols-outlined" style="font-size:16px">sell</span>All Tags
+      <span class="material-symbols-outlined pf-sidebar-link__icon">sell</span>All Tags
     </a>
   </aside>
 
@@ -123,54 +86,32 @@
       <button class="pf-feed-tab" data-tab="popular" role="tab" aria-selected="false">Popular</button>
       <button class="pf-feed-tab" data-tab="prompts" role="tab" aria-selected="false">Prompts</button>
       <button class="pf-feed-tab" data-tab="skills" role="tab" aria-selected="false">Skills</button>
-      <button class="pf-feed-tab" data-tab="articles" role="tab" aria-selected="false">Articles <small style="color:var(--pf-text-muted)">(soon)</small></button>
-      <button class="pf-feed-tab" data-tab="questions" role="tab" aria-selected="false">Questions <small style="color:var(--pf-text-muted)">(soon)</small></button>
+      <button class="pf-feed-tab pf-feed-tab--disabled" role="tab" aria-selected="false" aria-disabled="true" disabled>Articles</button>
+      <button class="pf-feed-tab pf-feed-tab--disabled" role="tab" aria-selected="false" aria-disabled="true" disabled>Questions</button>
     </div>
     <div id="feed-container" aria-live="polite"></div>
   </main>
 
   <!-- RIGHT RAIL -->
-  <aside class="pf-sidebar-right" aria-label="Promotions and stats">
-
-    <div id="right-ad-slot" class="pf-ad-slot pf-ad-banner--hidden">
-      <span class="pf-ad-slot__label">Advertisement</span>
-      Sponsor slot — contact us
-    </div>
-
+  <aside class="pf-sidebar-right" aria-label="Community sidebar">
     <div class="pf-rail-widget">
-      <div class="pf-rail-widget__header">🚀 Promoted Prompts</div>
-      <div class="pf-rail-widget__body" style="font-size:12px;color:var(--pf-text-muted)">
-        <span class="pf-stub-badge">Coming Soon</span>
-      </div>
-    </div>
-
-    <div class="pf-rail-widget">
-      <div class="pf-rail-widget__header">⚡ Popular Skills</div>
+      <div class="pf-rail-widget__header">Popular Skills</div>
       <div class="pf-rail-widget__body" id="rail-skills">
         <div class="pf-loading"><div class="pf-spinner"></div></div>
       </div>
     </div>
 
-    <div class="pf-rail-widget">
-      <div class="pf-rail-widget__header">📊 Efficiency Leaders</div>
-      <div class="pf-rail-widget__body" style="font-size:12px;color:var(--pf-text-muted)">
-        <span class="pf-stub-badge">Coming Soon</span>
-        <span style="margin-left:6px;font-size:11px">— GET /api/leaderboard</span>
-      </div>
-    </div>
-
     <div id="pro-box" class="pf-pro-box pf-ad-banner--hidden">
-      <span class="pf-pro-box__badge">⭐ PRO</span>
-      <div class="pf-pro-box__title">Go Pro — Remove Ads</div>
+      <span class="pf-pro-box__badge">PRO</span>
+      <div class="pf-pro-box__title">Go Pro - Remove Ads</div>
       <ul class="pf-pro-box__list">
         <li>No advertisements</li>
         <li>Unlimited prompt runs</li>
         <li>Priority benchmarks</li>
-        <li>Pro badge &amp; wallet boosts</li>
+        <li>Pro badge and wallet boosts</li>
       </ul>
       <a href="subscription.html" class="pf-pro-btn">Upgrade to Pro</a>
     </div>
-
   </aside>
 </div>
 

@@ -145,6 +145,7 @@ img { display: block; max-width: 100%; }
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 /* ── Ad Banner ── */
@@ -178,6 +179,7 @@ img { display: block; max-width: 100%; }
   font-weight: 700;
   letter-spacing: 1px;
 }
+.pf-ad-banner__link { color: var(--pf-accent); }
 
 /* ── Page Layout: 3-column ── */
 .pf-layout {
@@ -233,6 +235,8 @@ img { display: block; max-width: 100%; }
   border-radius: 50%;
   flex-shrink: 0;
 }
+.pf-sidebar-link__icon { font-size: 16px; }
+.pf-sidebar-link__hash { color: var(--pf-text-muted); font-size: 12px; }
 .pf-sidebar-link__count {
   margin-left: auto;
   font-size: 11px;
@@ -318,6 +322,13 @@ img { display: block; max-width: 100%; }
   color: var(--pf-accent);
   background: var(--pf-accent-dim);
   font-weight: 600;
+}
+.pf-feed-tab--disabled,
+.pf-feed-tab--disabled:hover {
+  color: var(--pf-text-muted);
+  background: transparent;
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 /* Topic Row */
@@ -610,8 +621,55 @@ img { display: block; max-width: 100%; }
   flex-shrink: 0;
   cursor: pointer;
   transition: border-color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pf-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
 }
 .pf-avatar:hover { border-color: var(--pf-accent); }
+
+.pf-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 190px;
+  padding: 2px 8px 2px 2px;
+  border: 1px solid var(--pf-border);
+  border-radius: 999px;
+  background: var(--pf-surface);
+  color: var(--pf-text-primary);
+  transition: border-color 0.15s, background 0.15s;
+}
+.pf-user-chip:hover {
+  border-color: var(--pf-accent);
+  background: #21262dcc;
+  text-decoration: none;
+}
+.pf-user-chip__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+.pf-user-chip__name {
+  max-width: 118px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+}
+.pf-user-chip__plan {
+  margin-top: 2px;
+  color: var(--pf-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
 /* ── Wallet Chip ── */
 .pf-wallet-chip {
@@ -627,9 +685,15 @@ img { display: block; max-width: 100%; }
   color: var(--pf-text-primary);
   cursor: pointer;
   transition: border-color 0.15s;
+  text-decoration: none;
 }
-.pf-wallet-chip:hover { border-color: var(--pf-accent); }
+.pf-wallet-chip:hover { border-color: var(--pf-accent); text-decoration: none; }
 .pf-wallet-chip__icon { color: var(--pf-warning); font-size: 14px; }
+
+.pf-muted-note {
+  font-size: 12px;
+  color: var(--pf-text-muted);
+}
 
 /* ── Sign-in Gate Modal ── */
 .pf-gate-overlay {
