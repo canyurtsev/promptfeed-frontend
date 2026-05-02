@@ -1011,6 +1011,106 @@ img { display: block; max-width: 100%; }
   }
 }
 
+/* ── Settings ── */
+.settings-shell {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+.settings-panel {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 24px;
+}
+.settings-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--pf-border);
+}
+.settings-panel__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--pf-radius);
+  background: var(--pf-accent-dim);
+  color: var(--pf-accent);
+}
+.settings-panel__title {
+  color: var(--pf-text-primary);
+  font-size: 22px;
+  font-weight: 800;
+}
+.settings-panel__subtitle {
+  color: var(--pf-text-secondary);
+  font-size: 13px;
+  margin-top: 2px;
+}
+.settings-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px;
+  align-items: end;
+  gap: 20px;
+  padding: 22px 0;
+}
+.settings-row__title {
+  color: var(--pf-text-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+.settings-row__description {
+  color: var(--pf-text-secondary);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.settings-select-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.settings-select {
+  width: 100%;
+  height: 36px;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  background: var(--pf-surface);
+  color: var(--pf-text-primary);
+  padding: 0 10px;
+  font: inherit;
+}
+.settings-select:focus {
+  border-color: var(--pf-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--pf-accent-dim);
+}
+.settings-note {
+  color: var(--pf-text-muted);
+  font-size: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--pf-border);
+}
+.settings-saved {
+  min-height: 18px;
+  color: var(--pf-success);
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+@media (max-width: 640px) {
+  .settings-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+}
+
 /* ── Responsive ── */
 @media (max-width: 1100px) {
   .pf-layout {
