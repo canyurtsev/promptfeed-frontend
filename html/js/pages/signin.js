@@ -11,6 +11,13 @@ const token = localStorage.getItem('accessToken');
 
 function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
+function normalizeReturnUrl(url) {
+  if (!url || typeof url !== 'string') return '/index.html';
+  if (/^https?:\/\//i.test(url)) return '/index.html';
+  if (!url.startsWith('/')) return '/' + url;
+  return url;
+}
+
 function showError(msg, reqId) {
   const box = document.getElementById('error-box');
   const spanMsg = document.getElementById('error-msg');
@@ -82,11 +89,8 @@ async function handleAuth(e) {
         localStorage.setItem('refreshToken', data.data.refreshToken);
       }
 
-      if (returnUrl) {
-        window.location.href = returnUrl;
-      } else {
-        window.location.href = 'community.html';
-      }
+      const finalUrl = normalizeReturnUrl(returnUrl || 'community.html');
+      window.location.href = finalUrl;
     } else {
       showError(data.message || data.error?.message || 'Authentication failed.', data.error?.requestId);
       btn.disabled = false;
@@ -101,7 +105,7 @@ async function handleAuth(e) {
 
 function handleOAuth(provider) {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  const redirectTo = returnUrl || 'community.html';
+  const redirectTo = normalizeReturnUrl(returnUrl || 'community.html');
   const targetUrl = `${API}/api/auth/${provider}?returnUrl=${encodeURIComponent(redirectTo)}`;
   window.location.href = targetUrl;
 }
@@ -141,11 +145,8 @@ async function handleOAuthCallback() {
 
       clearOAuthParams();
 
-      if (returnUrl) {
-        window.location.href = returnUrl;
-      } else {
-        window.location.href = 'community.html';
-      }
+      const finalUrl = normalizeReturnUrl(returnUrl || 'community.html');
+      window.location.href = finalUrl;
     } else {
       showError(data.message || data.error?.message || 'OAuth exchange failed.', data.error?.requestId);
       clearOAuthParams();
@@ -179,8 +180,8 @@ function checkExistingSession() {
     .then(r => r.json())
     .then(d => {
       if (d.success) {
-        if (returnUrl) window.location.href = returnUrl;
-        else window.location.href = 'community.html';
+        const finalUrl = normalizeReturnUrl(returnUrl || 'community.html');
+        window.location.href = finalUrl;
       }
     })
     .catch(() => {});

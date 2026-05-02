@@ -57,8 +57,8 @@ function errorHTML(title, detail) {
   return `<div class="pf-empty-state">
     <div class="pf-empty-state__icon"><span class="material-symbols-outlined">warning</span></div>
     <h3>${esc(title)}</h3>
-    <p style="color:var(--pf-danger);font-size:12px">${esc(detail)}</p>
-    <p style="margin-top:8px;font-size:12px;color:var(--pf-text-muted)">Ensure backend is running: <code>npm run dev</code></p>
+    <p class="pf-error-detail">${esc(detail)}</p>
+    <p class="pf-error-help">Ensure backend is running: <code>npm run dev</code></p>
   </div>`;
 }
 
@@ -138,21 +138,21 @@ function gotoSignin() {
 }
 
 const CATS = [
-  { name: 'Prompt Engineering', color: '#00c2ff', tag: 'prompt-engineering' },
-  { name: 'AI Agents', color: '#a371f7', tag: 'agents' },
-  { name: 'Coding', color: '#3fb950', tag: 'coding' },
-  { name: 'Marketing', color: '#d29922', tag: 'marketing' },
-  { name: 'Research', color: '#58a6ff', tag: 'research' },
-  { name: 'Security', color: '#f85149', tag: 'security' },
-  { name: 'Automation', color: '#ffa657', tag: 'automation' },
-  { name: 'Data', color: '#79c0ff', tag: 'data' },
+  { name: 'Prompt Engineering', dotClass: 'pf-sidebar-link__dot--prompt', tag: 'prompt-engineering' },
+  { name: 'AI Agents', dotClass: 'pf-sidebar-link__dot--agents', tag: 'agents' },
+  { name: 'Coding', dotClass: 'pf-sidebar-link__dot--coding', tag: 'coding' },
+  { name: 'Marketing', dotClass: 'pf-sidebar-link__dot--marketing', tag: 'marketing' },
+  { name: 'Research', dotClass: 'pf-sidebar-link__dot--research', tag: 'research' },
+  { name: 'Security', dotClass: 'pf-sidebar-link__dot--security', tag: 'security' },
+  { name: 'Automation', dotClass: 'pf-sidebar-link__dot--automation', tag: 'automation' },
+  { name: 'Data', dotClass: 'pf-sidebar-link__dot--data', tag: 'data' },
 ];
 const TAGS = ['gpt-4o', 'claude', 'agents', 'rag', 'sql', 'automation', 'security'];
 
 function renderSidebar() {
   document.getElementById('sidebar-cats').innerHTML = CATS.map(c =>
     `<button class="pf-sidebar-link" data-action="filterByTag" data-tag="${esc(c.tag)}">
-       <span class="pf-sidebar-link__dot" style="background:${esc(c.color)}"></span>${esc(c.name)}
+       <span class="pf-sidebar-link__dot ${esc(c.dotClass)}"></span>${esc(c.name)}
      </button>`).join('');
   document.getElementById('sidebar-tags').innerHTML = TAGS.map(t =>
     `<button class="pf-sidebar-link" data-action="filterByTag" data-tag="${esc(t)}">
@@ -187,11 +187,11 @@ function topicRow(p) {
       </div>
     </div>
     <div class="pf-topic-row__stats">
-      <span class="pf-stat"><span class="material-symbols-outlined" style="font-size:13px">chat_bubble</span><span>${cmts}</span></span>
-      <button class="pf-btn pf-btn--ghost" style="font-size:11px;padding:3px 8px;margin-top:4px"
+      <span class="pf-stat"><span class="material-symbols-outlined pf-topic-row__stat-icon">chat_bubble</span><span>${cmts}</span></span>
+      <button class="pf-btn pf-btn--ghost pf-topic-row__bookmark"
         title="Bookmark this prompt"
         data-action="bookmark" data-id="${esc(p.id)}">
-        <span class="material-symbols-outlined" style="font-size:14px">bookmark</span>
+        <span class="material-symbols-outlined pf-topic-row__bookmark-icon">bookmark</span>
       </button>
     </div>
   </div>`;
@@ -199,7 +199,7 @@ function topicRow(p) {
 
 function skillRow(s, i) {
   return `
-  <div class="pf-topic-row" data-action="gotoSkill" data-id="${esc(s.id)}" style="cursor:pointer">
+  <div class="pf-topic-row pf-topic-row--clickable" data-action="gotoSkill" data-id="${esc(s.id)}">
     <div class="pf-topic-row__vote">
       <span class="pf-vote-count">${i + 1}</span>
     </div>
@@ -305,7 +305,7 @@ async function loadRailSkills() {
       return;
     }
     el.innerHTML = items.map((s, i) =>
-      `<div class="pf-rail-row" data-action="gotoSkill" data-id="${esc(s.id)}" style="cursor:pointer">
+      `<div class="pf-rail-row pf-rail-row--clickable" data-action="gotoSkill" data-id="${esc(s.id)}">
          <span class="pf-rail-row__rank">${i + 1}</span>
          <div class="pf-rail-row__body">
            <div class="pf-rail-row__title">${esc(s.name)}</div>

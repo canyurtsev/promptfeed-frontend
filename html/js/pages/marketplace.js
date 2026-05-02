@@ -1,6 +1,6 @@
 /* ================================================================
    marketplace.html — Page Controller
-   No backend.js / payment-backend.js.
+   No shared backend or payment client.
    Uses GET /api/marketplace/products + POST /api/marketplace/purchase
    Decimal string prices safe. requestId in error messages.
    ================================================================ */

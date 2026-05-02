@@ -1,6 +1,6 @@
 /* ================================================================
    index.html — Landing Page Controller
-   No backend.js. No mock data. Direct API calls.
+   No shared backend client. No mock data. Direct API calls.
    ================================================================ */
 const API   = 'http://localhost:5000';
 const token = localStorage.getItem('accessToken');
