@@ -208,7 +208,7 @@ function renderPage(){
           </div>
         </div>
         
-        <div class="pd-actions">
+<div class="pd-actions">
           ${actionHtml}
           <div class="pd-action-row">
             <button class="pf-btn pf-btn--ghost" id="run-btn" style="display:flex;align-items:center;justify-content:center;gap:6px">
@@ -218,6 +218,11 @@ function renderPage(){
               <span class="material-symbols-outlined" style="font-size:16px">${isSaved ? 'bookmark_added' : 'bookmark'}</span>
               <span class="save-label">${isSaved ? 'Saved' : 'Save'}</span>
             </button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--pf-border)">
+            <button class="pf-vote-btn" data-action="upvote" data-id="${p.id}" data-dir="1">▲</button>
+            <span id="pd-vote-count" style="font-size:14px;font-weight:600;color:var(--pf-text-primary)">${p.score || 0}</span>
+            <button class="pf-vote-btn" data-action="upvote" data-id="${p.id}" data-dir="-1">▼</button>
           </div>
         </div>
       </div>
@@ -303,8 +308,41 @@ async function handleSave(){
     } else {
       toast('Failed to update saved prompt.', false);
     }
-  } catch(err) {
+} catch(err) {
     toast('Network error.', false);
+  }
+}
+
+async function handleVote(promptId, dir){
+  if(!requireAuth('vote on this prompt')) return;
+  const btn = document.querySelector(`[data-action="upvote"][data-dir="${dir}"]`);
+  if(btn) btn.disabled = true;
+  try {
+    let res;
+    if(dir === 1){
+      res = await fetch(API+`/api/prompts/${promptId}/upvote`, {
+        method: 'POST',
+        headers: { 'Authorization':'Bearer '+token }
+      });
+    } else {
+      res = await fetch(API+`/api/prompts/${promptId}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+        body: JSON.stringify({ value: dir })
+      });
+    }
+    const data = await res.json();
+    if(data.success){
+      const scoreEl = document.getElementById('pd-vote-count');
+      if(scoreEl) scoreEl.textContent = data.data?.score || 0;
+      if(btn) btn.classList.toggle('pf-vote-btn--active', dir === 1);
+    } else {
+      toast(data.message || 'Vote failed', false);
+    }
+  } catch(err){
+    toast('Network error.', false);
+  } finally {
+    if(btn) btn.disabled = false;
   }
 }
 
@@ -336,8 +374,16 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (e.target.closest('#save-btn')) {
+if (e.target.closest('#save-btn')) {
       handleSave();
+      return;
+    }
+
+    const voteBtn = e.target.closest('[data-action="upvote"]');
+    if (voteBtn) {
+      const dir = parseInt(voteBtn.dataset.dir, 10);
+      const id = voteBtn.dataset.id;
+      handleVote(id, dir);
       return;
     }
   });

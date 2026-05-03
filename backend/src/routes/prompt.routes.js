@@ -59,6 +59,20 @@ router.delete('/:id', authenticate, asyncHandler(promptController.delete.bind(pr
 router.post('/:id/vote', authenticate, asyncHandler(promptController.vote.bind(promptController)));
 
 /**
+ * @route   POST /api/prompts/:id/upvote
+ * @desc    Upvote a prompt
+ * @access  Private
+ */
+router.post('/:id/upvote', authenticate, asyncHandler(promptController.upvote.bind(promptController)));
+
+/**
+ * @route   DELETE /api/prompts/:id/upvote
+ * @desc    Remove upvote from a prompt
+ * @access  Private
+ */
+router.delete('/:id/upvote', authenticate, asyncHandler(promptController.removeUpvote.bind(promptController)));
+
+/**
  * @route   POST /api/prompts/:id/bookmark
  * @desc    Toggle bookmark on a prompt
  * @access  Private

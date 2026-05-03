@@ -262,15 +262,25 @@ async function handleVote(promptId, value, e) {
   e.stopPropagation();
   if (!requireAuth('vote on prompts')) return;
   try {
-    const r = await fetch(API + '/api/prompts/' + promptId + '/vote', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-      body: JSON.stringify({ value })
-    });
+    let r;
+    if (value === 1) {
+      r = await fetch(API + '/api/prompts/' + promptId + '/upvote', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token }
+      });
+    } else {
+      r = await fetch(API + '/api/prompts/' + promptId + '/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ value })
+      });
+    }
     const d = await r.json();
     if (d.success) {
       const el = document.getElementById('score-' + promptId);
       if (el) el.textContent = fmtN(d.data?.score ?? d.data?.newScore ?? 0);
+      const btn = e.target.closest('.pf-vote-btn');
+      if (btn) btn.classList.toggle('pf-vote-btn--active', value === 1);
     } else {
       toast((d.message || 'Vote failed'));
     }

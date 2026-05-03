@@ -159,6 +159,28 @@
 }
 @keyframes skel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
+.pf-vote-btn {
+  background: transparent;
+  border: none;
+  color: var(--pf-text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.pf-vote-btn:hover {
+  background: var(--pf-surface);
+  color: var(--pf-text-primary);
+}
+.pf-vote-btn--active {
+  color: var(--pf-success);
+}
+.pf-vote-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 </style>
   <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 </head>

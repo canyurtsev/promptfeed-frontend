@@ -62,6 +62,26 @@ class PromptController {
     }
 
     /**
+     * Upvote prompt
+     */
+    async upvote(req, res) {
+        const { id } = req.params;
+        const userId = req.user.id;
+        const result = await promptService.upvote(id, userId);
+        res.json({ success: true, data: result });
+    }
+
+    /**
+     * Remove upvote
+     */
+    async removeUpvote(req, res) {
+        const { id } = req.params;
+        const userId = req.user.id;
+        const result = await promptService.removeUpvote(id, userId);
+        res.json({ success: true, data: result });
+    }
+
+    /**
      * Bookmark prompt
      */
     async bookmark(req, res) {

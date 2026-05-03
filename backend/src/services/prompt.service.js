@@ -311,6 +311,38 @@ class PromptService {
     }
 
     /**
+     * Upvote a prompt (convenience method)
+     */
+    async upvote(promptId, userId) {
+        return this.vote(promptId, userId, 1);
+    }
+
+    /**
+     * Remove upvote (convenience method)
+     */
+    async removeUpvote(promptId, userId) {
+        const prompt = await promptRepository.findByIdSimple(promptId);
+        if (!prompt) throw new NotFoundError('Prompt not found');
+
+        const existing = await promptRepository.findVote(promptId, userId);
+        if (!existing) {
+            return { score: prompt.score, vote: 0, removed: false };
+        }
+
+        const scoreImpact = -(existing.value * existing.weight);
+        await promptRepository.deleteVote(existing.id);
+        const updatedPrompt = await promptRepository.updateScore(promptId, scoreImpact);
+
+        analytics.voteSubmitted(userId, promptId, 0, updatedPrompt.score);
+
+        return {
+            score: updatedPrompt.score,
+            vote: 0,
+            removed: true
+        };
+    }
+
+    /**
      * Toggle bookmark on a prompt
      */
     async toggleBookmark(promptId, userId) {
