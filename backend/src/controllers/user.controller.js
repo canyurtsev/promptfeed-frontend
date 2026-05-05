@@ -1,5 +1,6 @@
 import userRepository from '../repositories/user.repository.js';
 import promptRepository from '../repositories/prompt.repository.js';
+import walletRepository from '../repositories/wallet.repository.js';
 
 class UserController {
     async getMe(req, res, next) {
@@ -126,6 +127,55 @@ class UserController {
         try {
             const prompts = await userRepository.findPurchasedPrompts(req.user.id);
             res.json({ success: true, data: { prompts } });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getWallet(req, res, next) {
+        try {
+            let wallet = await walletRepository.findByUserId(req.user.id);
+            if (!wallet) {
+                wallet = await walletRepository.upsert(req.user.id, {}, { balance: 0 });
+            }
+            res.json({ success: true, data: { balance: parseFloat(wallet.balance) } });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getEarnings(req, res, next) {
+        try {
+            const prisma = req.app.locals.prisma;
+            const purchases = await prisma.$queryRaw`
+                SELECT
+                    pp.id AS "purchaseId",
+                    pp."createdAt",
+                    pp."pricePaid",
+                    p.id AS "promptId",
+                    p.title
+                FROM "PromptPurchase" pp
+                JOIN "Prompt" p ON p.id = pp."promptId"
+                WHERE p."userId" = ${req.user.id}
+                ORDER BY pp."createdAt" DESC
+            `;
+
+            const sales = purchases.map(row => ({
+                promptId: row.promptId,
+                title: row.title,
+                pricePaid: parseFloat(row.pricePaid),
+                createdAt: row.createdAt
+            }));
+
+            const totalEarnings = sales.reduce((sum, s) => sum + s.pricePaid, 0);
+
+            res.json({
+                success: true,
+                data: {
+                    totalEarnings,
+                    sales
+                }
+            });
         } catch (error) {
             next(error);
         }

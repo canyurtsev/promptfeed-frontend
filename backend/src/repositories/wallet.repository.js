@@ -19,11 +19,16 @@ class WalletRepository {
     }
 
     async creditBalance(userId, amount) {
-        return prisma.wallet.update({
+        return prisma.wallet.upsert({
             where: { userId },
-            data: {
+            update: {
                 balance: { increment: amount },
                 totalEarnings: { increment: amount }
+            },
+            create: {
+                userId,
+                balance: amount,
+                totalEarnings: amount
             }
         });
     }

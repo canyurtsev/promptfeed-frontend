@@ -48,6 +48,20 @@ router.put('/me', authenticate, asyncHandler(userController.updateMe.bind(userCo
 router.get('/me/purchased-prompts', authenticate, asyncHandler(userController.getPurchasedPrompts.bind(userController)));
 
 /**
+ * @route   GET /api/users/me/wallet
+ * @desc    Get current user's wallet
+ * @access  Private
+ */
+router.get('/me/wallet', authenticate, asyncHandler(userController.getWallet.bind(userController)));
+
+/**
+ * @route   GET /api/users/me/earnings
+ * @desc    Get current user's earnings (creator sales)
+ * @access  Private
+ */
+router.get('/me/earnings', authenticate, asyncHandler(userController.getEarnings.bind(userController)));
+
+/**
  * @route   GET /api/users/:id
  * @desc    Get user by ID
  * @access  Public

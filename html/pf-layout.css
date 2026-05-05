@@ -1440,6 +1440,40 @@ img { display: block; max-width: 100%; }
   color: var(--pf-text-muted);
   margin: 0 0 12px;
 }
+.dash-mt-1 { margin-top: 12px; }
+.dash-mt-2 { margin-top: 16px; }
+
+.dash-earnings-summary {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--pf-border);
+}
+.dash-earnings-total {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dash-earnings-label {
+  font-size: 12px;
+  color: var(--pf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.dash-earnings-amount {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--pf-success);
+}
+.dash-earnings-list {
+  padding-top: 12px;
+}
+.dash-earnings-list-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
 
 .dash-rail-card {
   background: var(--pf-card);

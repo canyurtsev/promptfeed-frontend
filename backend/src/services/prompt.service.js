@@ -1,5 +1,6 @@
 import promptRepository from '../repositories/prompt.repository.js';
 import subscriptionRepository from '../repositories/subscription.repository.js';
+import walletRepository from '../repositories/wallet.repository.js';
 import { validate, createPromptSchema, updatePromptSchema } from '../utils/validators.js';
 import { ValidationError, NotFoundError, ForbiddenError } from '../middleware/error.middleware.js';
 import analytics from './analytics.service.js';
@@ -12,6 +13,9 @@ const DAILY_VOTE_LIMITS = {
     pro: 50,
     enterprise: -1 // unlimited
 };
+
+// ── Prompt Creation Limits ──
+const FREE_PROMPT_LIMIT = 3;
 
 /**
  * Compute time-decay hot score (HN-style).
@@ -46,9 +50,29 @@ class PromptService {
             throw new ValidationError('Validation failed', validation.errors);
         }
 
+        // Check user's subscription plan
+        const subscription = await subscriptionRepository.findByUserId(userId);
+        const plan = subscription?.plan?.toLowerCase() || 'free';
+
+        // Free plan limit check
+        if (plan === 'free') {
+            const promptCount = await promptRepository.count({ userId });
+            if (promptCount >= FREE_PROMPT_LIMIT) {
+                const error = new Error('Free plan limit reached. Upgrade to Pro to publish more prompts.');
+                error.statusCode = 403;
+                throw error;
+            }
+        }
+
+        // Auto-derive isPremium from price
+        const createData = { ...validation.data };
+        if (createData.price && parseFloat(createData.price) > 0) {
+            createData.isPremium = true;
+        }
+
         const prompt = await promptRepository.create({
             userId,
-            ...validation.data
+            ...createData
         });
 
         // Analytics: track prompt creation
@@ -131,7 +155,8 @@ class PromptService {
                 promptRepository.findUserVotesForPrompts(currentUserId, promptIds),
                 promptRepository.findUserSavesForPrompts(currentUserId, promptIds)
             ]);
-            votes.forEach(v => { userVotes[v.promptId] = v.value; });
+            // userVote is 1 if voted, 0 if not
+            votes.forEach(v => { userVotes[v.promptId] = 1; });
             saves.forEach(s => { userSaves[s.promptId] = true; });
         }
 
@@ -177,24 +202,28 @@ class PromptService {
         let userVote = 0;
         let isBookmarked = false;
         let isSaved = false;
+        let isPurchased = false;
 
         if (currentUserId) {
-            const [vote, bookmark, save] = await Promise.all([
+            const [vote, bookmark, save, purchase] = await Promise.all([
                 promptRepository.findVote(id, currentUserId),
                 promptRepository.findBookmark(id, currentUserId),
-                promptRepository.findSave(id, currentUserId)
+                promptRepository.findSave(id, currentUserId),
+                promptRepository.findPurchase(id, currentUserId)
             ]);
 
-            if (vote) userVote = vote.value;
+            if (vote) userVote = 1; // upvote-only: presence of record = voted
             if (bookmark) isBookmarked = true;
             if (save) isSaved = true;
+            if (purchase) isPurchased = true;
         }
 
         return serializeDecimals({
             ...prompt,
             userVote,
             isBookmarked,
-            isSaved
+            isSaved,
+            isPurchased
         });
     }
 
@@ -238,87 +267,63 @@ class PromptService {
     }
 
     /**
-     * Vote on a prompt (Reddit-style)
-     * Handles Upvote (1), Downvote (-1), and Toggle
+     * Toggle upvote on a prompt (upvote-only).
+     * POST → add vote (if not already voted)
+     * Calling upvote when already voted acts as a toggle (removes vote).
      */
-    async vote(promptId, userId, value) {
-        if (![1, -1].includes(value)) {
-            throw new ValidationError('Vote value must be 1 (up) or -1 (down)');
-        }
-
+    async upvote(promptId, userId) {
         const prompt = await promptRepository.findByIdSimple(promptId);
         if (!prompt) throw new NotFoundError('Prompt not found');
 
-        // ── Daily Vote Limit Check ──
-        const subscription = await subscriptionRepository.findByUserId(userId);
-        const plan = subscription?.plan || 'free';
-        const tier = plan === 'enterprise' ? 'enterprise' : (plan === 'pro' ? 'pro' : (subscription ? 'authenticated' : 'free'));
-        const dailyLimit = DAILY_VOTE_LIMITS[tier] ?? DAILY_VOTE_LIMITS.free;
-
-        // Check existing vote first — switching/toggling doesn't count as a new vote
+        // ── Daily Vote Limit Check (only for NEW votes) ──
         const existing = await promptRepository.findVote(promptId, userId);
 
-        if (!existing && dailyLimit !== -1) {
-            // Only enforce limit for NEW votes (not toggles/switches)
-            const todayVotes = await promptRepository.countUserVotesToday(userId);
-            if (todayVotes >= dailyLimit) {
-                throw new ValidationError(
-                    `Daily vote limit reached (${dailyLimit}/${dailyLimit}). ` +
-                    (tier === 'free' ? 'Upgrade to Pro for 50 votes/day.' : 'Limit resets in 24 hours.')
-                );
+        if (!existing) {
+            const subscription = await subscriptionRepository.findByUserId(userId);
+            const plan = subscription?.plan || 'free';
+            const tier = plan === 'enterprise' ? 'enterprise' : (plan === 'pro' ? 'pro' : (subscription ? 'authenticated' : 'free'));
+            const dailyLimit = DAILY_VOTE_LIMITS[tier] ?? DAILY_VOTE_LIMITS.free;
+
+            if (dailyLimit !== -1) {
+                const todayVotes = await promptRepository.countUserVotesToday(userId);
+                if (todayVotes >= dailyLimit) {
+                    throw new ValidationError(
+                        `Daily vote limit reached (${dailyLimit}/${dailyLimit}). ` +
+                        (tier === 'free' ? 'Upgrade to Pro for 50 votes/day.' : 'Limit resets in 24 hours.')
+                    );
+                }
             }
-        }
 
-        // Vote weight based on plan
-        const weight = (plan === 'pro' || plan === 'enterprise') ? 2 : 1;
+            // Vote weight based on plan
+            const weight = (plan === 'pro' || plan === 'enterprise') ? 2 : 1;
 
-        let scoreImpact = 0;
+            // Create vote — score = count of upvotes, so increment by weight
+            await promptRepository.createVote({ promptId, userId, weight });
+            const updatedPrompt = await promptRepository.updateScore(promptId, weight);
 
-        if (existing) {
-            if (existing.value === value) {
-                // Cancel current vote (Toggle)
-                scoreImpact = -(existing.value * existing.weight);
-                await promptRepository.deleteVote(existing.id);
-            } else {
-                // Switch vote (e.g. Up -> Down)
-                scoreImpact = (value * weight) - (existing.value * existing.weight);
-                await promptRepository.updateVote(existing.id, { value, weight });
-            }
+            analytics.voteSubmitted(userId, promptId, 1, updatedPrompt.score);
+
+            const votesUsedToday = await promptRepository.countUserVotesToday(userId);
+            const subscription2 = await subscriptionRepository.findByUserId(userId);
+            const plan2 = subscription2?.plan || 'free';
+            const tier2 = plan2 === 'enterprise' ? 'enterprise' : (plan2 === 'pro' ? 'pro' : (subscription2 ? 'authenticated' : 'free'));
+            const dailyLimit2 = DAILY_VOTE_LIMITS[tier2] ?? DAILY_VOTE_LIMITS.free;
+
+            return {
+                score: updatedPrompt.score,
+                vote: 1,
+                weightUsed: weight,
+                dailyVotesUsed: votesUsedToday,
+                dailyVoteLimit: dailyLimit2 === -1 ? 'unlimited' : dailyLimit2
+            };
         } else {
-            // New vote
-            scoreImpact = value * weight;
-            await promptRepository.createVote({ promptId, userId, value, weight });
+            // Already voted — toggle off (remove)
+            return this.removeUpvote(promptId, userId);
         }
-
-        // Update net score on prompt
-        const updatedPrompt = await promptRepository.updateScore(promptId, scoreImpact);
-
-        const finalVote = existing && existing.value === value ? 0 : value;
-
-        // Analytics: track vote
-        analytics.voteSubmitted(userId, promptId, finalVote, updatedPrompt.score);
-
-        // Return remaining daily votes
-        const votesUsedToday = await promptRepository.countUserVotesToday(userId);
-
-        return {
-            score: updatedPrompt.score,
-            vote: finalVote,
-            weightUsed: weight,
-            dailyVotesUsed: votesUsedToday,
-            dailyVoteLimit: dailyLimit === -1 ? 'unlimited' : dailyLimit
-        };
     }
 
     /**
-     * Upvote a prompt (convenience method)
-     */
-    async upvote(promptId, userId) {
-        return this.vote(promptId, userId, 1);
-    }
-
-    /**
-     * Remove upvote (convenience method)
+     * Remove upvote
      */
     async removeUpvote(promptId, userId) {
         const prompt = await promptRepository.findByIdSimple(promptId);
@@ -326,12 +331,12 @@ class PromptService {
 
         const existing = await promptRepository.findVote(promptId, userId);
         if (!existing) {
-            return { score: prompt.score, vote: 0, removed: false };
+            return { score: Math.max(0, prompt.score), vote: 0, removed: false };
         }
 
-        const scoreImpact = -(existing.value * existing.weight);
         await promptRepository.deleteVote(existing.id);
-        const updatedPrompt = await promptRepository.updateScore(promptId, scoreImpact);
+        // Decrement by weight, floor at 0
+        const updatedPrompt = await promptRepository.updateScore(promptId, -(existing.weight));
 
         analytics.voteSubmitted(userId, promptId, 0, updatedPrompt.score);
 
@@ -376,6 +381,84 @@ class PromptService {
 
         await promptRepository.deleteSave(promptId, userId);
         return { saved: false };
+    }
+
+    /**
+     * Mock Buy System
+     */
+    async buy(promptId, userId) {
+        const prompt = await promptRepository.findByIdSimple(promptId);
+        if (!prompt) throw new NotFoundError('Prompt not found');
+
+        const priceVal = parseFloat(prompt.price || 0);
+        const isPaid = prompt.isPremium || prompt.isPaid || priceVal > 0 || false;
+
+        if (!isPaid) {
+            return { success: true, message: 'Prompt is free', alreadyPurchased: false };
+        }
+
+        if (prompt.userId === userId) {
+            throw new ForbiddenError('You cannot buy your own prompt');
+        }
+
+        const existingPurchase = await promptRepository.findPurchase(promptId, userId);
+        if (existingPurchase) {
+            return { success: true, message: 'Already purchased', alreadyPurchased: true };
+        }
+
+        const purchase = await promptRepository.createPurchase({
+            userId,
+            promptId,
+            pricePaid: prompt.price || 0
+        });
+
+        await walletRepository.creditBalance(prompt.userId, priceVal);
+
+        analytics.promptPurchased && analytics.promptPurchased(userId, promptId, prompt.price);
+
+        return { success: true, message: 'Purchase successful', data: purchase };
+    }
+
+    /**
+     * Get marketplace prompts (isPremium = true)
+     * Returns title, price, author (username), score
+     */
+    async getMarketplace({ page = 1, limit = 24 } = {}) {
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const [prompts, total] = await Promise.all([
+            promptRepository.findAll({
+                where: { isPremium: true },
+                orderBy: { score: 'desc' },
+                skip,
+                take: parseInt(limit)
+            }),
+            promptRepository.count({ isPremium: true })
+        ]);
+
+        const result = prompts.map(p => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            price: p.price,
+            isPaid: true,
+            score: p.score,
+            category: p.category,
+            tags: typeof p.tags === 'string'
+                ? p.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean)
+                : (p.tags || []),
+            createdAt: p.createdAt,
+            user: p.user
+        }));
+
+        return serializeDecimals({
+            prompts: result,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total,
+                totalPages: Math.ceil(total / parseInt(limit))
+            }
+        });
     }
 }
 

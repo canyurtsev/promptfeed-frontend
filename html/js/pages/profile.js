@@ -90,6 +90,8 @@ async function initAuth() {
   loadMyPrompts();
   loadSavedPrompts();
   loadPurchasedPrompts();
+  loadWallet();
+  loadEarnings();
 }
 
 function renderNav() {
@@ -356,6 +358,99 @@ async function loadPurchasedPrompts() {
     el.innerHTML = `<div class="dash-empty">
       <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
       <h3>Unable to load purchased prompts</h3>
+      <p>${esc(err.message)}</p>
+    </div>`;
+}
+  }
+}
+
+async function loadWallet() {
+  if (!token) return;
+
+  try {
+    const r = await fetch(API + '/api/users/me/wallet', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const d = await r.json();
+
+    if (!d.success) throw new Error(d.message || d.error?.message || 'Failed to load wallet');
+
+    const balance = d.data?.balance ?? 0;
+    text('sum-wallet', formatMoney(balance));
+    text('wallet-display', formatMoney(balance));
+
+    const walletChip = document.querySelector('.pf-wallet-chip');
+    if (walletChip) {
+      walletChip.innerHTML = `<span class="material-symbols-outlined pf-wallet-chip__icon">toll</span><span>${formatMoney(balance)}</span>`;
+    }
+  } catch (err) {
+    console.error('Failed to load wallet:', err);
+  }
+}
+
+function earningsItemHTML(sale) {
+  return `
+    <div class="dash-prompt-item">
+      <a href="prompt-detail.html?id=${esc(sale.promptId)}" class="dash-prompt-item__link">
+        <span class="dash-prompt-item__title">${esc(sale.title)}</span>
+        <span class="dash-prompt-item__meta">
+          <span>${new Date(sale.createdAt).toLocaleDateString()}</span>
+        </span>
+      </a>
+      <div class="dash-prompt-item__price">${esc(formatMoney(sale.pricePaid))}</div>
+    </div>`;
+}
+
+async function loadEarnings() {
+  const el = document.getElementById('creator-content');
+  if (!el || !token) {
+    if (el) {
+      el.innerHTML = `<div class="dash-empty"><div class="dash-empty__icon"><span class="material-symbols-outlined">login</span></div><h3>Sign in to view earnings</h3></div>`;
+    }
+    return;
+  }
+
+  try {
+    const r = await fetch(API + '/api/users/me/earnings', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const d = await r.json();
+
+    if (!d.success) throw new Error(d.message || d.error?.message || 'Failed to load earnings');
+
+    const { totalEarnings, sales } = d.data || { totalEarnings: 0, sales: [] };
+
+    if (sales.length === 0) {
+      el.innerHTML = `
+        <div class="dash-earnings-summary">
+          <div class="dash-earnings-total">
+            <span class="dash-earnings-label">Total Earnings</span>
+            <span class="dash-earnings-amount">${formatMoney(totalEarnings)}</span>
+          </div>
+        </div>
+        <div class="dash-empty dash-mt-2">
+          <div class="dash-empty__icon"><span class="material-symbols-outlined">shopping_bag</span></div>
+          <h3>No sales yet</h3>
+          <p>List your prompts on the marketplace to start earning.</p>
+          <a href="create.html" class="pf-btn pf-btn--primary dash-mt-1">Create Prompt</a>
+        </div>`;
+    } else {
+      el.innerHTML = `
+        <div class="dash-earnings-summary">
+          <div class="dash-earnings-total">
+            <span class="dash-earnings-label">Total Earnings</span>
+            <span class="dash-earnings-amount">${formatMoney(totalEarnings)}</span>
+          </div>
+        </div>
+        <div class="dash-earnings-list">
+          <div class="dash-earnings-list-header">Recent Sales</div>
+          ${sales.map(earningsItemHTML).join('')}
+        </div>`;
+    }
+  } catch (err) {
+    el.innerHTML = `<div class="dash-empty">
+      <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
+      <h3>Unable to load earnings</h3>
       <p>${esc(err.message)}</p>
     </div>`;
   }
