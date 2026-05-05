@@ -1,6 +1,6 @@
 /* ================================================================
    profile.html - Controller
-   Honest user dashboard without mock data.
+   Dashboard-style user profile without mock data.
    ================================================================ */
 'use strict';
 
@@ -40,17 +40,17 @@ function formatPlan(plan) {
 }
 
 function formatMoney(value) {
-  if (value == null || value === '') return 'Unavailable';
+  if (value == null || value === '') return '$0.00';
   const n = Number(value);
   if (!Number.isFinite(n)) return String(value);
   return '$' + n.toFixed(2);
 }
 
 function formatDate(value) {
-  if (!value) return 'Joined date unavailable';
+  if (!value) return 'Unknown';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Joined date unavailable';
-  return 'Joined ' + date.toLocaleDateString();
+  if (Number.isNaN(date.getTime())) return 'Unknown';
+  return date.toLocaleDateString();
 }
 
 async function fetchCurrentUser() {
@@ -86,8 +86,10 @@ async function initAuth() {
   }
 
   renderNav();
-  renderProfile();
+  renderDashboard();
+  loadMyPrompts();
   loadSavedPrompts();
+  loadPurchasedPrompts();
 }
 
 function renderNav() {
@@ -129,45 +131,54 @@ function applyAvatar(id, avatarUrl, name) {
   avatar.textContent = initials(name);
 }
 
-function statHTML(label, value) {
-  const rendered = value == null || value === '' ? 'Unavailable' : String(value);
-  return `<div class="stat-box"><div class="stat-box__val">${esc(rendered)}</div><div class="stat-box__label">${esc(label)}</div></div>`;
-}
-
-function renderProfile() {
+function renderDashboard() {
   const c = currentUser;
   const plan = formatPlan(c.plan);
   const name = displayName(c);
-  const email = c.email || 'Email unavailable';
+  const email = c.email || 'No email';
   const wallet = c.walletBalance ?? c.balance;
 
-  text('prof-name', name);
-  text('prof-email', email);
-  text('prof-joined', formatDate(c.createdAt));
-  text('detail-username', c.username || 'Unavailable');
-  text('detail-email', c.email || 'Unavailable');
-  text('detail-plan', plan);
-  text('detail-wallet', formatMoney(wallet));
-  text('wallet-display', formatMoney(wallet));
+  // Header
+  text('dash-name', name);
+  text('dash-email', email);
+  applyAvatar('dash-avatar', c.avatarUrl, name);
 
-  applyAvatar('prof-avatar', c.avatarUrl, name);
+  // Summary cards
+  const promptsCount = c._count?.prompts ?? c.promptsCount ?? 0;
+  const savedCount = c._count?.savedPrompts ?? c.savedPromptsCount ?? 0;
 
-  const planBadge = document.getElementById('prof-plan');
-  if (planBadge) {
-    planBadge.textContent = plan;
-    planBadge.className = 'plan-badge ' + esc(plan);
+  text('sum-prompts', promptsCount);
+  text('sum-saved', savedCount);
+  text('sum-wallet', formatMoney(wallet));
+
+  // Plan badge
+  const planEl = document.getElementById('sum-plan');
+  if (planEl) {
+    if (plan === 'pro') {
+      planEl.className = 'dash-plan-badge dash-plan-badge--pro';
+      planEl.innerHTML = '<span class="material-symbols-outlined dash-icon-sm">workspace_premium</span>PRO';
+    } else {
+      planEl.className = 'dash-plan-badge';
+      planEl.innerHTML = '<span class="material-symbols-outlined dash-icon-sm">workspace_premium</span>FREE';
+    }
   }
 
-  document.getElementById('activity-grid').innerHTML = [
-    statHTML('Saved Prompts', c._count?.savedPrompts ?? c.savedPromptsCount),
-    statHTML('Published', c._count?.prompts ?? c.promptsCount),
-    statHTML('Votes Used', c.votesUsedToday),
-    statHTML('Playground Runs', c.playgroundRuns)
-  ].join('');
+  // Account details
+  text('detail-username', c.username || '—');
+  text('detail-joined', formatDate(c.createdAt));
+  text('wallet-display', formatMoney(wallet));
 
-  renderCreatorState(plan);
-  renderUpgradeState(plan);
+  // Upgrade box for free users
+  const upgradeBox = document.getElementById('upgrade-box');
+  if (upgradeBox) {
+    if (plan === 'free') {
+      upgradeBox.classList.remove('dash-hidden');
+    } else {
+      upgradeBox.classList.add('dash-hidden');
+    }
+  }
 
+  // Show loading complete
   document.getElementById('init-loading').hidden = true;
   document.getElementById('page-content').hidden = false;
 
@@ -176,56 +187,92 @@ function renderProfile() {
   }
 }
 
-function renderCreatorState(plan) {
-  const el = document.getElementById('creator-content');
-  if (!el) return;
+function myPromptItemHTML(p) {
+  const tags = Array.isArray(p.tags)
+    ? p.tags
+    : String(p.tags || '').split(',').map(t => t.trim()).filter(Boolean);
 
-  if (plan === 'creator') {
-    el.innerHTML = `
-      <div class="pf-empty-state pd-empty">
-        <div class="pf-empty-state__icon"><span class="material-symbols-outlined">query_stats</span></div>
-        <h3>Creator analytics unavailable</h3>
-        <p>This account has creator access, but no creator dashboard data was returned by the account API.</p>
-      </div>`;
-    return;
-  }
-
-  el.innerHTML = `
-    <div class="pf-empty-state pd-empty">
-      <div class="pf-empty-state__icon"><span class="material-symbols-outlined">lock</span></div>
-      <h3>Creator tools locked</h3>
-      <p>Creator sections require a creator plan.</p>
+  return `
+    <div class="dash-prompt-item">
+      <a href="prompt-detail.html?id=${esc(p.id)}" class="dash-prompt-item__link">
+        <span class="dash-prompt-item__title">${esc(p.title)}</span>
+        <span class="dash-prompt-item__meta">
+          <span>${new Date(p.createdAt).toLocaleDateString()}</span>
+          ${tags.slice(0, 2).map(tag => `<span class="pf-tag">${esc(tag)}</span>`).join('')}
+        </span>
+      </a>
+      <div class="dash-prompt-item__score">
+        <span class="material-symbols-outlined">arrow_upward</span>
+        ${p.score || 0}
+      </div>
     </div>`;
 }
 
-function renderUpgradeState(plan) {
-  if (plan === 'free') {
-    document.getElementById('upgrade-box')?.classList.remove('pf-ad-banner--hidden');
+async function loadMyPrompts() {
+  const el = document.getElementById('my-prompts-content');
+  if (!el || !token) {
+    if (el) {
+      el.innerHTML = `<div class="dash-empty"><div class="dash-empty__icon"><span class="material-symbols-outlined">login</span></div><h3>Sign in to view your prompts</h3></div>`;
+    }
+    return;
+  }
+
+  try {
+    const r = await fetch(API + '/api/users/me/prompts?limit=5', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const d = await r.json();
+
+    if (!d.success) throw new Error(d.message || d.error?.message || 'Failed to load prompts');
+
+    const items = d.data?.prompts || [];
+    el.innerHTML = items.length
+      ? items.map(myPromptItemHTML).join('')
+      : `<div class="dash-empty">
+          <div class="dash-empty__icon"><span class="material-symbols-outlined">edit_note</span></div>
+          <h3>No prompts yet</h3>
+          <p>Create your first prompt to share with the community.</p>
+          <a href="create.html" class="pf-btn pf-btn--primary dash-mt-1">Create Prompt</a>
+        </div>`;
+  } catch (err) {
+    el.innerHTML = `<div class="dash-empty">
+      <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
+      <h3>Unable to load prompts</h3>
+      <p>${esc(err.message)}</p>
+    </div>`;
   }
 }
 
-function savedPromptHTML(item) {
+function savedPromptItemHTML(item) {
   const prompt = item.prompt || item;
-  const author = prompt.user?.username || prompt.user?.fullName || 'unknown';
   const tags = Array.isArray(prompt.tags)
     ? prompt.tags
     : String(prompt.tags || '').split(',').map(t => t.trim()).filter(Boolean);
 
   return `
-    <a href="prompt-detail.html?id=${esc(prompt.id)}" class="pf-topic-row pf-topic-row--clickable">
-      <div class="pf-topic-row__body">
-        <div class="pf-topic-row__title">${esc(prompt.title)}</div>
-        <div class="pf-topic-row__meta">
-          <span>by <strong>${esc(author)}</strong></span>
-          ${tags.slice(0, 3).map(tag => `<span class="pf-tag">${esc(tag)}</span>`).join('')}
-        </div>
+    <div class="dash-prompt-item">
+      <a href="prompt-detail.html?id=${esc(prompt.id)}" class="dash-prompt-item__link">
+        <span class="dash-prompt-item__title">${esc(prompt.title)}</span>
+        <span class="dash-prompt-item__meta">
+          <span>by ${esc(prompt.user?.username || 'unknown')}</span>
+          ${tags.slice(0, 2).map(tag => `<span class="pf-tag">${esc(tag)}</span>`).join('')}
+        </span>
+      </a>
+      <div class="dash-prompt-item__score">
+        <span class="material-symbols-outlined">arrow_upward</span>
+        ${prompt.score || 0}
       </div>
-    </a>`;
+    </div>`;
 }
 
 async function loadSavedPrompts() {
   const el = document.getElementById('saved-prompts-content');
-  if (!el || !token) return;
+  if (!el || !token) {
+    if (el) {
+      el.innerHTML = `<div class="dash-empty"><div class="dash-empty__icon"><span class="material-symbols-outlined">login</span></div><h3>Sign in to view saved prompts</h3></div>`;
+    }
+    return;
+  }
 
   try {
     const r = await fetch(API + '/api/users/me/saved-prompts', {
@@ -237,16 +284,78 @@ async function loadSavedPrompts() {
 
     const items = d.data || [];
     el.innerHTML = items.length
-      ? items.map(savedPromptHTML).join('')
-      : `<div class="pf-empty-state pd-empty">
-          <div class="pf-empty-state__icon"><span class="material-symbols-outlined">bookmark_border</span></div>
+      ? items.map(savedPromptItemHTML).join('')
+      : `<div class="dash-empty">
+          <div class="dash-empty__icon"><span class="material-symbols-outlined">bookmark_border</span></div>
           <h3>No saved prompts</h3>
-          <p>Prompts you save from the community or detail pages will appear here.</p>
+          <p>Save prompts from the community to view them here.</p>
+          <a href="community.html" class="pf-btn pf-btn--ghost dash-mt-1">Browse Community</a>
         </div>`;
   } catch (err) {
-    el.innerHTML = `<div class="pf-empty-state pd-empty">
-      <div class="pf-empty-state__icon"><span class="material-symbols-outlined">warning</span></div>
-      <h3>Saved prompts unavailable</h3>
+    el.innerHTML = `<div class="dash-empty">
+      <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
+      <h3>Unable to load saved prompts</h3>
+      <p>${esc(err.message)}</p>
+    </div>`;
+  }
+}
+
+function purchasedPromptItemHTML(p) {
+  const tags = Array.isArray(p.tags)
+    ? p.tags
+    : String(p.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+
+  const price = p.price != null ? '$' + Number(p.price).toFixed(2) : '$0.00';
+
+  return `
+    <div class="dash-prompt-item">
+      <a href="prompt-detail.html?id=${esc(p.id)}" class="dash-prompt-item__link">
+        <span class="dash-prompt-item__title">${esc(p.title)}</span>
+        <span class="dash-prompt-item__meta">
+          <span>${new Date(p.createdAt).toLocaleDateString()}</span>
+          ${tags.slice(0, 2).map(tag => `<span class="pf-tag">${esc(tag)}</span>`).join('')}
+        </span>
+      </a>
+      <div class="dash-prompt-item__right">
+        <span class="dash-prompt-item__price">${esc(price)}</span>
+        <div class="dash-prompt-item__score">
+          <span class="material-symbols-outlined">arrow_upward</span>
+          ${p.score || 0}
+        </div>
+      </div>
+    </div>`;
+}
+
+async function loadPurchasedPrompts() {
+  const el = document.getElementById('purchased-prompts-content');
+  if (!el || !token) {
+    if (el) {
+      el.innerHTML = `<div class="dash-empty"><div class="dash-empty__icon"><span class="material-symbols-outlined">login</span></div><h3>Sign in to view purchased prompts</h3></div>`;
+    }
+    return;
+  }
+
+  try {
+    const r = await fetch(API + '/api/users/me/purchased-prompts', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const d = await r.json();
+
+    if (!d.success) throw new Error(d.message || d.error?.message || 'Failed to load purchased prompts');
+
+    const items = d.data?.prompts || [];
+    el.innerHTML = items.length
+      ? items.map(purchasedPromptItemHTML).join('')
+      : `<div class="dash-empty">
+          <div class="dash-empty__icon"><span class="material-symbols-outlined">shopping_cart</span></div>
+          <h3>You haven't purchased any prompts yet</h3>
+          <p>Browse the marketplace to find quality prompts.</p>
+          <a href="marketplace.html" class="pf-btn pf-btn--primary dash-mt-1">Browse Marketplace</a>
+        </div>`;
+  } catch (err) {
+    el.innerHTML = `<div class="dash-empty">
+      <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
+      <h3>Unable to load purchased prompts</h3>
       <p>${esc(err.message)}</p>
     </div>`;
   }

@@ -7,7 +7,8 @@ class UserRepository {
             include: {
                 _count: {
                     select: { prompts: true, skills: true }
-                }
+                },
+                subscription: true
             }
         });
     }
@@ -35,6 +36,12 @@ class UserRepository {
                 ownerships: {
                     select: {
                         productId: true
+                    }
+                },
+                subscription: {
+                    select: {
+                        plan: true,
+                        status: true
                     }
                 },
                 createdAt: true,
@@ -127,6 +134,33 @@ class UserRepository {
                     avatarUrl: row.avatarUrl
                 }
             }
+        }));
+    }
+
+    async findPurchasedPrompts(userId) {
+        const rows = await prisma.$queryRaw`
+            SELECT
+                pp.id AS "purchaseId",
+                pp."createdAt" AS "purchasedAt",
+                pp."pricePaid",
+                p.id,
+                p.title,
+                p.tags,
+                p."createdAt",
+                p.score
+            FROM "PromptPurchase" pp
+            JOIN "Prompt" p ON p.id = pp."promptId"
+            WHERE pp."userId" = ${userId}
+            ORDER BY pp."createdAt" DESC
+        `;
+
+        return rows.map(row => ({
+            id: row.id,
+            title: row.title,
+            tags: typeof row.tags === 'string' ? row.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+            createdAt: row.createdAt,
+            score: row.score,
+            price: row.pricePaid
         }));
     }
 }

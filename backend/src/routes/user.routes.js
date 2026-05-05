@@ -27,11 +27,25 @@ router.get('/me/bookmarks', authenticate, asyncHandler(userController.getBookmar
 router.get('/me/saved-prompts', authenticate, asyncHandler(userController.getSavedPrompts.bind(userController)));
 
 /**
+ * @route   GET /api/users/me/prompts
+ * @desc    Get current user's created prompts
+ * @access  Private
+ */
+router.get('/me/prompts', authenticate, asyncHandler(userController.getMyPrompts.bind(userController)));
+
+/**
  * @route   PUT /api/users/me
  * @desc    Update current user
  * @access  Private
  */
 router.put('/me', authenticate, asyncHandler(userController.updateMe.bind(userController)));
+
+/**
+ * @route   GET /api/users/me/purchased-prompts
+ * @desc    Get current user's purchased prompts
+ * @access  Private
+ */
+router.get('/me/purchased-prompts', authenticate, asyncHandler(userController.getPurchasedPrompts.bind(userController)));
 
 /**
  * @route   GET /api/users/:id
