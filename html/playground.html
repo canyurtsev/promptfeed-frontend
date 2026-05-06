@@ -1,195 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PromptFeed — Prompt Testing Lab</title>
-<meta name="description" content="Test, measure, and optimize AI prompts in the Prompt Testing Lab."/>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Playground — PromptFeed</title>
+<meta name="description" content="Test and run AI prompts."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 <link rel="stylesheet" href="pf-layout.css"/>
-<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <style>
-/* Playground-specific overrides */
-.pf-lab-layout {
-  max-width: var(--pf-max-w);
-  margin: 0 auto;
-  padding: 20px 16px;
-  display: grid;
-  grid-template-columns: 320px 1fr 280px;
-  gap: 20px;
-  align-items: start;
-}
-@media (max-width: 1100px) {
-  .pf-lab-layout { grid-template-columns: 300px 1fr; }
-  .pf-sidebar-right { display: none; }
-}
-@media (max-width: 768px) {
-  .pf-lab-layout { grid-template-columns: 1fr; }
-}
-
-.pf-editor-box {
-  background: var(--pf-card);
-  border: 1px solid var(--pf-border);
-  border-radius: var(--pf-radius-lg);
-  padding: 16px;
-  margin-bottom: 12px;
-}
-.pf-editor-title {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--pf-text-secondary);
-  letter-spacing: 0.5px;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.pf-textarea {
-  width: 100%;
-  height: 220px;
-  background: var(--pf-bg);
-  border: 1px solid var(--pf-border);
-  border-radius: var(--pf-radius);
-  color: var(--pf-text-primary);
-  font-family: var(--pf-font-mono);
-  font-size: 13px;
-  padding: 12px;
-  resize: vertical;
-  margin-bottom: 12px;
-  line-height: 1.5;
-}
-.pf-textarea:focus {
-  border-color: var(--pf-accent);
-  outline: none;
-}
-
-.pf-select {
-  width: 100%;
-  background: var(--pf-bg);
-  border: 1px solid var(--pf-border);
-  color: var(--pf-text-primary);
-  padding: 8px 12px;
-  border-radius: var(--pf-radius);
-  font-size: 13px;
-  margin-bottom: 16px;
-}
-.pf-select:focus { outline: none; border-color: var(--pf-accent); }
-
-.pf-var-row { margin-bottom: 10px; }
-.pf-var-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--pf-accent);
-  margin-bottom: 4px;
-  font-family: var(--pf-font-mono);
-}
-.pf-var-input {
-  width: 100%;
-  background: var(--pf-bg);
-  border: 1px solid var(--pf-border);
-  color: var(--pf-text-primary);
-  padding: 8px 12px;
-  border-radius: var(--pf-radius);
-  font-size: 13px;
-}
-.pf-var-input:focus { border-color: var(--pf-accent); outline: none; }
-
-.pf-output-container {
-  background: var(--pf-card);
-  border: 1px solid var(--pf-border);
-  border-radius: var(--pf-radius-lg);
-  display: flex;
-  flex-direction: column;
-  min-height: 600px;
-}
-.pf-output-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--pf-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.pf-output-body {
-  flex: 1;
-  padding: 16px;
-  font-family: var(--pf-font-mono);
-  font-size: 13px;
-  white-space: pre-wrap;
-  color: var(--pf-text-primary);
-  overflow-y: auto;
-  line-height: 1.6;
-}
-.pf-empty-output {
-  color: var(--pf-text-muted);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 12px;
-}
-
-.pf-metric-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--pf-border);
-  font-size: 12px;
-}
-.pf-metric-row:last-child { border-bottom: none; }
-.pf-metric-label { color: var(--pf-text-muted); }
-.pf-metric-value { color: var(--pf-text-primary); font-family: var(--pf-font-mono); font-weight: 600; }
-
-.pf-error-box {
-  background: rgba(248, 81, 73, 0.1);
-  border: 1px solid var(--pf-danger);
-  border-radius: var(--pf-radius);
-  padding: 16px;
-  margin-bottom: 16px;
-}
-.pf-error-title { color: var(--pf-danger); font-weight: 700; font-size: 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-.pf-error-msg { color: var(--pf-text-primary); font-size: 13px; margin-bottom: 10px; }
-.pf-error-reqid { font-size: 11px; color: var(--pf-text-muted); font-family: var(--pf-font-mono); }
-
-.pf-rating-area {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--pf-border);
-}
-.pf-star { cursor: pointer; color: var(--pf-text-muted); font-size: 20px; transition: color 0.15s; }
-.pf-star:hover, .pf-star.active { color: var(--pf-warning); }
-
+.play-container { background:var(--pf-card); border:1px solid var(--pf-border); border-radius:var(--pf-radius-lg); padding:20px; display:flex; flex-direction:column; gap:16px; }
+.play-title { font-size:18px; font-weight:700; color:var(--pf-text-primary); }
+.play-input-wrapper { display:flex; flex-direction:column; gap:8px; }
+.play-label { font-size:12px; font-weight:600; color:var(--pf-text-secondary); text-transform:uppercase; letter-spacing:0.5px; }
+.play-textarea { width:100%; height:150px; background:var(--pf-bg); border:1px solid var(--pf-border); border-radius:var(--pf-radius); padding:12px; font-family:var(--pf-font-mono); font-size:13px; color:var(--pf-text-primary); resize:vertical; outline:none; transition:border-color 0.15s; }
+.play-textarea:focus { border-color:var(--pf-accent); }
+.play-actions { display:flex; justify-content:flex-end; }
+.play-output-wrapper { margin-top:20px; display:flex; flex-direction:column; gap:8px; }
+.play-output { background:var(--pf-bg); border:1px solid var(--pf-border); border-radius:var(--pf-radius); padding:16px; min-height:100px; font-size:14px; color:var(--pf-text-primary); white-space:pre-wrap; }
+.exec-item { padding:10px; border-bottom:1px solid var(--pf-border); cursor:pointer; transition:background 0.15s; }
+.exec-item:hover { background:var(--pf-surface); }
+.exec-title { font-size:13px; font-weight:600; color:var(--pf-text-primary); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.exec-meta { font-size:11px; color:var(--pf-text-muted); }
+.loading { opacity: 0.5; pointer-events: none; }
 </style>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 </head>
 <body>
 
-<!-- Sign-in Gate Modal -->
-<div id="pf-gate" class="pf-gate-overlay">
-  <div class="pf-gate-modal">
-    <div class="pf-gate-modal__icon">🔒</div>
-    <div class="pf-gate-modal__title">Sign in required</div>
-    <div class="pf-gate-modal__desc" id="gate-desc">You need an account to run prompts in the Playground.</div>
-    <div class="pf-gate-modal__actions">
-      <button id="gate-cancel-btn" class="pf-btn pf-btn--ghost">Cancel</button>
-      <button id="gate-signin-btn" class="pf-btn pf-btn--primary">Sign In</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOP NAV -->
 <header class="pf-topnav">
   <div class="pf-topnav__inner">
     <a href="index.html" class="pf-topnav__logo">
       <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
     </a>
-    <nav class="pf-topnav__nav" aria-label="Main navigation">
+    <nav class="pf-topnav__nav" aria-label="Main">
       <a href="index.html" class="pf-topnav__nav-link">News</a>
       <a href="community.html" class="pf-topnav__nav-link">Community</a>
       <a href="create.html" class="pf-topnav__nav-link">Create</a>
@@ -203,110 +47,47 @@
   </div>
 </header>
 
-<div class="pf-lab-layout">
-
-  <!-- LEFT: SETUP -->
-  <aside>
-    <div class="pf-editor-box">
-      <div class="pf-editor-title">
-        <span class="material-symbols-outlined" style="font-size:16px">code</span>
-        Prompt Setup
-      </div>
-      
-      <div id="prompt-context" style="display:none; margin-bottom:12px; padding:10px; background:var(--pf-surface); border-radius:var(--pf-radius); border:1px solid var(--pf-border);">
-        <div style="font-size:11px; color:var(--pf-text-muted); text-transform:uppercase; font-weight:700; margin-bottom:4px;">Loaded Prompt</div>
-        <div id="prompt-title" style="font-size:13px; font-weight:600; color:var(--pf-accent);"></div>
-      </div>
-
-      <label style="font-size:12px; font-weight:600; color:var(--pf-text-secondary); margin-bottom:6px; display:block;">Model</label>
-      <select id="model-select" class="pf-select">
-        <option value="gpt-4o">GPT-4o (OpenAI)</option>
-        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Anthropic)</option>
-        <option value="gemini-1-5-pro">Gemini 1.5 Pro (Google)</option>
-      </select>
-
-      <label style="font-size:12px; font-weight:600; color:var(--pf-text-secondary); margin-bottom:6px; display:block;">Prompt Template</label>
-      <textarea id="prompt-input" class="pf-textarea" placeholder="Enter your prompt here... Use {{variable_name}} to define dynamic inputs."></textarea>
-      
-      <div id="variables-container" style="display:none;">
-        <div class="pf-editor-title" style="margin-top:16px;">
-          <span class="material-symbols-outlined" style="font-size:16px">data_object</span>
-          Variables
-        </div>
-        <div id="variables-list"></div>
-      </div>
-
+<div class="pf-layout">
+  <!-- LEFT SIDEBAR: Recent Executions -->
+  <aside class="pf-sidebar-left" aria-label="Recent Executions">
+    <div class="pf-sidebar-label">Recent Runs</div>
+    <div id="executions-list" style="margin-top:10px">
+      <!-- Injected via JS -->
     </div>
   </aside>
 
-  <!-- CENTER: OUTPUT -->
-  <main>
-    <div class="pf-output-container">
-      <div class="pf-output-header">
-        <div style="font-weight:600; font-size:14px; display:flex; align-items:center; gap:6px;">
-          <span class="material-symbols-outlined" style="font-size:18px; color:var(--pf-success)">terminal</span>
-          Execution Output
-        </div>
-        <button id="run-btn" class="pf-btn pf-btn--primary">
-          <span class="material-symbols-outlined" style="font-size:16px">play_arrow</span> Run
-        </button>
+  <!-- CENTER: Playground Area -->
+  <main class="pf-feed" role="main">
+    <div style="margin-bottom:16px">
+      <h1 style="font-size:22px;font-weight:800;color:var(--pf-text-primary);margin-bottom:4px">Playground</h1>
+      <p style="font-size:13px;color:var(--pf-text-secondary)">Test and execute prompts with mocked backend response.</p>
+    </div>
+
+    <div class="play-container">
+      <div id="prompt-info" style="display:none;">
+        <div class="play-title" id="prompt-title">Loading prompt...</div>
       </div>
       
-      <div id="output-area" class="pf-output-body">
-        <div class="pf-empty-output">
-          <span class="material-symbols-outlined" style="font-size:48px; opacity:0.5;">science</span>
-          <span>Enter a prompt and hit Run to see the output.</span>
-        </div>
+      <div class="play-input-wrapper">
+        <label class="play-label" for="prompt-input">Input Variables / Content</label>
+        <textarea id="prompt-input" class="play-textarea" placeholder="Enter input text here..."></textarea>
+      </div>
+
+      <div class="play-actions">
+        <button id="btn-run" class="pf-btn pf-btn--primary">
+          <span class="material-symbols-outlined" style="font-size:18px;margin-right:4px">play_arrow</span> Run
+        </button>
+      </div>
+
+      <div class="play-output-wrapper">
+        <label class="play-label">Output</label>
+        <div id="prompt-output" class="play-output">Output will appear here...</div>
       </div>
     </div>
   </main>
 
-  <!-- RIGHT: METRICS & HISTORY -->
   <aside class="pf-sidebar-right">
-    
-    <div class="pf-editor-box">
-      <div class="pf-editor-title">
-        <span class="material-symbols-outlined" style="font-size:16px">analytics</span>
-        Run Metrics
-      </div>
-      <div id="metrics-area">
-        <div class="pf-metric-row"><span class="pf-metric-label">Status</span><span class="pf-metric-value" id="m-status">—</span></div>
-        <div class="pf-metric-row"><span class="pf-metric-label">Model</span><span class="pf-metric-value" id="m-model">—</span></div>
-        <div class="pf-metric-row"><span class="pf-metric-label">Latency</span><span class="pf-metric-value" id="m-latency">—</span></div>
-        <div class="pf-metric-row"><span class="pf-metric-label">Tokens (In/Out)</span><span class="pf-metric-value" id="m-tokens">—</span></div>
-        <div class="pf-metric-row"><span class="pf-metric-label">Est. Cost</span><span class="pf-metric-value" id="m-cost">—</span></div>
-        <div class="pf-metric-row"><span class="pf-metric-label">Request ID</span><span class="pf-metric-value" id="m-reqid" style="font-size:10px; color:var(--pf-text-muted)">—</span></div>
-      </div>
-
-      <div class="pf-rating-area" style="display:none;" id="rating-area">
-        <span style="font-size:12px; font-weight:600; color:var(--pf-text-secondary);">Rate Result:</span>
-        <div style="display:flex;">
-          <span class="material-symbols-outlined pf-star" data-val="1">star</span>
-          <span class="material-symbols-outlined pf-star" data-val="2">star</span>
-          <span class="material-symbols-outlined pf-star" data-val="3">star</span>
-          <span class="material-symbols-outlined pf-star" data-val="4">star</span>
-          <span class="material-symbols-outlined pf-star" data-val="5">star</span>
-        </div>
-      </div>
-      <div id="rating-msg" style="font-size:11px; color:var(--pf-text-muted); margin-top:6px; display:none;">Rating persistence coming soon</div>
-
-      <button class="pf-btn pf-btn--ghost" style="width:100%; margin-top:16px; opacity:0.5; cursor:not-allowed;" disabled title="Coming soon">
-        Save Benchmark — Coming soon
-      </button>
-    </div>
-
-    <div class="pf-editor-box">
-      <div class="pf-editor-title">
-        <span class="material-symbols-outlined" style="font-size:16px">history</span>
-        Recent Runs
-      </div>
-      <div style="font-size:12px; color:var(--pf-text-muted); text-align:center; padding:20px 0;">
-        Run history coming soon.
-      </div>
-    </div>
-
   </aside>
-
 </div>
 
 <script src="js/language-toggle.js" defer></script>

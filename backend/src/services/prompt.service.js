@@ -460,6 +460,37 @@ class PromptService {
             }
         });
     }
+
+    /**
+     * Run a prompt (Mock Execution)
+     */
+    async runPrompt(promptId, userId, input) {
+        const prompt = await promptRepository.findByIdSimple(promptId);
+        if (!prompt) throw new NotFoundError('Prompt not found');
+
+        const isPaid = prompt.isPremium || prompt.price > 0;
+        
+        if (isPaid && prompt.userId !== userId) {
+            const purchase = await promptRepository.findPurchase(promptId, userId);
+            if (!purchase) {
+                throw new ForbiddenError('You must purchase this prompt to run it.');
+            }
+        }
+
+        // Mock output logic
+        const safeInput = typeof input === 'string' ? input : JSON.stringify(input);
+        const first100 = safeInput.substring(0, 100);
+        const output = `AI response for: ${first100}`;
+
+        const execution = await promptRepository.createExecution({
+            promptId,
+            userId,
+            input: safeInput,
+            output
+        });
+
+        return execution;
+    }
 }
 
 export default new PromptService();

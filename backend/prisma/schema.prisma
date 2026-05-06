@@ -47,7 +47,9 @@ model User {
   aiLogs            AILog[]
   ownerships        Ownership[]
   oauthAccounts     OAuthAccount[]
-  oauthStates      OAuthState[]
+  oauthStates       OAuthState[]
+  promptPurchases   PromptPurchase[]
+  promptExecutions  PromptExecution[]
 }
 
 // ============================================
@@ -117,6 +119,7 @@ model Prompt {
   votes             PromptVote[]
   bookmarks         PromptBookmark[]
   saves             PromptSave[]
+  purchases         PromptPurchase[]
   bountySubmissions BountySubmission[]
   comments          Comment[]
   versions          PromptVersion[]
@@ -126,6 +129,7 @@ model Prompt {
   skillPrompts      SkillPrompt[]
   useCases          String?
   exampleOutput     String?
+  executions        PromptExecution[]
 }
 
 // ============================================
@@ -263,7 +267,6 @@ model PromptVote {
   id        String   @id @default(uuid())
   promptId  String
   userId    String
-  value     Int // 1 for upvote, -1 for downvote
   weight    Int      @default(1) // For freemium weighting
   createdAt DateTime @default(now())
 
@@ -521,4 +524,38 @@ model Ownership {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+}
+
+// ============================================
+// PROMPT PURCHASE MODEL (Mock Buy System)
+// ============================================
+model PromptPurchase {
+  id        String   @id @default(uuid())
+  userId    String
+  promptId  String
+  pricePaid Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, promptId])
+}
+
+// ============================================
+// PROMPT EXECUTION MODEL
+// ============================================
+model PromptExecution {
+  id        String   @id @default(uuid())
+  userId    String
+  promptId  String
+  input     String
+  output    String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([promptId])
 }

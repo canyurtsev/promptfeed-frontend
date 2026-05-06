@@ -12,6 +12,15 @@ class PromptController {
     }
 
     /**
+     * Get marketplace prompts (isPremium = true)
+     */
+    async getMarketplace(req, res) {
+        const { page, limit } = req.query;
+        const result = await promptService.getMarketplace({ page, limit });
+        res.json({ success: true, data: result });
+    }
+
+    /**
      * Get prompt by ID with user state (vote, bookmark)
      */
     async getById(req, res) {
@@ -48,17 +57,6 @@ class PromptController {
         const userId = req.user.id;
         const result = await promptService.delete(id, userId);
         res.json({ success: true, ...result });
-    }
-
-    /**
-     * Vote on prompt
-     */
-    async vote(req, res) {
-        const { id } = req.params;
-        const userId = req.user.id;
-        const { value } = req.body;
-        const result = await promptService.vote(id, userId, value);
-        res.json({ success: true, data: result });
     }
 
     /**
@@ -108,6 +106,28 @@ class PromptController {
         const { id } = req.params;
         const userId = req.user.id;
         const result = await promptService.unsave(id, userId);
+        res.json({ success: true, data: result });
+    }
+
+    /**
+     * Buy prompt
+     */
+    async buy(req, res) {
+        const { id } = req.params;
+        const userId = req.user.id;
+        const result = await promptService.buy(id, userId);
+        res.json(result);
+    }
+
+    /**
+     * Run prompt
+     */
+    async run(req, res) {
+        const { id } = req.params;
+        const userId = req.user.id;
+        const { input } = req.body;
+        
+        const result = await promptService.runPrompt(id, userId, input);
         res.json({ success: true, data: result });
     }
 }

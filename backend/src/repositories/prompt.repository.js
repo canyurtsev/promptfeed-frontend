@@ -114,9 +114,11 @@ class PromptRepository {
     }
 
     async updateScore(id, scoreImpact) {
+        const prompt = await prisma.prompt.findUnique({ where: { id }, select: { score: true } });
+        const newScore = Math.max(0, (prompt?.score || 0) + scoreImpact);
         return await prisma.prompt.update({
             where: { id },
-            data: { score: { increment: scoreImpact } }
+            data: { score: newScore }
         });
     }
 
@@ -156,7 +158,7 @@ class PromptRepository {
                 userId,
                 promptId: { in: promptIds }
             },
-            select: { promptId: true, value: true }
+            select: { promptId: true }
         });
     }
 
@@ -286,6 +288,36 @@ class PromptRepository {
                 }
             }
         }));
+    }
+
+    // ── Purchase Operations (Mock) ──
+
+    async findPurchase(promptId, userId) {
+        return await prisma.promptPurchase.findUnique({
+            where: { userId_promptId: { promptId, userId } }
+        });
+    }
+
+    async createPurchase(data) {
+        return await prisma.promptPurchase.create({ data });
+    }
+
+    // ── Execution Operations ──
+
+    async createExecution(data) {
+        return await prisma.promptExecution.create({ data });
+    }
+
+    async findExecutionsByUser(userId) {
+        return await prisma.promptExecution.findMany({
+            where: { userId },
+            include: {
+                prompt: {
+                    select: { id: true, title: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
     }
 }
 

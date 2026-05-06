@@ -1,6 +1,7 @@
 import userRepository from '../repositories/user.repository.js';
 import promptRepository from '../repositories/prompt.repository.js';
 import walletRepository from '../repositories/wallet.repository.js';
+import prisma from '../config/database.js';
 
 class UserController {
     async getMe(req, res, next) {
@@ -146,7 +147,6 @@ class UserController {
 
     async getEarnings(req, res, next) {
         try {
-            const prisma = req.app.locals.prisma;
             const purchases = await prisma.$queryRaw`
                 SELECT
                     pp.id AS "purchaseId",
@@ -176,6 +176,15 @@ class UserController {
                     sales
                 }
             });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getExecutions(req, res, next) {
+        try {
+            const executions = await promptRepository.findExecutionsByUser(req.user.id);
+            res.json({ success: true, data: executions });
         } catch (error) {
             next(error);
         }

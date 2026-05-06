@@ -48,6 +48,13 @@ router.put('/me', authenticate, asyncHandler(userController.updateMe.bind(userCo
 router.get('/me/purchased-prompts', authenticate, asyncHandler(userController.getPurchasedPrompts.bind(userController)));
 
 /**
+ * @route   GET /api/users/me/executions
+ * @desc    Get current user's prompt executions
+ * @access  Private
+ */
+router.get('/me/executions', authenticate, asyncHandler(userController.getExecutions.bind(userController)));
+
+/**
  * @route   GET /api/users/me/wallet
  * @desc    Get current user's wallet
  * @access  Private

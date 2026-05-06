@@ -31,6 +31,13 @@ router.post('/', authenticate, asyncHandler(promptController.create.bind(promptC
 router.post('/score', asyncHandler(promptScoreController.scorePrompt.bind(promptScoreController)));
 
 /**
+ * @route   GET /api/prompts/marketplace
+ * @desc    List paid prompts (isPremium = true) for the marketplace
+ * @access  Public
+ */
+router.get('/marketplace', asyncHandler(promptController.getMarketplace.bind(promptController)));
+
+/**
  * @route   GET /api/prompts/:id
  * @desc    Get prompt details
  * @access  Public
@@ -50,13 +57,6 @@ router.put('/:id', authenticate, asyncHandler(promptController.update.bind(promp
  * @access  Private (owner only)
  */
 router.delete('/:id', authenticate, asyncHandler(promptController.delete.bind(promptController)));
-
-/**
- * @route   POST /api/prompts/:id/vote
- * @desc    Vote on a prompt (Up/Down)
- * @access  Private
- */
-router.post('/:id/vote', authenticate, asyncHandler(promptController.vote.bind(promptController)));
 
 /**
  * @route   POST /api/prompts/:id/upvote
@@ -92,6 +92,20 @@ router.post('/:id/save', authenticate, asyncHandler(promptController.save.bind(p
  * @access  Private
  */
 router.delete('/:id/save', authenticate, asyncHandler(promptController.unsave.bind(promptController)));
+
+/**
+ * @route   POST /api/prompts/:id/buy
+ * @desc    Buy a prompt
+ * @access  Private
+ */
+router.post('/:id/buy', authenticate, asyncHandler(promptController.buy.bind(promptController)));
+
+/**
+ * @route   POST /api/prompts/:id/run
+ * @desc    Run a prompt
+ * @access  Private
+ */
+router.post('/:id/run', authenticate, asyncHandler(promptController.run.bind(promptController)));
 
 // ── Comment Endpoints ──
 
