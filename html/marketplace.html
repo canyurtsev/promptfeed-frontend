@@ -24,6 +24,10 @@
 .mk-metrics{display:flex;gap:12px;font-size:11px;color:var(--pf-text-muted);flex-wrap:wrap}
 .mk-metric{display:flex;align-items:center;gap:3px}
 .mk-metric span{color:var(--pf-text-secondary);font-weight:600}
+.pf-pagination-btn{background:var(--pf-surface);border:1px solid var(--pf-border);color:var(--pf-text-primary);padding:6px 12px;border-radius:var(--pf-radius);font-size:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px}
+.pf-pagination-btn:hover:not(:disabled){border-color:var(--pf-accent);background:var(--pf-surface-hover)}
+.pf-pagination-btn:disabled{opacity:.5;cursor:not-allowed}
+.pf-pagination-info{font-size:12px;color:var(--pf-text-muted);display:flex;align-items:center;padding:0 8px}
 </style>
   <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 </head>
@@ -116,10 +120,10 @@
     <div style="padding:0 8px">
       <label style="font-size:11px;color:var(--pf-text-muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Sort By</label>
       <select id="sort-select"  style="width:100%;background:var(--pf-surface);border:1px solid var(--pf-border);border-radius:var(--pf-radius);color:var(--pf-text-primary);font-size:12px;padding:6px 8px;outline:none">
-        <option value="popular">Most Popular</option>
+        <option value="trending">Trending (Popular)</option>
         <option value="newest">Newest First</option>
-        <option value="price-asc">Price: Low → High</option>
-        <option value="price-desc">Price: High → Low</option>
+        <option value="price_low">Price: Low → High</option>
+        <option value="price_high">Price: High → Low</option>
       </select>
     </div>
   </aside>
@@ -146,6 +150,7 @@
     </div>
 
     <div id="products-container" class="mk-grid" aria-live="polite"></div>
+    <div id="pagination-controls" style="margin-top:24px;display:flex;justify-content:center;gap:8px"></div>
   </main>
 
   <!-- RIGHT RAIL -->

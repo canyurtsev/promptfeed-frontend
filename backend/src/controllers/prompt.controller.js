@@ -15,8 +15,8 @@ class PromptController {
      * Get marketplace prompts (isPremium = true)
      */
     async getMarketplace(req, res) {
-        const { page, limit } = req.query;
-        const result = await promptService.getMarketplace({ page, limit });
+        const { search, tag, sort, page, limit } = req.query;
+        const result = await promptService.getMarketplace({ search, tag, sort, page, limit });
         res.json({ success: true, data: result });
     }
 

@@ -1,16 +1,19 @@
 /* ================================================================
    marketplace.html — Page Controller
-   No shared backend or payment client.
-   Uses GET /api/marketplace/products + POST /api/marketplace/purchase
-   Decimal string prices safe. requestId in error messages.
+   Uses GET /api/prompts/marketplace
    ================================================================ */
 const API   = 'http://localhost:5000';
 const token = localStorage.getItem('accessToken');
 let currentUser = null;
-let activeTab   = 'featured';
-let activeCategory = '';
-let activePriceFilter = '';
 let searchTimer = null;
+
+/* ── State ── */
+let currentPage = 1;
+let currentLimit = 12;
+let currentSort = 'trending';
+let currentTag = '';
+let currentSearch = '';
+
 
 /* ── Helpers ── */
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -75,70 +78,33 @@ function requireAuth(label){
 function closeGate(){ document.getElementById('pf-gate').classList.remove('open'); }
 function gotoSignin(){ window.location.href='signin.html?returnUrl='+encodeURIComponent(location.href); }
 
-
-
-/* ── Filter Controls ── */
-function setCategory(el, cat){
-  activeCategory=cat;
-  document.querySelectorAll('[data-cat]').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  activePriceFilter='';
-  document.querySelectorAll('[data-price]').forEach(b=>b.classList.remove('active'));
-  loadProducts();
-}
-function setPrice(el, pf){
-  activePriceFilter=(activePriceFilter===pf)?'':pf;
-  document.querySelectorAll('[data-price]').forEach(b=>b.classList.remove('active'));
-  if(activePriceFilter) el.classList.add('active');
-  loadProducts();
-}
-
-
 /* ── Render Card ── */
 function renderCard(p){
-  const isFree=(p.price==='0'||p.price==='0.00'||!p.price);
   const priceStr=fmtPrice(p.price);
-  const author=p.seller?.username||p.sellerName||p.user?.username||'unknown';
-  const rating=p.avgRating||p.rating;
-  const sales=p.salesCount||p.downloads||0;
-  const effScore=p.efficiencyScore??p.prompt?.efficiencyScore;
-  const avgTok=p.avgTokens??p.prompt?.avgTokens;
-  const avgCost=p.avgCost??p.prompt?.avgCost;
-
-  const metricHtml = (effScore||avgTok||avgCost)
-    ? `<div class="mk-metrics">
-        ${effScore?`<span class="mk-metric">⚡ <span>${Number(effScore).toFixed(1)}</span> eff</span>`:''}
-        ${avgTok?`<span class="mk-metric">🪙 <span>${avgTok}</span> tok</span>`:''}
-        ${avgCost?`<span class="mk-metric">💲 <span>$${avgCost}</span></span>`:''}
-      </div>`
-    : `<span style="font-size:11px;color:var(--pf-text-muted)">Not benchmarked yet</span>`;
+  const author=p.user?.username||'unknown';
+  const score=p.score||0;
 
   return `
-  <div class="mk-card" data-action="gotoDetail" data-id="${esc(p.promptId||p.id)}">
+  <div class="mk-card" data-action="gotoDetail" data-id="${esc(p.id)}">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
-      <div class="mk-card__title">${esc(p.title||p.prompt?.title||'Untitled')}</div>
+      <div class="mk-card__title">${esc(p.title||'Untitled')}</div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        <span class="mk-badge ${isFree?'mk-badge--free':'mk-badge--premium'}">${isFree?'Free':'Premium'}</span>
-        ${p.featured||p.isFeatured?'<span class="mk-badge mk-badge--featured">Featured</span>':''}
+        <span class="mk-badge mk-badge--premium">Premium</span>
       </div>
     </div>
-    <div class="mk-card__desc">${esc(p.description||p.prompt?.description||'')}</div>
+    <div class="mk-card__desc">${esc(p.description||'')}</div>
     <div class="mk-card__meta">
       <span>by <strong style="color:var(--pf-text-secondary)">${esc(author)}</strong></span>
-      ${rating?`<span>• ⭐ ${Number(rating).toFixed(1)}</span>`:''}
-      ${sales?`<span>• ${sales} sold</span>`:''}
+      <span>• ▲ ${score}</span>
       ${p.category?`<span>• ${esc(p.category)}</span>`:''}
     </div>
-    ${metricHtml}
     <div class="mk-card__footer" data-action="stopProp">
       <div class="mk-card__price">${esc(priceStr)}</div>
       <div style="display:flex;gap:8px">
         <button class="pf-btn pf-btn--ghost" style="font-size:12px;padding:5px 12px"
-          data-action="gotoDetail" data-id="${esc(p.promptId||p.id)}">Details</button>
-        ${!isFree?`<button class="pf-btn pf-btn--primary" style="font-size:12px;padding:5px 12px"
-          data-action="buy" data-id="${esc(p.id)}" data-title="${esc(p.title||'')}" data-price="${esc(String(p.price||'0'))}">Buy</button>`
-          :`<button class="pf-btn pf-btn--ghost" style="font-size:12px;padding:5px 12px;color:var(--pf-success);border-color:var(--pf-success)"
-          data-action="gotoDetail" data-id="${esc(p.promptId||p.id)}">Get Free</button>`}
+          data-action="gotoDetail" data-id="${esc(p.id)}">Details</button>
+        <button class="pf-btn pf-btn--primary" style="font-size:12px;padding:5px 12px"
+          data-action="buy" data-id="${esc(p.id)}" data-title="${esc(p.title||'')}" data-price="${esc(String(p.price||'0'))}">Buy</button>
       </div>
     </div>
   </div>`;
@@ -148,57 +114,68 @@ function renderCard(p){
 async function loadProducts(){
   const el=document.getElementById('products-container');
   const cnt=document.getElementById('product-count');
+  const pag=document.getElementById('pagination-controls');
+  if(!el) return;
   el.innerHTML='<div class="pf-loading" style="grid-column:1/-1"><div class="pf-spinner"></div></div>';
-  cnt.textContent='';
+  if(cnt) cnt.textContent='';
+  if(pag) pag.innerHTML='';
 
   try{
     const p=new URLSearchParams();
-    if(activeCategory) p.set('category',activeCategory);
-    if(activePriceFilter==='free') p.set('free','true');
-    if(activePriceFilter==='premium') p.set('premium','true');
-    const tab=activeTab;
-    if(tab==='latest') p.set('sort','newest');
-    else if(tab==='popular') p.set('sort','popular');
-    const q=document.getElementById('search-input').value.trim();
-    if(q) p.set('search',q);
-    const sort=document.getElementById('sort-select').value;
-    if(sort&&sort!=='popular') p.set('sort',sort);
+    p.set('page', currentPage);
+    p.set('limit', currentLimit);
+    p.set('sort', currentSort);
+    if(currentTag) p.set('tag', currentTag);
+    if(currentSearch) p.set('search', currentSearch);
 
     const headers={};
     if(token) headers['Authorization']='Bearer '+token;
 
-    const r=await fetch(API+'/api/marketplace/products?'+p,{headers});
+    const r=await fetch(API+'/api/prompts/marketplace?'+p,{headers});
     if(!r.ok) throw new Error('HTTP '+r.status);
     const d=await r.json();
     if(!d.success) throw new Error(d.message||'API error');
 
-    let items=d.data?.products||d.data||[];
+    const items=d.data?.prompts||[];
+    const meta=d.data?.pagination||{};
 
-    // Client-side tab filtering
-    if(tab==='prompts') items=items.filter(i=>(i.type||'prompt')==='prompt');
-    else if(tab==='skills') items=items.filter(i=>i.type==='skill');
-    else if(tab==='workflows') items=items.filter(i=>i.type==='workflow');
-    else if(tab==='featured') items=items.filter(i=>i.featured||i.isFeatured).concat(items.filter(i=>!i.featured&&!i.isFeatured)).slice(0,20);
-
-    cnt.textContent=items.length+' listing'+(items.length!==1?'s':'');
+    if(cnt) {
+      if (meta.total !== undefined) {
+        cnt.textContent = `${meta.total} listing${meta.total!==1?'s':''}`;
+      } else {
+        cnt.textContent = items.length+' listing'+(items.length!==1?'s':'');
+      }
+    }
 
     if(!items.length){
       el.innerHTML=`<div class="pf-empty-state" style="grid-column:1/-1">
         <div class="pf-empty-state__icon">🔍</div>
         <h3>No marketplace products found</h3>
-        <p>Try adjusting your filters or check back later.</p>
+        <p>Try adjusting your filters or search terms.</p>
       </div>`;
       return;
     }
     el.innerHTML=items.map(renderCard).join('');
+    
+    // Pagination
+    if(pag && meta.totalPages > 1) {
+      pag.innerHTML = `
+        <button class="pf-pagination-btn" ${currentPage <= 1 ? 'disabled' : ''} data-page="${currentPage - 1}">
+          <span class="material-symbols-outlined" style="font-size:18px">chevron_left</span> Previous
+        </button>
+        <div class="pf-pagination-info">Page ${currentPage} of ${meta.totalPages}</div>
+        <button class="pf-pagination-btn" ${currentPage >= meta.totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">
+          Next <span class="material-symbols-outlined" style="font-size:18px">chevron_right</span>
+        </button>
+      `;
+    }
   } catch(e){
     el.innerHTML=`<div class="pf-empty-state" style="grid-column:1/-1">
       <div class="pf-empty-state__icon">⚠️</div>
       <h3>Could not load marketplace</h3>
       <p style="color:var(--pf-danger);font-size:12px">${esc(e.message)}</p>
-      <p style="margin-top:8px;font-size:12px;color:var(--pf-text-muted)">Ensure backend is running: <code>npm run dev</code></p>
     </div>`;
-    cnt.textContent='';
+    if(cnt) cnt.textContent='';
   }
 }
 
@@ -238,25 +215,6 @@ async function handleBuy(btn){
   btn.textContent=origText; btn.disabled=false;
 }
 
-
-/* ── Tabs ── */
-document.querySelectorAll('.pf-feed-tab').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.pf-feed-tab').forEach(b=>{
-      b.classList.remove('active'); b.setAttribute('aria-selected','false');
-    });
-    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
-    activeTab=btn.dataset.tab;
-    loadProducts();
-  });
-});
-
-/* ── Search ── */
-document.getElementById('search-input').addEventListener('input',e=>{
-  clearTimeout(searchTimer);
-  searchTimer=setTimeout(()=>loadProducts(),420);
-});
-
 /* ── Init ── */
 (async function(){
   await initAuth();
@@ -267,8 +225,25 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-close-gate')?.addEventListener('click', closeGate);
   document.getElementById('btn-goto-signin')?.addEventListener('click', gotoSignin);
   
+  const searchInput = document.getElementById('search-input');
+  if(searchInput) {
+      searchInput.addEventListener('input', () => {
+        currentSearch = searchInput.value.trim();
+        currentPage = 1;
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => loadProducts(), 420);
+      });
+  }
+
   const sortSelect = document.getElementById('sort-select');
-  if(sortSelect) sortSelect.addEventListener('change', loadProducts);
+  if(sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      currentSort = sortSelect.value;
+      currentPage = 1;
+      loadProducts();
+    });
+  }
+
 
   document.addEventListener('click', e => {
     if (e.target.id === 'pf-gate') { closeGate(); return; }
@@ -278,15 +253,21 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const setCatBtn = e.target.closest('[data-action="setCategory"]');
-    if (setCatBtn) {
-      setCategory(setCatBtn, setCatBtn.dataset.val);
+    const filterBtn = e.target.closest('[data-action="setCategory"]');
+    if (filterBtn) {
+      document.querySelectorAll('[data-action="setCategory"]').forEach(b => b.classList.remove('active'));
+      filterBtn.classList.add('active');
+      currentTag = filterBtn.dataset.val;
+      currentPage = 1;
+      loadProducts();
       return;
     }
 
-    const setPriceBtn = e.target.closest('[data-action="setPrice"]');
-    if (setPriceBtn) {
-      setPrice(setPriceBtn, setPriceBtn.dataset.val);
+    const pagBtn = e.target.closest('.pf-pagination-btn');
+    if (pagBtn) {
+      currentPage = parseInt(pagBtn.dataset.page);
+      loadProducts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -306,9 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const stopProp = e.target.closest('[data-action="stopProp"]');
     if (stopProp) {
       e.stopPropagation();
-      // Let the click die here so the card isn't clicked
     }
   });
 });
-
-

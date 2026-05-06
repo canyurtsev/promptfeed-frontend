@@ -423,16 +423,56 @@ class PromptService {
      * Get marketplace prompts (isPremium = true)
      * Returns title, price, author (username), score
      */
-    async getMarketplace({ page = 1, limit = 24 } = {}) {
+    async getMarketplace({ search, tag, sort = 'trending', page = 1, limit = 24 } = {}) {
         const skip = (parseInt(page) - 1) * parseInt(limit);
+        const take = parseInt(limit);
+
+        const where = { isPremium: true };
+
+        // Handle search
+        if (search) {
+            where.OR = [
+                { title: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
+                { tags: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+
+        // Handle tag/category filter
+        if (tag) {
+            const tagFilter = {
+                OR: [
+                    { category: { contains: tag, mode: 'insensitive' } },
+                    { tags: { contains: tag, mode: 'insensitive' } }
+                ]
+            };
+            if (where.OR) {
+                const searchFilter = { OR: where.OR };
+                delete where.OR;
+                where.AND = [searchFilter, tagFilter];
+            } else {
+                where.AND = [tagFilter];
+            }
+        }
+
+        // Handle sorting
+        let orderBy = { score: 'desc' }; // default 'trending'
+        if (sort === 'newest') {
+            orderBy = { createdAt: 'desc' };
+        } else if (sort === 'price_low') {
+            orderBy = { price: 'asc' };
+        } else if (sort === 'price_high') {
+            orderBy = { price: 'desc' };
+        }
+
         const [prompts, total] = await Promise.all([
             promptRepository.findAll({
-                where: { isPremium: true },
-                orderBy: { score: 'desc' },
+                where,
+                orderBy,
                 skip,
-                take: parseInt(limit)
+                take
             }),
-            promptRepository.count({ isPremium: true })
+            promptRepository.count(where)
         ]);
 
         const result = prompts.map(p => ({
@@ -454,9 +494,9 @@ class PromptService {
             prompts: result,
             pagination: {
                 page: parseInt(page),
-                limit: parseInt(limit),
+                limit: take,
                 total,
-                totalPages: Math.ceil(total / parseInt(limit))
+                totalPages: Math.ceil(total / take)
             }
         });
     }
