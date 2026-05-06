@@ -45,7 +45,7 @@ app.use(helmet({
                 "https://cdn.jsdelivr.net"
             ],
             connectSrc: ["'self'", "http://localhost:5000"],
-            imgSrc: ["'self'", "data:", "https://unpkg.com", "https://images.unsplash.com"],
+            imgSrc: ["'self'", "data:", "https://unpkg.com", "https://images.unsplash.com", "https://api.dicebear.com"],
             styleSrc: [
                 "'self'",
                 "'unsafe-inline'", // Tailwind injection requires this or a nonce; keeping for styles but strict on scripts

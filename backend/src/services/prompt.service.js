@@ -423,11 +423,27 @@ class PromptService {
      * Get marketplace prompts (isPremium = true)
      * Returns title, price, author (username), score
      */
-    async getMarketplace({ search, tag, sort = 'trending', page = 1, limit = 24 } = {}) {
+    async getMarketplace({ search, tag, sort = 'trending', page = 1, limit = 24, priceFilter } = {}) {
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const take = parseInt(limit);
 
-        const where = { isPremium: true };
+        let where = {};
+
+        // Apply price filter
+        if (priceFilter === 'free') {
+            where.OR = [
+                { isPremium: false },
+                { price: 0 }
+            ];
+        } else if (priceFilter === 'premium') {
+            where.OR = [
+                { isPremium: true },
+                { price: { gt: 0 } }
+            ];
+        } else {
+            // Default: premium only
+            where.isPremium = true;
+        }
 
         // Handle search
         if (search) {
