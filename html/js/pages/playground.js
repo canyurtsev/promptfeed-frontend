@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const promptInfo = document.getElementById('prompt-info');
 
     // Authentication check
-    const token = localStorage.getItem('pf_token');
+    const token = localStorage.getItem('accessToken');
     
     // Auth UI setup (similar to marketplace.js)
     const navAuthArea = document.getElementById('nav-auth-area');

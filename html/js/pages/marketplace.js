@@ -13,6 +13,7 @@ let currentLimit = 12;
 let currentSort = 'trending';
 let currentTag = '';
 let currentSearch = '';
+let currentPriceFilter = '';
 
 
 /* ── Helpers ── */
@@ -120,18 +121,19 @@ async function loadProducts(){
   if(cnt) cnt.textContent='';
   if(pag) pag.innerHTML='';
 
-  try{
-    const p=new URLSearchParams();
-    p.set('page', currentPage);
-    p.set('limit', currentLimit);
-    p.set('sort', currentSort);
-    if(currentTag) p.set('tag', currentTag);
-    if(currentSearch) p.set('search', currentSearch);
+   try{
+     const p=new URLSearchParams();
+     p.set('page', currentPage);
+     p.set('limit', currentLimit);
+     p.set('sort', currentSort);
+     if(currentTag) p.set('tag', currentTag);
+     if(currentSearch) p.set('search', currentSearch);
+     if(currentPriceFilter) p.set('priceFilter', currentPriceFilter);
 
-    const headers={};
-    if(token) headers['Authorization']='Bearer '+token;
+     const headers={};
+     if(token) headers['Authorization']='Bearer '+token;
 
-    const r=await fetch(API+'/api/prompts/marketplace?'+p,{headers});
+     const r=await fetch(API+'/api/prompts/marketplace?'+p,{headers});
     if(!r.ok) throw new Error('HTTP '+r.status);
     const d=await r.json();
     if(!d.success) throw new Error(d.message||'API error');
@@ -258,6 +260,16 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('[data-action="setCategory"]').forEach(b => b.classList.remove('active'));
       filterBtn.classList.add('active');
       currentTag = filterBtn.dataset.val;
+      currentPage = 1;
+      loadProducts();
+      return;
+    }
+
+    const priceFilterBtn = e.target.closest('[data-action="setPrice"]');
+    if (priceFilterBtn) {
+      document.querySelectorAll('[data-action="setPrice"]').forEach(b => b.classList.remove('active'));
+      priceFilterBtn.classList.add('active');
+      currentPriceFilter = priceFilterBtn.dataset.val;
       currentPage = 1;
       loadProducts();
       return;

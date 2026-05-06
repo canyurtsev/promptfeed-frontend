@@ -48,7 +48,13 @@ class AuthService {
         });
 
         // Create wallet for user
-        await walletRepository.create({
+        await walletRepository.upsert(user.id, {
+            balance: 0,
+            totalEarnings: 0,
+            totalSpent: 0,
+            pendingPayouts: 0,
+            lifetimePayouts: 0
+        }, {
             userId: user.id,
             balance: 0,
             totalEarnings: 0,
