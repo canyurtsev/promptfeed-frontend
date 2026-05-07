@@ -53,8 +53,17 @@ async function initAuth(){
         </div>
         <div class="pf-avatar" id="user-avatar" title="Profile"
           style="${currentUser.avatarUrl?'background-image:url('+esc(currentUser.avatarUrl)+')':''}"
-          id="user-avatar-btn"></div>`;
+          id="user-avatar-btn"></div>
+        <button id="btn-logout" class="pf-btn pf-btn--ghost" style="font-size:12px;padding:4px 10px">Logout</button>`;
       if(plan==='free') showAds();
+      const logoutBtn = document.getElementById('btn-logout');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          window.location.href = 'signin.html';
+        });
+      }
     } else { guestNav(area); showAds(); }
   } catch { guestNav(area); showAds(); }
 }
@@ -198,16 +207,7 @@ async function handleBuy(btn){
     const rid=d.requestId?` [${d.requestId}]`:'';
     if(d.success){
       toast('✅ Purchase successful! "'+title+'" is now yours.');
-      // Refresh wallet balance
-      try{
-        const u=await fetch(API+'/api/users/me',{headers:{Authorization:'Bearer '+token}});
-        const ud=await u.json();
-        if(ud.success&&ud.data){
-          currentUser=ud.data;
-          const wb=document.getElementById('wallet-bal');
-          if(wb) wb.textContent=String(ud.data.walletBalance??'—');
-        }
-      } catch{}
+      await refreshWallet();
     } else {
       toast('⚠ Purchase failed: '+(d.message||'Unknown error')+rid, false);
     }
@@ -215,6 +215,20 @@ async function handleBuy(btn){
     toast('⚠ Connection error: '+e.message, false);
   }
   btn.textContent=origText; btn.disabled=false;
+}
+
+async function refreshWallet(){
+  try{
+    const u=await fetch(API+'/api/users/me',{headers:{Authorization:'Bearer '+token}});
+    const ud=await u.json();
+    if(ud.success&&ud.data){
+      currentUser=ud.data;
+      const wb=document.getElementById('wallet-bal');
+      if(wb) wb.textContent=String(ud.data.walletBalance??'—');
+    }
+  } catch(e){
+    console.error('Wallet refresh failed', e);
+  }
 }
 
 /* ── Init ── */

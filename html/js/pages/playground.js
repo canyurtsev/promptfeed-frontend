@@ -32,8 +32,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                     `;
                     document.getElementById('nav-btn-logout').addEventListener('click', () => {
-                        localStorage.removeItem('pf_token');
-                        window.location.reload();
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('refreshToken');
+                        window.location.href = 'signin.html';
                     });
                 }
             } catch (e) {

@@ -427,49 +427,42 @@ class PromptService {
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const take = parseInt(limit);
 
-        let where = {};
+        // Build filter conditions separately, then combine with AND
+        const conditions = [];
 
-        // Apply price filter
+        // Price filter condition
         if (priceFilter === 'free') {
-            where.OR = [
-                { isPremium: false },
-                { price: 0 }
-            ];
+            conditions.push({ OR: [{ isPremium: false }, { price: 0 }] });
         } else if (priceFilter === 'premium') {
-            where.OR = [
-                { isPremium: true },
-                { price: { gt: 0 } }
-            ];
+            conditions.push({ OR: [{ isPremium: true }, { price: { gt: 0 } }] });
         } else {
             // Default: premium only
-            where.isPremium = true;
+            conditions.push({ isPremium: true });
         }
 
-        // Handle search
+        // Search condition
         if (search) {
-            where.OR = [
-                { title: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-                { tags: { contains: search, mode: 'insensitive' } }
-            ];
+            conditions.push({
+                OR: [
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } },
+                    { tags: { contains: search, mode: 'insensitive' } }
+                ]
+            });
         }
 
-        // Handle tag/category filter
+        // Tag/category filter condition
         if (tag) {
-            const tagFilter = {
+            conditions.push({
                 OR: [
                     { category: { contains: tag, mode: 'insensitive' } },
                     { tags: { contains: tag, mode: 'insensitive' } }
                 ]
-            };
-            if (where.OR) {
-                const searchFilter = { OR: where.OR };
-                delete where.OR;
-                where.AND = [searchFilter, tagFilter];
-            } else {
-                where.AND = [tagFilter];
-            }
+            });
         }
+
+        // Combine all conditions
+        const where = conditions.length === 1 ? conditions[0] : { AND: conditions };
 
         // Handle sorting
         let orderBy = { score: 'desc' }; // default 'trending'

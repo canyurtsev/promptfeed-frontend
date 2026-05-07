@@ -61,17 +61,31 @@ async function handleSubmit(event) {
   const description = document.getElementById('prompt-description').value.trim();
   const content = document.getElementById('prompt-content').value.trim();
   const tags = cleanTags(document.getElementById('prompt-tags').value);
+  const category = document.getElementById('prompt-category')?.value || '';
 
   if (!title || !content || !tags) {
     showMessage('Title, content, and tags are required.', 'error');
     return;
   }
 
+  const rawPrice = document.getElementById('prompt-price')?.value;
+  let price = 0;
+  if (rawPrice) {
+    price = parseFloat(rawPrice);
+    if (isNaN(price) || price < 0) {
+      showMessage('Price cannot be negative.', 'error');
+      return;
+    }
+    price = Math.round(price * 100) / 100;
+  }
+
   const payload = {
     title,
     description,
     content,
-    tags
+    tags,
+    category: category || undefined,
+    price
   };
 
   setSubmitting(true);

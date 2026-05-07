@@ -34,11 +34,11 @@
 
 <main class="create-shell">
   <section class="create-panel" aria-labelledby="create-title">
-    <div class="create-panel__header">
+<div class="create-panel__header">
       <span class="material-symbols-outlined create-panel__icon">edit_square</span>
       <div>
         <h1 id="create-title" class="create-panel__title">Create Prompt</h1>
-        <p class="create-panel__subtitle">Publish a prompt to the community feed.</p>
+        <p class="create-panel__subtitle">Publish a prompt to the community feed. <span class="create-plan-hint" style="color:var(--pf-text-muted);font-size:12px;display:block;margin-top:4px">Free plan includes up to 3 published prompts.</span></p>
       </div>
     </div>
 
@@ -63,6 +63,25 @@
       <div class="create-field">
         <label class="create-label" for="prompt-tags">Tags</label>
         <input id="prompt-tags" class="create-input" name="tags" type="text" required autocomplete="off" placeholder="automation, coding, research"/>
+      </div>
+
+      <div class="create-field">
+        <label class="create-label" for="prompt-category">Category</label>
+        <select id="prompt-category" class="create-input" name="category">
+          <option value="">Select a category (optional)</option>
+          <option value="Coding">Coding</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Security">Security</option>
+          <option value="Automation">Automation</option>
+          <option value="Research">Research</option>
+          <option value="Data">Data</option>
+        </select>
+      </div>
+
+      <div class="create-field">
+        <label class="create-label" for="prompt-price">Price (USD)</label>
+        <input id="prompt-price" class="create-input" name="price" type="number" min="0" step="0.01" placeholder="0.00"/>
+        <span style="color:var(--pf-text-muted);font-size:12px;margin-top:2px;">Set a price above 0 to list this prompt in the marketplace.</span>
       </div>
 
       <div class="create-actions">

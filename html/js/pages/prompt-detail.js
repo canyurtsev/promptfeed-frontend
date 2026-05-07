@@ -53,7 +53,16 @@ async function initAuth(){
         </div>
         <div class="pf-avatar" id="user-avatar" title="Profile"
           style="${currentUser.avatarUrl ? 'background-image:url('+esc(currentUser.avatarUrl)+')' : ''}"
-          id="user-avatar-btn"></div>`;
+          id="user-avatar-btn"></div>
+        <button id="btn-logout" class="pf-btn pf-btn--ghost" style="font-size:12px;padding:4px 10px">Logout</button>`;
+      const logoutBtn = document.getElementById('btn-logout');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          window.location.href = 'signin.html';
+        });
+      }
     } else {
       guestNav(area);
     }
@@ -72,8 +81,6 @@ function requireAuth(label){
 }
 function closeGate(){ document.getElementById('pf-gate').classList.remove('open'); }
 function gotoSignin(){ window.location.href = 'signin.html?returnUrl='+encodeURIComponent(location.href); }
-
-
 
 /* ── Load Prompt ── */
 async function loadPrompt(){
@@ -111,10 +118,13 @@ function renderError(msg){
 
 function renderPage(){
   const p = promptData;
-  const isFree = (p.price === '0' || p.price === '0.00' || !p.price);
-  const isOwned = p.isOwned || p.isOwner; // based on API response
+  const priceVal = parseFloat(p.price || 0);
+  const isPaid = p.isPremium || p.isPaid || priceVal > 0 || false;
+  const isPurchased = Boolean(p.isPurchased || p.hasPurchased);
+  const isFree = !isPaid;
+  const isOwned = p.isOwned || p.isOwner || (currentUser && currentUser.id === p.userId) || isPurchased;
   const author = p.user?.username || p.authorHandle || 'unknown';
-  const tags = Array.isArray(p.tags) ? p.tags : [];
+  const tags = Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? p.tags.split(',').map(t=>t.trim()).filter(Boolean) : []);
   const effScore = p.efficiencyScore || p.benchmark?.efficiencyScore;
   const avgTok = p.avgTokens || p.benchmark?.avgTokens;
   const avgCost = p.avgCost || p.benchmark?.avgCost;
@@ -149,13 +159,14 @@ function renderPage(){
   if(isOwned){
     actionHtml = `
       <div style="background:#3fb95015;border:1px solid #3fb95030;color:var(--pf-success);padding:10px;border-radius:6px;font-size:13px;font-weight:600;text-align:center;margin-bottom:10px">
-        ✓ Owned
+        ✓ ${isPurchased ? 'Purchased' : 'Owned'}
       </div>
     `;
-  } else if(!isFree){
+  } else if(isPaid){
+    const priceStr = p.product?.price ? fmtPrice(p.product.price) : fmtPrice(p.price);
     actionHtml = `
       <button class="pf-btn pf-btn--primary" style="width:100%;margin-bottom:10px;font-size:14px" id="buy-btn">
-        Buy Prompt
+        Buy Prompt — ${priceStr}
       </button>
     `;
   }
@@ -204,25 +215,26 @@ function renderPage(){
         <div class="pd-price-row">
           <div class="pd-badge ${isFree?'pd-badge--free':'pd-badge--premium'}">${isFree?'Free':'Premium'}</div>
           <div style="font-size:24px;font-weight:800;color:var(--pf-text-primary);font-family:var(--pf-font-mono)">
-            ${fmtPrice(p.price)}
+            ${isPaid ? (p.product?.price ? fmtPrice(p.product.price) : fmtPrice(p.price)) : 'Free'}
           </div>
         </div>
         
-<div class="pd-actions">
+        <div class="pd-actions">
           ${actionHtml}
           <div class="pd-action-row">
+            ${isFree || isOwned ? `
             <button class="pf-btn pf-btn--ghost" id="run-btn" style="display:flex;align-items:center;justify-content:center;gap:6px">
               <span class="material-symbols-outlined" style="font-size:16px">play_arrow</span> Run Prompt
             </button>
+            ` : ''}
             <button class="pf-btn pf-btn--ghost" id="save-btn" data-saved="${isSaved ? 'true' : 'false'}" style="display:flex;align-items:center;justify-content:center;gap:6px">
               <span class="material-symbols-outlined" style="font-size:16px">${isSaved ? 'bookmark_added' : 'bookmark'}</span>
               <span class="save-label">${isSaved ? 'Saved' : 'Save'}</span>
             </button>
           </div>
           <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--pf-border)">
-            <button class="pf-vote-btn" data-action="upvote" data-id="${p.id}" data-dir="1">▲</button>
-            <span id="pd-vote-count" style="font-size:14px;font-weight:600;color:var(--pf-text-primary)">${p.score || 0}</span>
-            <button class="pf-vote-btn" data-action="upvote" data-id="${p.id}" data-dir="-1">▼</button>
+            <button class="pf-vote-btn ${p.userVote === 1 ? 'pf-vote-btn--active' : ''}" data-action="upvote" data-id="${p.id}">▲</button>
+            <span id="pd-vote-count" style="font-size:14px;font-weight:600;color:var(--pf-text-primary)">${Math.max(0, p.score || 0)}</span>
           </div>
         </div>
       </div>
@@ -253,18 +265,16 @@ async function handleBuy(){
   btn.disabled = true;
 
   try {
-    const res = await fetch(API+'/api/marketplace/purchase', {
+    const res = await fetch(API+`/api/prompts/${promptId}/buy`, {
       method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
-      body: JSON.stringify({ productId: promptId }) // assuming purchase endpoint takes productId which maps to prompt
+      headers: { 'Authorization':'Bearer '+token }
     });
     const data = await res.json();
     const reqIdStr = data.error?.requestId ? ` [Req: ${data.error.requestId}]` : '';
 
     if(data.success){
       toast('✅ Purchase successful!');
-      // refresh user and prompt
-      await initAuth();
+      await refreshWallet();
       await loadPrompt();
     } else {
       toast('⚠ Purchase failed: ' + (data.message || data.error?.message || 'Unknown error') + reqIdStr, false);
@@ -278,9 +288,23 @@ async function handleBuy(){
   }
 }
 
+async function refreshWallet(){
+  try {
+    const r = await fetch(API+'/api/users/me', {headers:{Authorization:'Bearer '+token}});
+    const d = await r.json();
+    if(d.success && d.data){
+      currentUser = d.data;
+      const wb = document.getElementById('wallet-bal');
+      if(wb) wb.textContent = String(d.data.walletBalance ?? '—');
+    }
+  } catch(e) {
+    console.error('Wallet refresh failed', e);
+  }
+}
+
 function handleRun(){
   if(!requireAuth('run this prompt')) return;
-  window.location.href = `playground.html?promptId=${promptId}`;
+  window.location.href = `playground.html?id=${promptId}`;
 }
 
 async function handleSave(){
@@ -313,29 +337,29 @@ async function handleSave(){
   }
 }
 
-async function handleVote(promptId, dir){
+async function handleVote(promptIdToVote){
   if(!requireAuth('vote on this prompt')) return;
-  const btn = document.querySelector(`[data-action="upvote"][data-dir="${dir}"]`);
+  const btn = document.querySelector('[data-action="upvote"]');
+  const isActive = btn?.classList.contains('pf-vote-btn--active');
   if(btn) btn.disabled = true;
   try {
     let res;
-    if(dir === 1){
-      res = await fetch(API+`/api/prompts/${promptId}/upvote`, {
-        method: 'POST',
+    if(isActive){
+      res = await fetch(API+`/api/prompts/${promptIdToVote}/upvote`, {
+        method: 'DELETE',
         headers: { 'Authorization':'Bearer '+token }
       });
     } else {
-      res = await fetch(API+`/api/prompts/${promptId}/vote`, {
+      res = await fetch(API+`/api/prompts/${promptIdToVote}/upvote`, {
         method: 'POST',
-        headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
-        body: JSON.stringify({ value: dir })
+        headers: { 'Authorization':'Bearer '+token }
       });
     }
     const data = await res.json();
     if(data.success){
       const scoreEl = document.getElementById('pd-vote-count');
-      if(scoreEl) scoreEl.textContent = data.data?.score || 0;
-      if(btn) btn.classList.toggle('pf-vote-btn--active', dir === 1);
+      if(scoreEl) scoreEl.textContent = Math.max(0, data.data?.score || 0);
+      if(btn) btn.classList.toggle('pf-vote-btn--active');
     } else {
       toast(data.message || 'Vote failed', false);
     }
@@ -374,18 +398,16 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-if (e.target.closest('#save-btn')) {
+    if (e.target.closest('#save-btn')) {
       handleSave();
       return;
     }
 
     const voteBtn = e.target.closest('[data-action="upvote"]');
     if (voteBtn) {
-      const dir = parseInt(voteBtn.dataset.dir, 10);
       const id = voteBtn.dataset.id;
-      handleVote(id, dir);
+      handleVote(id);
       return;
     }
   });
 });
-

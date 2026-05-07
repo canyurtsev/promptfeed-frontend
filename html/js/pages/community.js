@@ -96,12 +96,22 @@ async function initAuth() {
           <span class="pf-user-chip__name">${esc(name)}</span>
           <span class="pf-user-chip__plan">${esc(plan)}</span>
         </span>
-      </a>`;
+      </a>
+      <button id="btn-logout" class="pf-btn pf-btn--ghost" style="font-size:12px;padding:4px 10px">Logout</button>`;
 
     const avatar = document.getElementById('user-avatar');
     if (avatar && currentUser.avatarUrl) {
       avatar.textContent = '';
       avatar.style.backgroundImage = 'url("' + currentUser.avatarUrl.replace(/"/g, '%22') + '")';
+    }
+
+    const logoutBtn = document.getElementById('btn-logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = 'signin.html';
+      });
     }
 
     if (plan === 'free') showAds();
@@ -167,6 +177,7 @@ function filterByTag(tag) {
 
 function topicRow(p) {
   const score = p.score ?? p.upvotes ?? 0;
+  const hasUpvoted = p.userVote === 1;
   const author = p.user?.username || p.authorHandle || 'unknown';
   const tags = Array.isArray(p.tags) ? p.tags.slice(0, 3) : [];
   const cmts = p.commentCount ?? p._count?.comments ?? 0;
@@ -174,9 +185,8 @@ function topicRow(p) {
   return `
   <div class="pf-topic-row">
     <div class="pf-topic-row__vote">
-      <button class="pf-vote-btn" title="Upvote" data-action="vote" data-id="${esc(p.id)}" data-value="1">▲</button>
-      <span class="pf-vote-count" id="score-${esc(p.id)}">${fmtN(score)}</span>
-      <button class="pf-vote-btn" title="Downvote" data-action="vote" data-id="${esc(p.id)}" data-value="-1">▼</button>
+      <button class="pf-vote-btn ${hasUpvoted ? 'pf-vote-btn--active' : ''}" title="Upvote" data-action="upvote" data-id="${esc(p.id)}" data-dir="1">▲</button>
+      <span class="pf-vote-count" id="score-${esc(p.id)}">${fmtN(Math.max(0, score))}</span>
     </div>
     <div class="pf-topic-row__body">
       <a class="pf-topic-row__title" href="prompt-detail.html?id=${esc(p.id)}">${esc(p.title)}</a>
@@ -258,29 +268,29 @@ async function loadFeed(query) {
   }
 }
 
-async function handleVote(promptId, value, e) {
+async function handleVote(promptId, e) {
   e.stopPropagation();
   if (!requireAuth('vote on prompts')) return;
+  const btn = e.target.closest('.pf-vote-btn');
+  const isActive = btn?.classList.contains('pf-vote-btn--active');
   try {
     let r;
-    if (value === 1) {
+    if (isActive) {
       r = await fetch(API + '/api/prompts/' + promptId + '/upvote', {
-        method: 'POST',
+        method: 'DELETE',
         headers: { Authorization: 'Bearer ' + token }
       });
     } else {
-      r = await fetch(API + '/api/prompts/' + promptId + '/vote', {
+      r = await fetch(API + '/api/prompts/' + promptId + '/upvote', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-        body: JSON.stringify({ value })
+        headers: { Authorization: 'Bearer ' + token }
       });
     }
     const d = await r.json();
     if (d.success) {
       const el = document.getElementById('score-' + promptId);
-      if (el) el.textContent = fmtN(d.data?.score ?? d.data?.newScore ?? 0);
-      const btn = e.target.closest('.pf-vote-btn');
-      if (btn) btn.classList.toggle('pf-vote-btn--active', value === 1);
+      if (el) el.textContent = fmtN(Math.max(0, d.data?.score ?? d.data?.newScore ?? 0));
+      if (btn) btn.classList.toggle('pf-vote-btn--active');
     } else {
       toast((d.message || 'Vote failed'));
     }
@@ -384,10 +394,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const voteBtn = e.target.closest('[data-action="vote"]');
+    const voteBtn = e.target.closest('[data-action="upvote"]');
     if (voteBtn) {
       e.stopPropagation();
-      handleVote(voteBtn.dataset.id, parseInt(voteBtn.dataset.value, 10), e);
+      handleVote(voteBtn.dataset.id, e);
       return;
     }
 
