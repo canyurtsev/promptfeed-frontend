@@ -100,7 +100,7 @@ function renderNav() {
 
   const plan = formatPlan(currentUser.plan);
   const name = displayName(currentUser);
-  const wallet = currentUser.walletBalance ?? currentUser.balance;
+  const wallet = currentUser.wallet?.balance ?? currentUser.walletBalance ?? currentUser.balance;
 
   area.innerHTML = `
     ${wallet == null ? '' : `
@@ -138,7 +138,7 @@ function renderDashboard() {
   const plan = formatPlan(c.plan);
   const name = displayName(c);
   const email = c.email || 'No email';
-  const wallet = c.walletBalance ?? c.balance;
+  const wallet = c.wallet?.balance ?? c.walletBalance ?? c.balance;
 
   // Header
   text('dash-name', name);
@@ -223,19 +223,22 @@ async function loadMyPrompts() {
     const r = await fetch(API + '/api/users/me/prompts?limit=5', {
       headers: { Authorization: 'Bearer ' + token }
     });
+    if (!r.ok) {
+      throw new Error('Failed to load prompts');
+    }
     const d = await r.json();
 
-    if (!d.success) throw new Error(d.message || d.error?.message || 'Failed to load prompts');
-
     const items = d.data?.prompts || [];
-    el.innerHTML = items.length
-      ? items.map(myPromptItemHTML).join('')
-      : `<div class="dash-empty">
-          <div class="dash-empty__icon"><span class="material-symbols-outlined">edit_note</span></div>
-          <h3>No prompts yet</h3>
-          <p>Create your first prompt to share with the community.</p>
-          <a href="create.html" class="pf-btn pf-btn--primary dash-mt-1">Create Prompt</a>
-        </div>`;
+    if (!items.length) {
+      el.innerHTML = `<div class="dash-empty">
+        <div class="dash-empty__icon"><span class="material-symbols-outlined">edit_note</span></div>
+        <h3>No prompts yet</h3>
+        <p>Create your first prompt to share with the community.</p>
+        <a href="create.html" class="pf-btn pf-btn--primary dash-mt-1">Create Prompt</a>
+      </div>`;
+      return;
+    }
+    el.innerHTML = items.map(myPromptItemHTML).join('');
   } catch (err) {
     el.innerHTML = `<div class="dash-empty">
       <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
@@ -280,19 +283,22 @@ async function loadSavedPrompts() {
     const r = await fetch(API + '/api/users/me/saved-prompts', {
       headers: { Authorization: 'Bearer ' + token }
     });
+    if (!r.ok) {
+      throw new Error('Failed to load saved prompts');
+    }
     const d = await r.json();
 
-    if (!d.success) throw new Error(d.message || d.error?.message || 'Failed to load saved prompts');
-
     const items = d.data || [];
-    el.innerHTML = items.length
-      ? items.map(savedPromptItemHTML).join('')
-      : `<div class="dash-empty">
-          <div class="dash-empty__icon"><span class="material-symbols-outlined">bookmark_border</span></div>
-          <h3>No saved prompts</h3>
-          <p>Save prompts from the community to view them here.</p>
-          <a href="community.html" class="pf-btn pf-btn--ghost dash-mt-1">Browse Community</a>
-        </div>`;
+    if (!items.length) {
+      el.innerHTML = `<div class="dash-empty">
+        <div class="dash-empty__icon"><span class="material-symbols-outlined">bookmark_border</span></div>
+        <h3>No saved prompts</h3>
+        <p>Save prompts from the community to view them here.</p>
+        <a href="community.html" class="pf-btn pf-btn--ghost dash-mt-1">Browse Community</a>
+      </div>`;
+      return;
+    }
+    el.innerHTML = items.map(savedPromptItemHTML).join('');
   } catch (err) {
     el.innerHTML = `<div class="dash-empty">
       <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
@@ -341,26 +347,28 @@ async function loadPurchasedPrompts() {
     const r = await fetch(API + '/api/users/me/purchased-prompts', {
       headers: { Authorization: 'Bearer ' + token }
     });
+    if (!r.ok) {
+      throw new Error('Failed to load purchased prompts');
+    }
     const d = await r.json();
 
-    if (!d.success) throw new Error(d.message || d.error?.message || 'Failed to load purchased prompts');
-
     const items = d.data?.prompts || [];
-    el.innerHTML = items.length
-      ? items.map(purchasedPromptItemHTML).join('')
-      : `<div class="dash-empty">
-          <div class="dash-empty__icon"><span class="material-symbols-outlined">shopping_cart</span></div>
-          <h3>You haven't purchased any prompts yet</h3>
-          <p>Browse the marketplace to find quality prompts.</p>
-          <a href="marketplace.html" class="pf-btn pf-btn--primary dash-mt-1">Browse Marketplace</a>
-        </div>`;
+    if (!items.length) {
+      el.innerHTML = `<div class="dash-empty">
+        <div class="dash-empty__icon"><span class="material-symbols-outlined">shopping_cart</span></div>
+        <h3>You haven't purchased any prompts yet</h3>
+        <p>Browse the marketplace to find quality prompts.</p>
+        <a href="marketplace.html" class="pf-btn pf-btn--primary dash-mt-1">Browse Marketplace</a>
+      </div>`;
+      return;
+    }
+    el.innerHTML = items.map(purchasedPromptItemHTML).join('');
   } catch (err) {
     el.innerHTML = `<div class="dash-empty">
       <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
       <h3>Unable to load purchased prompts</h3>
       <p>${esc(err.message)}</p>
     </div>`;
-}
   }
 }
 
@@ -371,9 +379,10 @@ async function loadWallet() {
     const r = await fetch(API + '/api/users/me/wallet', {
       headers: { Authorization: 'Bearer ' + token }
     });
+    if (!r.ok) {
+      throw new Error('Failed to load wallet');
+    }
     const d = await r.json();
-
-    if (!d.success) throw new Error(d.message || d.error?.message || 'Failed to load wallet');
 
     const balance = d.data?.balance ?? 0;
     text('sum-wallet', formatMoney(balance));
@@ -414,13 +423,14 @@ async function loadEarnings() {
     const r = await fetch(API + '/api/users/me/earnings', {
       headers: { Authorization: 'Bearer ' + token }
     });
+    if (!r.ok) {
+      throw new Error('Failed to load earnings');
+    }
     const d = await r.json();
-
-    if (!d.success) throw new Error(d.message || d.error?.message || 'Failed to load earnings');
 
     const { totalEarnings, sales } = d.data || { totalEarnings: 0, sales: [] };
 
-    if (sales.length === 0) {
+    if (!sales || sales.length === 0) {
       el.innerHTML = `
         <div class="dash-earnings-summary">
           <div class="dash-earnings-total">

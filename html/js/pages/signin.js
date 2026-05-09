@@ -72,7 +72,7 @@ async function handleAuth(e) {
   btn.textContent = 'Please wait...';
 
   const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
-  const payload = mode === 'login' ? { email, password } : { email, password, username };
+  const payload = mode === 'login' ? { emailOrUsername: email, password } : { email, password, username };
 
   try {
     const res = await fetch(API + endpoint, {
