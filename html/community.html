@@ -86,84 +86,113 @@
 
       <!-- Shown when authenticated -->
       <div id="composer-card" class="pf-composer" hidden>
-        <div class="pf-composer__header">
-          <div class="pf-composer__avatar" id="composer-avatar" aria-hidden="true">?</div>
-          <div>
-            <div class="pf-composer__label">Share a prompt</div>
-            <div class="pf-composer__sublabel">Publish to the community feed</div>
-          </div>
-        </div>
         <div id="composer-msg" class="pf-composer__msg" role="alert" aria-live="polite"></div>
-        <form id="composer-form" class="pf-composer__form" novalidate>
-          <input
-            id="composer-title"
-            class="pf-composer__input"
-            type="text"
-            name="title"
-            placeholder="Title — give your prompt a clear name"
-            maxlength="200"
-            required
-            autocomplete="off"
-          />
-          <textarea
-            id="composer-content"
-            class="pf-composer__textarea"
-            name="content"
-            placeholder="Paste your prompt here…"
-            required
-          ></textarea>
-          <input
-            id="composer-description"
-            class="pf-composer__input"
-            type="text"
-            name="description"
-            placeholder="Short description (optional)"
-            maxlength="500"
-            autocomplete="off"
-          />
-          <div class="pf-composer__row">
+        <form id="composer-form" class="pf-composer__body" novalidate>
+
+          <!-- Avatar column -->
+          <div class="pf-composer__avatar-col">
+            <div class="pf-composer__avatar" id="composer-avatar" aria-hidden="true">?</div>
+            <div class="pf-composer__avatar-line" aria-hidden="true"></div>
+          </div>
+
+          <!-- Compose column -->
+          <div class="pf-composer__compose-col">
+
+            <!-- Title: compact, ghost -->
             <input
-              id="composer-tags"
-              class="pf-composer__input"
+              id="composer-title"
+              class="pf-composer__title-input"
               type="text"
-              name="tags"
-              placeholder="Tags: automation, coding…"
+              name="title"
+              placeholder="Give your prompt a title..."
+              maxlength="200"
               required
               autocomplete="off"
             />
-            <select id="composer-category" class="pf-composer__select" name="category">
-              <option value="">Category (optional)</option>
-              <option value="Coding">Coding</option>
-              <option value="Marketing">Marketing</option>
-              <option value="Security">Security</option>
-              <option value="Automation">Automation</option>
-              <option value="Research">Research</option>
-              <option value="Data">Data</option>
-            </select>
-          </div>
-          <div class="pf-composer__footer">
-            <span class="pf-composer__hint">Free plan · up to 3 published prompts</span>
-            <button id="composer-submit" class="pf-btn pf-btn--primary" type="submit">
-              <span class="material-symbols-outlined" aria-hidden="true">publish</span>
-              Publish Prompt
-            </button>
-          </div>
+
+            <!-- Main content: visual focus, large borderless textarea -->
+            <textarea
+              id="composer-content"
+              class="pf-composer__main-textarea"
+              name="content"
+              placeholder="Share a prompt, workflow, or AI trick..."
+              required
+            ></textarea>
+
+            <!-- Description: secondary ghost input -->
+            <input
+              id="composer-description"
+              class="pf-composer__desc-input"
+              type="text"
+              name="description"
+              placeholder="Add a short description..."
+              maxlength="500"
+              autocomplete="off"
+            />
+
+            <!-- Divider -->
+            <div class="pf-composer__divider" aria-hidden="true"></div>
+
+            <!-- Bottom toolbar -->
+            <div class="pf-composer__toolbar" role="toolbar" aria-label="Composer options">
+
+              <!-- Left: tags, category, future icon placeholders -->
+              <div class="pf-composer__toolbar-left">
+                <input
+                  id="composer-tags"
+                  class="pf-composer__tag-input"
+                  type="text"
+                  name="tags"
+                  placeholder="# Tags"
+                  required
+                  autocomplete="off"
+                />
+                <select id="composer-category" class="pf-composer__cat-select" name="category">
+                  <option value="">Category</option>
+                  <option value="Coding">Coding</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Security">Security</option>
+                  <option value="Automation">Automation</option>
+                  <option value="Research">Research</option>
+                  <option value="Data">Data</option>
+                </select>
+                <button class="pf-composer__toolbar-btn" type="button" disabled aria-label="Attach image (coming soon)" title="Attach image (coming soon)">
+                  <span class="material-symbols-outlined" aria-hidden="true">image</span>
+                </button>
+                <button class="pf-composer__toolbar-btn" type="button" disabled aria-label="Attach link (coming soon)" title="Attach link (coming soon)">
+                  <span class="material-symbols-outlined" aria-hidden="true">link</span>
+                </button>
+              </div>
+
+              <!-- Right: publish button -->
+              <div class="pf-composer__toolbar-right">
+                <button id="composer-submit" class="pf-composer__publish-btn" type="submit">
+                  <span class="material-symbols-outlined" aria-hidden="true">send</span>
+                  Publish
+                </button>
+              </div>
+
+            </div><!-- /.pf-composer__toolbar -->
+          </div><!-- /.pf-composer__compose-col -->
+
         </form>
       </div>
 
       <!-- Shown when not authenticated -->
       <div id="composer-gate" class="pf-composer-gate" hidden>
-        <div class="pf-composer-gate__icon">
-          <span class="material-symbols-outlined" aria-hidden="true">edit_square</span>
+        <div class="pf-composer__avatar-col">
+          <div class="pf-composer-gate__avatar" aria-hidden="true">
+            <span class="material-symbols-outlined" aria-hidden="true">person</span>
+          </div>
         </div>
         <div class="pf-composer-gate__body">
-          <div class="pf-composer-gate__title">Share a prompt with the community</div>
-          <div class="pf-composer-gate__sub">Sign in to publish prompts, upvote and save.</div>
+          <p class="pf-composer-gate__prompt">What prompt are you working on?</p>
+          <p class="pf-composer-gate__sub">Sign in to publish prompts, upvote and save.</p>
         </div>
         <div class="pf-composer-gate__cta">
           <a
             id="composer-signin-btn"
-            class="pf-btn pf-btn--primary"
+            class="pf-composer__publish-btn"
             href="signin.html?returnUrl=%2Fcommunity.html"
           >Sign In</a>
         </div>

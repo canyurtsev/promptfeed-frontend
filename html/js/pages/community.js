@@ -1,4 +1,4 @@
-/* ================================================================
+﻿/* ================================================================
    community.html - Page Controller
    Direct API calls only. No shared backend client. No mock data.
    Protected actions gate to signin.html?returnUrl=...
@@ -213,9 +213,9 @@ function composerSetSubmitting(on) {
   // The button's last child is the text node after the icon span
   const textNode = btn.lastChild;
   if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-    textNode.textContent = on ? ' Publishing\u2026' : ' Publish Prompt';
+    textNode.textContent = on ? ' Publishing\u2026' : ' Publish';
   } else {
-    btn.childNodes[btn.childNodes.length - 1].textContent = on ? ' Publishing\u2026' : ' Publish Prompt';
+    btn.childNodes[btn.childNodes.length - 1].textContent = on ? ' Publishing\u2026' : ' Publish';
   }
 }
 
