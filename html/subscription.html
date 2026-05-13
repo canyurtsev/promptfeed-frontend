@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -165,6 +165,20 @@
   margin-bottom: 24px;
   display: none;
 }
+.sub-card__current-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--pf-success);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
 </style>
   <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 </head>
@@ -179,7 +193,6 @@
     <nav class="pf-topnav__nav" aria-label="Main">
       <a href="index.html" class="pf-topnav__nav-link">News</a>
       <a href="community.html" class="pf-topnav__nav-link">Community</a>
-      <a href="create.html" class="pf-topnav__nav-link">Create</a>
       <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
       <a href="benchmarks.html" class="pf-topnav__nav-link">Benchmarks</a>
       <a href="skill-library.html" class="pf-topnav__nav-link">Skills</a>
@@ -203,56 +216,40 @@
       You are currently on the <span id="current-plan-name" style="text-transform:capitalize">Free</span> plan.
     </div>
 
-    <!-- Pricing Cards -->
+<!-- Pricing Cards -->
     <div class="sub-cards">
       <!-- FREE -->
       <div class="sub-card" id="card-free">
+        <span class="sub-card__current-badge" id="badge-free" style="display:none">Current Plan</span>
         <div class="sub-card__name">Free</div>
         <div class="sub-card__price">$0<span>/mo</span></div>
         <ul class="sub-card__features">
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Community access</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> 3 votes/day</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Limited playground runs</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Access to free prompts and skills</li>
-          <li class="sub-card__feature" style="opacity:0.6"><span class="material-symbols-outlined" style="color:var(--pf-warning)">info</span> Ads enabled</li>
+          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Publish up to 3 prompts</li>
+          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Save prompts</li>
+          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Vote on community prompts</li>
+          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Full community access</li>
         </ul>
         <button class="pf-btn pf-btn--ghost" id="btn-free" data-action="plan-action" data-plan="free" style="width:100%">Current Plan</button>
       </div>
 
       <!-- PRO -->
       <div class="sub-card sub-card--pro" id="card-pro">
+        <span class="sub-card__current-badge" id="badge-pro" style="display:none">Current Plan</span>
         <div class="sub-card__badge">Most Popular</div>
         <div class="sub-card__name">Pro</div>
         <div class="sub-card__price">$9<span>/mo</span></div>
         <ul class="sub-card__features">
+          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Unlimited prompt publishing</li>
+          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Sell prompts (coming soon)</li>
+          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Advanced analytics</li>
           <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> No ads</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Higher daily vote limit</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> More playground runs</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Advanced benchmark visibility</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Collections / saved searches</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Priority community features</li>
+          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Priority features</li>
         </ul>
         <button class="pf-btn pf-btn--primary" id="btn-pro" data-action="plan-action" data-plan="pro" style="width:100%">Upgrade to Pro</button>
       </div>
-
-      <!-- CREATOR -->
-      <div class="sub-card sub-card--creator" id="card-creator">
-        <div class="sub-card__badge">Monetize</div>
-        <div class="sub-card__name">Creator</div>
-        <div class="sub-card__price">$29<span>/mo</span></div>
-        <ul class="sub-card__features">
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Sell prompts and skill packs</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Creator dashboard</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Boost credits</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Lower platform fee</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Sales analytics</li>
-          <li class="sub-card__feature"><span class="material-symbols-outlined">check</span> Verified creator badge</li>
-        </ul>
-        <button class="pf-btn pf-btn--ghost" id="btn-creator" data-action="plan-action" data-plan="creator" style="width:100%;border-color:var(--pf-pro);color:var(--pf-pro)">Become a Creator</button>
-      </div>
     </div>
 
-    <!-- Comparison Table -->
+<!-- Comparison Table -->
     <h2 style="font-size:20px;font-weight:800;color:var(--pf-text-primary);margin-bottom:16px">Plan Comparison</h2>
     <div class="sub-table-wrapper">
       <table class="sub-table">
@@ -261,61 +258,46 @@
             <th>Feature</th>
             <th>Free</th>
             <th>Pro</th>
-            <th>Creator</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Ads</td>
-            <td>Enabled</td>
-            <td>None</td>
-            <td>None</td>
-          </tr>
-          <tr>
-            <td>Daily Votes</td>
-            <td>3 / day</td>
-            <td>20 / day</td>
+            <td>Publish Prompts</td>
+            <td>Up to 3</td>
             <td>Unlimited</td>
           </tr>
           <tr>
-            <td>Playground Runs</td>
-            <td>Limited</td>
-            <td>High Priority</td>
-            <td>Maximum Priority</td>
+            <td>Save Prompts</td>
+            <td><span class="material-symbols-outlined check">check</span></td>
+            <td><span class="material-symbols-outlined check">check</span></td>
           </tr>
           <tr>
-            <td>Prompt Selling</td>
+            <td>Vote on Prompts</td>
+            <td><span class="material-symbols-outlined check">check</span></td>
+            <td><span class="material-symbols-outlined check">check</span></td>
+          </tr>
+          <tr>
+            <td>Community Access</td>
+            <td><span class="material-symbols-outlined check">check</span></td>
+            <td><span class="material-symbols-outlined check">check</span></td>
+          </tr>
+          <tr>
+            <td>Ads</td>
+            <td>Enabled</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td>Sell Prompts</td>
             <td><span class="material-symbols-outlined cross">close</span></td>
+            <td>Coming soon</td>
+          </tr>
+          <tr>
+            <td>Advanced Analytics</td>
             <td><span class="material-symbols-outlined cross">close</span></td>
             <td><span class="material-symbols-outlined check">check</span></td>
           </tr>
           <tr>
-            <td>Skill Selling</td>
-            <td><span class="material-symbols-outlined cross">close</span></td>
-            <td><span class="material-symbols-outlined cross">close</span></td>
-            <td><span class="material-symbols-outlined check">check</span></td>
-          </tr>
-          <tr>
-            <td>Benchmark Access</td>
-            <td>Basic</td>
-            <td>Advanced</td>
-            <td>Advanced</td>
-          </tr>
-          <tr>
-            <td>Boost Credits</td>
-            <td><span class="material-symbols-outlined cross">close</span></td>
-            <td><span class="material-symbols-outlined cross">close</span></td>
-            <td>10 / month</td>
-          </tr>
-          <tr>
-            <td>Platform Fee</td>
-            <td>â€”</td>
-            <td>â€”</td>
-            <td>Reduced</td>
-          </tr>
-          <tr>
-            <td>Creator Analytics</td>
-            <td><span class="material-symbols-outlined cross">close</span></td>
+            <td>Priority Features</td>
             <td><span class="material-symbols-outlined cross">close</span></td>
             <td><span class="material-symbols-outlined check">check</span></td>
           </tr>

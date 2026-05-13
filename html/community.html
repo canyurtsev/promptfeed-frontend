@@ -37,7 +37,6 @@
     <nav class="pf-topnav__nav" aria-label="Main navigation">
       <a href="index.html" class="pf-topnav__nav-link">News</a>
       <a href="community.html" class="pf-topnav__nav-link active" aria-current="page">Community</a>
-      <a href="create.html" class="pf-topnav__nav-link">Create</a>
       <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
       <a href="benchmarks.html" class="pf-topnav__nav-link">Benchmarks</a>
       <a href="skill-library.html" class="pf-topnav__nav-link">Skills</a>
@@ -81,6 +80,97 @@
 
   <!-- CENTER FEED -->
   <main class="pf-feed" role="main">
+
+    <!-- COMPOSER: logged-in users see the form; logged-out users see the gate -->
+    <section id="composer-section" aria-label="Publish a prompt">
+
+      <!-- Shown when authenticated -->
+      <div id="composer-card" class="pf-composer" hidden>
+        <div class="pf-composer__header">
+          <div class="pf-composer__avatar" id="composer-avatar" aria-hidden="true">?</div>
+          <div>
+            <div class="pf-composer__label">Share a prompt</div>
+            <div class="pf-composer__sublabel">Publish to the community feed</div>
+          </div>
+        </div>
+        <div id="composer-msg" class="pf-composer__msg" role="alert" aria-live="polite"></div>
+        <form id="composer-form" class="pf-composer__form" novalidate>
+          <input
+            id="composer-title"
+            class="pf-composer__input"
+            type="text"
+            name="title"
+            placeholder="Title — give your prompt a clear name"
+            maxlength="200"
+            required
+            autocomplete="off"
+          />
+          <textarea
+            id="composer-content"
+            class="pf-composer__textarea"
+            name="content"
+            placeholder="Paste your prompt here…"
+            required
+          ></textarea>
+          <input
+            id="composer-description"
+            class="pf-composer__input"
+            type="text"
+            name="description"
+            placeholder="Short description (optional)"
+            maxlength="500"
+            autocomplete="off"
+          />
+          <div class="pf-composer__row">
+            <input
+              id="composer-tags"
+              class="pf-composer__input"
+              type="text"
+              name="tags"
+              placeholder="Tags: automation, coding…"
+              required
+              autocomplete="off"
+            />
+            <select id="composer-category" class="pf-composer__select" name="category">
+              <option value="">Category (optional)</option>
+              <option value="Coding">Coding</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Security">Security</option>
+              <option value="Automation">Automation</option>
+              <option value="Research">Research</option>
+              <option value="Data">Data</option>
+            </select>
+          </div>
+          <div class="pf-composer__footer">
+            <span class="pf-composer__hint">Free plan · up to 3 published prompts</span>
+            <button id="composer-submit" class="pf-btn pf-btn--primary" type="submit">
+              <span class="material-symbols-outlined" aria-hidden="true">publish</span>
+              Publish Prompt
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Shown when not authenticated -->
+      <div id="composer-gate" class="pf-composer-gate" hidden>
+        <div class="pf-composer-gate__icon">
+          <span class="material-symbols-outlined" aria-hidden="true">edit_square</span>
+        </div>
+        <div class="pf-composer-gate__body">
+          <div class="pf-composer-gate__title">Share a prompt with the community</div>
+          <div class="pf-composer-gate__sub">Sign in to publish prompts, upvote and save.</div>
+        </div>
+        <div class="pf-composer-gate__cta">
+          <a
+            id="composer-signin-btn"
+            class="pf-btn pf-btn--primary"
+            href="signin.html?returnUrl=%2Fcommunity.html"
+          >Sign In</a>
+        </div>
+      </div>
+
+    </section>
+
     <div class="pf-feed-tabs" role="tablist" aria-label="Feed filters">
       <button class="pf-feed-tab active" data-tab="featured" role="tab" aria-selected="true">Featured</button>
       <button class="pf-feed-tab" data-tab="latest" role="tab" aria-selected="false">Latest</button>

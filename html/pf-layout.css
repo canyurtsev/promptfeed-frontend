@@ -1783,3 +1783,183 @@ img { display: block; max-width: 100%; }
   color: #06B6D4;
   margin-left: 1px;
 }
+
+/* ── Vote button active state ── */
+.pf-vote-btn--active { color: var(--pf-accent); }
+
+/* ── Community Composer Card ── */
+.pf-composer {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 16px 18px 14px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.pf-composer:focus-within {
+  border-color: var(--pf-accent);
+}
+
+.pf-composer__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pf-composer__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pf-accent-dim) 0%, var(--pf-surface) 100%);
+  border: 2px solid var(--pf-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pf-accent);
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+.pf-composer__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--pf-text-primary);
+}
+.pf-composer__sublabel {
+  font-size: 11px;
+  color: var(--pf-text-muted);
+  margin-top: 1px;
+}
+
+.pf-composer__form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pf-composer__input,
+.pf-composer__textarea,
+.pf-composer__select {
+  width: 100%;
+  background: var(--pf-bg);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  color: var(--pf-text-primary);
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 12px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.pf-composer__input:focus,
+.pf-composer__textarea:focus,
+.pf-composer__select:focus {
+  outline: none;
+  border-color: var(--pf-accent);
+  box-shadow: 0 0 0 3px var(--pf-accent-dim);
+}
+.pf-composer__input::placeholder,
+.pf-composer__textarea::placeholder {
+  color: var(--pf-text-muted);
+}
+.pf-composer__textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: var(--pf-font-mono);
+  line-height: 1.5;
+}
+.pf-composer__select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23484f58' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  cursor: pointer;
+}
+.pf-composer__select option {
+  background: var(--pf-card);
+}
+
+.pf-composer__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pf-composer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+.pf-composer__hint {
+  font-size: 11px;
+  color: var(--pf-text-muted);
+}
+
+.pf-composer__msg {
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: var(--pf-radius);
+  display: none;
+}
+.pf-composer__msg--error {
+  display: block;
+  color: var(--pf-danger);
+  background: #f8514912;
+  border: 1px solid #f8514930;
+}
+.pf-composer__msg--success {
+  display: block;
+  color: var(--pf-success);
+  background: #3fb95012;
+  border: 1px solid #3fb95030;
+}
+
+/* Sign-in prompt (shown to logged-out users instead of composer) */
+.pf-composer-gate {
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.pf-composer-gate__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--pf-surface);
+  border: 1px dashed var(--pf-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pf-text-muted);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.pf-composer-gate__body {
+  flex: 1;
+  min-width: 0;
+}
+.pf-composer-gate__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pf-text-primary);
+}
+.pf-composer-gate__sub {
+  font-size: 12px;
+  color: var(--pf-text-muted);
+  margin-top: 2px;
+}
+.pf-composer-gate__cta {
+  flex-shrink: 0;
+}
+
+@media (max-width: 520px) {
+  .pf-composer__row { grid-template-columns: 1fr; }
+}
