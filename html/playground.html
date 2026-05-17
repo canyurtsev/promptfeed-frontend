@@ -1,29 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Playground — PromptFeed</title>
 <meta name="description" content="Test and run AI prompts."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 <link rel="stylesheet" href="pf-layout.css"/>
-<style>
-.play-container { background:var(--pf-card); border:1px solid var(--pf-border); border-radius:var(--pf-radius-lg); padding:20px; display:flex; flex-direction:column; gap:16px; }
-.play-title { font-size:18px; font-weight:700; color:var(--pf-text-primary); }
-.play-input-wrapper { display:flex; flex-direction:column; gap:8px; }
-.play-label { font-size:12px; font-weight:600; color:var(--pf-text-secondary); text-transform:uppercase; letter-spacing:0.5px; }
-.play-textarea { width:100%; height:150px; background:var(--pf-bg); border:1px solid var(--pf-border); border-radius:var(--pf-radius); padding:12px; font-family:var(--pf-font-mono); font-size:13px; color:var(--pf-text-primary); resize:vertical; outline:none; transition:border-color 0.15s; }
-.play-textarea:focus { border-color:var(--pf-accent); }
-.play-actions { display:flex; justify-content:flex-end; }
-.play-output-wrapper { margin-top:20px; display:flex; flex-direction:column; gap:8px; }
-.play-output { background:var(--pf-bg); border:1px solid var(--pf-border); border-radius:var(--pf-radius); padding:16px; min-height:100px; font-size:14px; color:var(--pf-text-primary); white-space:pre-wrap; }
-.exec-item { padding:10px; border-bottom:1px solid var(--pf-border); cursor:pointer; transition:background 0.15s; }
-.exec-item:hover { background:var(--pf-surface); }
-.exec-title { font-size:13px; font-weight:600; color:var(--pf-text-primary); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.exec-meta { font-size:11px; color:var(--pf-text-muted); }
-.loading { opacity: 0.5; pointer-events: none; }
-</style>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 </head>
 <body>
@@ -33,7 +18,7 @@
     <a href="index.html" class="pf-topnav__logo">
       <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
     </a>
-    <nav class="pf-topnav__nav" aria-label="Main">
+    <nav class="pf-topnav__nav" aria-label="Main navigation">
       <a href="index.html" class="pf-topnav__nav-link">News</a>
       <a href="community.html" class="pf-topnav__nav-link">Community</a>
       <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
@@ -46,47 +31,77 @@
   </div>
 </header>
 
-<div class="pf-layout">
-  <!-- LEFT SIDEBAR: Recent Executions -->
-  <aside class="pf-sidebar-left" aria-label="Recent Executions">
-    <div class="pf-sidebar-label">Recent Runs</div>
-    <div id="executions-list" style="margin-top:10px">
-      <!-- Injected via JS -->
-    </div>
-  </aside>
-
-  <!-- CENTER: Playground Area -->
-  <main class="pf-feed" role="main">
-    <div style="margin-bottom:16px">
-      <h1 style="font-size:22px;font-weight:800;color:var(--pf-text-primary);margin-bottom:4px">Playground</h1>
-      <p style="font-size:13px;color:var(--pf-text-secondary)">Test and execute prompts with mocked backend response.</p>
-    </div>
-
-    <div class="play-container">
-      <div id="prompt-info" style="display:none;">
-        <div class="play-title" id="prompt-title">Loading prompt...</div>
-      </div>
-      
-      <div class="play-input-wrapper">
-        <label class="play-label" for="prompt-input">Input Variables / Content</label>
-        <textarea id="prompt-input" class="play-textarea" placeholder="Enter input text here..."></textarea>
+<div class="pg-container">
+  <div class="pg-layout">
+    
+    <!-- Main Column: Playground -->
+    <main class="pg-main" role="main">
+      <div class="pg-header">
+        <h1 class="pg-header__title">Playground</h1>
+        <p class="pg-header__sub">Test and execute prompts with mocked AI backend response.</p>
       </div>
 
-      <div class="play-actions">
-        <button id="btn-run" class="pf-btn pf-btn--primary">
-          <span class="material-symbols-outlined" style="font-size:18px;margin-right:4px">play_arrow</span> Run
-        </button>
-      </div>
+      <div class="pg-panel">
+        <div class="pg-panel__body">
+          
+          <!-- Prompt Info (hidden until loaded) -->
+          <div id="prompt-info" class="pg-prompt-info pg-hidden">
+            <div id="prompt-media" class="pg-prompt-media"></div>
+            <div class="pg-prompt-header">
+              <h2 class="pg-prompt-title" id="prompt-title">Loading prompt...</h2>
+              <div id="prompt-badge"></div>
+            </div>
+            <div class="pg-prompt-meta" id="prompt-meta"></div>
+          </div>
+          
+          <!-- Error/Empty State -->
+          <div id="prompt-error" class="pg-empty pg-hidden">
+            <div class="pg-empty__icon"><span class="material-symbols-outlined" aria-hidden="true">warning</span></div>
+            <h3 class="pg-empty__title" id="prompt-error-title">Error</h3>
+            <p class="pg-empty__desc" id="prompt-error-desc">Could not load prompt.</p>
+          </div>
 
-      <div class="play-output-wrapper">
-        <label class="play-label">Output</label>
-        <div id="prompt-output" class="play-output">Output will appear here...</div>
-      </div>
-    </div>
-  </main>
+          <!-- Input Area -->
+          <div class="pg-input-wrapper">
+            <label class="pg-label" for="prompt-input">Input Variables / Content</label>
+            <textarea id="prompt-input" class="pg-textarea" placeholder="Enter input text or variables to inject into the prompt..."></textarea>
+          </div>
 
-  <aside class="pf-sidebar-right">
-  </aside>
+          <!-- Run Actions -->
+          <div class="pg-actions">
+            <button id="btn-run" class="pf-btn pf-btn--primary pg-btn-run" disabled>
+              <span class="material-symbols-outlined pg-btn-icon" aria-hidden="true">play_arrow</span>
+              Run Prompt
+            </button>
+          </div>
+
+          <!-- Output Area -->
+          <div class="pg-output-wrapper">
+            <label class="pg-label">Output</label>
+            <div id="prompt-output" class="pg-output pg-output--empty">Output will appear here...</div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <!-- Side Column: History -->
+    <aside class="pg-sidebar" aria-label="Execution History">
+      <div class="pg-panel">
+        <div class="pg-panel__header">
+          <div class="pg-panel__title">
+            <span class="material-symbols-outlined pg-panel__icon" aria-hidden="true">history</span>
+            Recent Runs
+          </div>
+        </div>
+        <div class="pg-history-list" id="executions-list">
+          <!-- Injected via JS -->
+          <div class="pg-history-msg">Loading history...</div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
 </div>
 
 <script src="js/language-toggle.js" defer></script>

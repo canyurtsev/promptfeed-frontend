@@ -35,11 +35,11 @@ async function initAuth(){
       area.innerHTML = `
         <div class="pf-wallet-chip" title="Wallet balance">
           <span class="material-symbols-outlined pf-wallet-chip__icon">toll</span>
-          <span>${esc(String(currentUser.walletBalance??'—'))}</span>
+          <span>${esc(String(currentUser.wallet?.balance ?? currentUser.walletBalance ?? '—'))}</span>
         </div>
         <div class="pf-avatar" id="user-avatar" title="Profile"
           style="${currentUser.avatarUrl ? 'background-image:url('+esc(currentUser.avatarUrl)+')' : ''}"
-          id="user-avatar-btn"></div>`;
+          id="user-avatar-btn">${currentUser.avatarUrl ? '' : esc(String(currentUser.username || currentUser.fullName || currentUser.email || 'A')[0].toUpperCase())}</div>`;
       if(plan === 'free') showAds();
     } else { guestNav(area); showAds(); }
   } catch { guestNav(area); showAds(); }

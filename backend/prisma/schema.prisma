@@ -129,6 +129,8 @@ model Prompt {
   skillPrompts      SkillPrompt[]
   useCases          String?
   exampleOutput     String?
+  imageUrl          String?
+  resourceUrl       String?
   executions        PromptExecution[]
 }
 

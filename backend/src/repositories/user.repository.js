@@ -8,7 +8,8 @@ class UserRepository {
                 _count: {
                     select: { prompts: true, skills: true }
                 },
-                subscription: true
+                subscription: true,
+                wallet: true
             }
         });
     }

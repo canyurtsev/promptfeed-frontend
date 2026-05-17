@@ -133,4 +133,21 @@
   } else {
     init();
   }
+
+  // Global image error handler (CSP safe, no inline JS)
+  window.addEventListener('error', function(e) {
+    if (e.target && e.target.tagName === 'IMG') {
+      e.target.classList.add('pf-img-broken');
+      
+      // Cleanly collapse wrappers if the broken image was the only visual element
+      const wrapper = e.target.closest('.mk-card__media, .pd-media-panel, .pf-topic-row__media');
+      if (wrapper) {
+        // If the wrapper contains no other visible links/chips, hide the entire wrapper
+        const hasOtherContent = Array.from(wrapper.children).some(c => c !== e.target && !c.classList.contains('pf-img-broken'));
+        if (!hasOtherContent) {
+          wrapper.classList.add('pf-img-broken');
+        }
+      }
+    }
+  }, true); // Use capture to catch resource loading errors
 })();

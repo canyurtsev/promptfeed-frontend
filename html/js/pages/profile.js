@@ -20,6 +20,8 @@ function text(id, value) {
 }
 
 function redirectToSignin() {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
   window.location.href = 'signin.html?returnUrl=/profile.html';
 }
 
@@ -104,17 +106,17 @@ function renderNav() {
 
   area.innerHTML = `
     ${wallet == null ? '' : `
-      <a href="profile.html" class="pf-wallet-chip" title="Wallet balance">
+      <div class="pf-wallet-chip" title="Wallet balance">
         <span class="material-symbols-outlined pf-wallet-chip__icon">toll</span>
         <span>${esc(formatMoney(wallet))}</span>
-      </a>`}
-    <a href="profile.html" class="pf-user-chip" title="Profile">
+      </div>`}
+    <div class="pf-user-chip" title="Profile">
       <span class="pf-avatar" id="user-avatar">${esc(initials(name))}</span>
       <span class="pf-user-chip__body">
         <span class="pf-user-chip__name">${esc(name)}</span>
         <span class="pf-user-chip__plan">${esc(plan)}</span>
       </span>
-    </a>`;
+    </div>`;
 
   applyAvatar('user-avatar', currentUser.avatarUrl, name);
 }
@@ -157,11 +159,11 @@ function renderDashboard() {
   const planEl = document.getElementById('sum-plan');
   if (planEl) {
     if (plan === 'pro') {
-      planEl.className = 'dash-plan-badge dash-plan-badge--pro';
-      planEl.innerHTML = '<span class="material-symbols-outlined dash-icon-sm">workspace_premium</span>PRO';
+      planEl.className = 'pr-plan-badge pr-plan-badge--pro';
+      planEl.innerHTML = '<span class="material-symbols-outlined pr-plan-badge__icon" aria-hidden="true">workspace_premium</span>PRO';
     } else {
-      planEl.className = 'dash-plan-badge';
-      planEl.innerHTML = '<span class="material-symbols-outlined dash-icon-sm">workspace_premium</span>FREE';
+      planEl.className = 'pr-plan-badge';
+      planEl.innerHTML = '<span class="material-symbols-outlined pr-plan-badge__icon" aria-hidden="true">workspace_premium</span>FREE';
     }
   }
 
@@ -174,9 +176,9 @@ function renderDashboard() {
   const upgradeBox = document.getElementById('upgrade-box');
   if (upgradeBox) {
     if (plan === 'free') {
-      upgradeBox.classList.remove('dash-hidden');
+      upgradeBox.classList.remove('pr-hidden');
     } else {
-      upgradeBox.classList.add('dash-hidden');
+      upgradeBox.classList.add('pr-hidden');
     }
   }
 
@@ -189,199 +191,162 @@ function renderDashboard() {
   }
 }
 
-function myPromptItemHTML(p) {
+/* ── Card Rendering (Reusing Marketplace style) ── */
+function isValidImageUrl(url) {
+  if (!url) return false;
+  try {
+    const p = new URL(url);
+    const path = p.pathname.toLowerCase();
+    return /\.(png|jpe?g|webp|gif|avif|svg)$/.test(path) ||
+           p.hostname.includes('unsplash.com') ||
+           p.hostname.includes('cloudinary.com') ||
+           p.hostname.includes('imgur.com');
+  } catch { return false; }
+}
+
+function buildCardMediaHtml(p) {
+  let html = '';
+  const validImg = isValidImageUrl(p.imageUrl);
+  if (validImg) {
+    html += `<img class="mk-card__thumb" src="${esc(p.imageUrl)}" alt="Prompt thumbnail" loading="lazy"/>`;
+  }
+  if (p.resourceUrl && !validImg) {
+    return `<div class="mk-card__resource-only"><a class="mk-card__resource-chip" href="${esc(p.resourceUrl)}" target="_blank" rel="noopener noreferrer"
+      data-action="stopProp">
+      <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+      ${esc(p.resourceUrl)}
+    </a></div>`;
+  }
+  return html ? `<div class="mk-card__media">${html}</div>` : '';
+}
+
+function renderPromptCard(p) {
+  const author = p.user?.username || 'unknown';
+  const score = Math.max(0, p.score || 0);
+  const numericPrice = parseFloat(p.price);
+  const isPremium = numericPrice > 0;
+  const priceStr = isPremium ? '$' + numericPrice.toFixed(2) : 'Free';
   const tags = Array.isArray(p.tags)
-    ? p.tags
-    : String(p.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+    ? p.tags.slice(0, 3)
+    : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim()).filter(Boolean).slice(0, 3) : []);
+
+  const badgeHtml = isPremium
+    ? `<span class="mk-badge mk-badge--premium">Premium</span>`
+    : `<span class="mk-badge mk-badge--free">Free</span>`;
+
+  const tagsHtml = tags.map(t => `<span class="pf-tag">${esc(t)}</span>`).join('');
+  const mediaHtml = buildCardMediaHtml(p);
 
   return `
-    <div class="dash-prompt-item">
-      <a href="prompt-detail.html?id=${esc(p.id)}" class="dash-prompt-item__link">
-        <span class="dash-prompt-item__title">${esc(p.title)}</span>
-        <span class="dash-prompt-item__meta">
-          <span>${new Date(p.createdAt).toLocaleDateString()}</span>
-          ${tags.slice(0, 2).map(tag => `<span class="pf-tag">${esc(tag)}</span>`).join('')}
-        </span>
-      </a>
-      <div class="dash-prompt-item__score">
-        <span class="material-symbols-outlined">arrow_upward</span>
-        ${p.score || 0}
+  <div class="mk-card" data-action="gotoDetail" data-id="${esc(p.id)}">
+    ${mediaHtml}
+    <div class="mk-card__header">
+      <div class="mk-card__title">${esc(p.title || 'Untitled')}</div>
+      ${badgeHtml}
+    </div>
+    <div class="mk-card__meta">
+      <span class="mk-card__author">by <strong>${esc(author)}</strong></span>
+      <span class="mk-card__dot">·</span>
+      <span class="mk-card__score">
+        <span class="material-symbols-outlined mk-card__score-icon" aria-hidden="true">arrow_upward</span>
+        ${score}
+      </span>
+    </div>
+    ${tagsHtml ? `<div class="mk-card__tags">${tagsHtml}</div>` : ''}
+    <div class="mk-card__footer" data-action="stopProp">
+      <div class="mk-card__price ${isPremium ? 'mk-card__price--premium' : 'mk-card__price--free'}">${esc(priceStr)}</div>
+      <div class="mk-card__actions">
+        <button class="pf-btn pf-btn--ghost mk-card__btn"
+          data-action="gotoDetail" data-id="${esc(p.id)}">View Details</button>
       </div>
-    </div>`;
+    </div>
+  </div>`;
+}
+
+function renderEmptyState(icon, title, desc, ctaHtml) {
+  return `<div class="pr-empty">
+    <div class="pr-empty__icon"><span class="material-symbols-outlined" aria-hidden="true">${icon}</span></div>
+    <h3 class="pr-empty__title">${esc(title)}</h3>
+    <p class="pr-empty__desc">${esc(desc)}</p>
+    ${ctaHtml ? `<div class="pr-empty__cta">${ctaHtml}</div>` : ''}
+  </div>`;
 }
 
 async function loadMyPrompts() {
   const el = document.getElementById('my-prompts-content');
-  if (!el || !token) {
-    if (el) {
-      el.innerHTML = `<div class="dash-empty"><div class="dash-empty__icon"><span class="material-symbols-outlined">login</span></div><h3>Sign in to view your prompts</h3></div>`;
-    }
-    return;
-  }
+  if (!el || !token) return;
 
   try {
-    const r = await fetch(API + '/api/users/me/prompts?limit=5', {
+    const r = await fetch(API + '/api/users/me/prompts?limit=6', {
       headers: { Authorization: 'Bearer ' + token }
     });
-    if (!r.ok) {
-      throw new Error('Failed to load prompts');
-    }
+    if (!r.ok) throw new Error('Failed to load prompts');
     const d = await r.json();
 
     const items = d.data?.prompts || [];
     if (!items.length) {
-      el.innerHTML = `<div class="dash-empty">
-        <div class="dash-empty__icon"><span class="material-symbols-outlined">edit_note</span></div>
-        <h3>No prompts yet</h3>
-        <p>Create your first prompt to share with the community.</p>
-        <a href="create.html" class="pf-btn pf-btn--primary dash-mt-1">Create Prompt</a>
-      </div>`;
+      el.innerHTML = renderEmptyState('edit_note', 'No prompts yet', 'Create your first prompt to share with the community.', '<a href="community.html?compose=1" class="pf-btn pf-btn--primary">Create Prompt</a>');
       return;
     }
-    el.innerHTML = items.map(myPromptItemHTML).join('');
+    el.innerHTML = `<div class="mk-grid">${items.map(renderPromptCard).join('')}</div>`;
   } catch (err) {
-    el.innerHTML = `<div class="dash-empty">
-      <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
-      <h3>Unable to load prompts</h3>
-      <p>${esc(err.message)}</p>
-    </div>`;
+    el.innerHTML = renderEmptyState('warning', 'Unable to load prompts', err.message);
   }
-}
-
-function savedPromptItemHTML(item) {
-  const prompt = item.prompt || item;
-  const tags = Array.isArray(prompt.tags)
-    ? prompt.tags
-    : String(prompt.tags || '').split(',').map(t => t.trim()).filter(Boolean);
-
-  return `
-    <div class="dash-prompt-item">
-      <a href="prompt-detail.html?id=${esc(prompt.id)}" class="dash-prompt-item__link">
-        <span class="dash-prompt-item__title">${esc(prompt.title)}</span>
-        <span class="dash-prompt-item__meta">
-          <span>by ${esc(prompt.user?.username || 'unknown')}</span>
-          ${tags.slice(0, 2).map(tag => `<span class="pf-tag">${esc(tag)}</span>`).join('')}
-        </span>
-      </a>
-      <div class="dash-prompt-item__score">
-        <span class="material-symbols-outlined">arrow_upward</span>
-        ${prompt.score || 0}
-      </div>
-    </div>`;
 }
 
 async function loadSavedPrompts() {
   const el = document.getElementById('saved-prompts-content');
-  if (!el || !token) {
-    if (el) {
-      el.innerHTML = `<div class="dash-empty"><div class="dash-empty__icon"><span class="material-symbols-outlined">login</span></div><h3>Sign in to view saved prompts</h3></div>`;
-    }
-    return;
-  }
+  if (!el || !token) return;
 
   try {
     const r = await fetch(API + '/api/users/me/saved-prompts', {
       headers: { Authorization: 'Bearer ' + token }
     });
-    if (!r.ok) {
-      throw new Error('Failed to load saved prompts');
-    }
+    if (!r.ok) throw new Error('Failed to load saved prompts');
     const d = await r.json();
 
     const items = d.data || [];
     if (!items.length) {
-      el.innerHTML = `<div class="dash-empty">
-        <div class="dash-empty__icon"><span class="material-symbols-outlined">bookmark_border</span></div>
-        <h3>No saved prompts</h3>
-        <p>Save prompts from the community to view them here.</p>
-        <a href="community.html" class="pf-btn pf-btn--ghost dash-mt-1">Browse Community</a>
-      </div>`;
+      el.innerHTML = renderEmptyState('bookmark_border', 'No saved prompts', 'Save prompts from the community to view them here.', '<a href="community.html" class="pf-btn pf-btn--ghost">Browse Community</a>');
       return;
     }
-    el.innerHTML = items.map(savedPromptItemHTML).join('');
+    // Saved prompts usually return just the prompt under item.prompt, check data structure
+    const promptList = items.map(item => item.prompt || item);
+    el.innerHTML = `<div class="mk-grid">${promptList.map(renderPromptCard).join('')}</div>`;
   } catch (err) {
-    el.innerHTML = `<div class="dash-empty">
-      <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
-      <h3>Unable to load saved prompts</h3>
-      <p>${esc(err.message)}</p>
-    </div>`;
+    el.innerHTML = renderEmptyState('warning', 'Unable to load saved prompts', err.message);
   }
-}
-
-function purchasedPromptItemHTML(p) {
-  const tags = Array.isArray(p.tags)
-    ? p.tags
-    : String(p.tags || '').split(',').map(t => t.trim()).filter(Boolean);
-
-  const price = p.price != null ? '$' + Number(p.price).toFixed(2) : '$0.00';
-
-  return `
-    <div class="dash-prompt-item">
-      <a href="prompt-detail.html?id=${esc(p.id)}" class="dash-prompt-item__link">
-        <span class="dash-prompt-item__title">${esc(p.title)}</span>
-        <span class="dash-prompt-item__meta">
-          <span>${new Date(p.createdAt).toLocaleDateString()}</span>
-          ${tags.slice(0, 2).map(tag => `<span class="pf-tag">${esc(tag)}</span>`).join('')}
-        </span>
-      </a>
-      <div class="dash-prompt-item__right">
-        <span class="dash-prompt-item__price">${esc(price)}</span>
-        <div class="dash-prompt-item__score">
-          <span class="material-symbols-outlined">arrow_upward</span>
-          ${p.score || 0}
-        </div>
-      </div>
-    </div>`;
 }
 
 async function loadPurchasedPrompts() {
   const el = document.getElementById('purchased-prompts-content');
-  if (!el || !token) {
-    if (el) {
-      el.innerHTML = `<div class="dash-empty"><div class="dash-empty__icon"><span class="material-symbols-outlined">login</span></div><h3>Sign in to view purchased prompts</h3></div>`;
-    }
-    return;
-  }
+  if (!el || !token) return;
 
   try {
     const r = await fetch(API + '/api/users/me/purchased-prompts', {
       headers: { Authorization: 'Bearer ' + token }
     });
-    if (!r.ok) {
-      throw new Error('Failed to load purchased prompts');
-    }
+    if (!r.ok) throw new Error('Failed to load purchased prompts');
     const d = await r.json();
 
     const items = d.data?.prompts || [];
     if (!items.length) {
-      el.innerHTML = `<div class="dash-empty">
-        <div class="dash-empty__icon"><span class="material-symbols-outlined">shopping_cart</span></div>
-        <h3>You haven't purchased any prompts yet</h3>
-        <p>Browse the marketplace to find quality prompts.</p>
-        <a href="marketplace.html" class="pf-btn pf-btn--primary dash-mt-1">Browse Marketplace</a>
-      </div>`;
+      el.innerHTML = renderEmptyState('shopping_cart', 'No purchased prompts', 'Browse the marketplace to find premium prompts.', '<a href="marketplace.html" class="pf-btn pf-btn--primary">Browse Marketplace</a>');
       return;
     }
-    el.innerHTML = items.map(purchasedPromptItemHTML).join('');
+    el.innerHTML = `<div class="mk-grid">${items.map(renderPromptCard).join('')}</div>`;
   } catch (err) {
-    el.innerHTML = `<div class="dash-empty">
-      <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
-      <h3>Unable to load purchased prompts</h3>
-      <p>${esc(err.message)}</p>
-    </div>`;
+    el.innerHTML = renderEmptyState('warning', 'Unable to load purchased prompts', err.message);
   }
 }
 
 async function loadWallet() {
   if (!token) return;
-
   try {
     const r = await fetch(API + '/api/users/me/wallet', {
       headers: { Authorization: 'Bearer ' + token }
     });
-    if (!r.ok) {
-      throw new Error('Failed to load wallet');
-    }
+    if (!r.ok) throw new Error('Failed to load wallet');
     const d = await r.json();
 
     const balance = d.data?.balance ?? 0;
@@ -399,70 +364,47 @@ async function loadWallet() {
 
 function earningsItemHTML(sale) {
   return `
-    <div class="dash-prompt-item">
-      <a href="prompt-detail.html?id=${esc(sale.promptId)}" class="dash-prompt-item__link">
-        <span class="dash-prompt-item__title">${esc(sale.title)}</span>
-        <span class="dash-prompt-item__meta">
-          <span>${new Date(sale.createdAt).toLocaleDateString()}</span>
-        </span>
+    <div class="pr-earning-item">
+      <a href="prompt-detail.html?id=${esc(sale.promptId)}#id=${esc(sale.promptId)}" class="pr-earning-item__link">
+        <span class="pr-earning-item__title">${esc(sale.title)}</span>
+        <span class="pr-earning-item__date">${new Date(sale.createdAt).toLocaleDateString()}</span>
       </a>
-      <div class="dash-prompt-item__price">${esc(formatMoney(sale.pricePaid))}</div>
+      <div class="pr-earning-item__price">${esc(formatMoney(sale.pricePaid))}</div>
     </div>`;
 }
 
 async function loadEarnings() {
   const el = document.getElementById('creator-content');
-  if (!el || !token) {
-    if (el) {
-      el.innerHTML = `<div class="dash-empty"><div class="dash-empty__icon"><span class="material-symbols-outlined">login</span></div><h3>Sign in to view earnings</h3></div>`;
-    }
-    return;
-  }
+  if (!el || !token) return;
 
   try {
     const r = await fetch(API + '/api/users/me/earnings', {
       headers: { Authorization: 'Bearer ' + token }
     });
-    if (!r.ok) {
-      throw new Error('Failed to load earnings');
-    }
+    if (!r.ok) throw new Error('Failed to load earnings');
     const d = await r.json();
 
     const { totalEarnings, sales } = d.data || { totalEarnings: 0, sales: [] };
 
+    const summaryHtml = `
+      <div class="pr-earnings-summary">
+        <div class="pr-earnings-total">
+          <span class="pr-earnings-label">Total Earnings</span>
+          <span class="pr-earnings-amount">${formatMoney(totalEarnings)}</span>
+        </div>
+      </div>`;
+
     if (!sales || sales.length === 0) {
-      el.innerHTML = `
-        <div class="dash-earnings-summary">
-          <div class="dash-earnings-total">
-            <span class="dash-earnings-label">Total Earnings</span>
-            <span class="dash-earnings-amount">${formatMoney(totalEarnings)}</span>
-          </div>
-        </div>
-        <div class="dash-empty dash-mt-2">
-          <div class="dash-empty__icon"><span class="material-symbols-outlined">shopping_bag</span></div>
-          <h3>No sales yet</h3>
-          <p>List your prompts on the marketplace to start earning.</p>
-          <a href="create.html" class="pf-btn pf-btn--primary dash-mt-1">Create Prompt</a>
-        </div>`;
+      el.innerHTML = summaryHtml + renderEmptyState('shopping_bag', 'No sales yet', 'List your prompts on the marketplace to start earning.', '<a href="community.html?compose=1" class="pf-btn pf-btn--primary">Sell a Prompt</a>');
     } else {
-      el.innerHTML = `
-        <div class="dash-earnings-summary">
-          <div class="dash-earnings-total">
-            <span class="dash-earnings-label">Total Earnings</span>
-            <span class="dash-earnings-amount">${formatMoney(totalEarnings)}</span>
-          </div>
-        </div>
-        <div class="dash-earnings-list">
-          <div class="dash-earnings-list-header">Recent Sales</div>
+      el.innerHTML = summaryHtml + `
+        <div class="pr-earnings-list">
+          <div class="pr-earnings-list-header">Recent Sales</div>
           ${sales.map(earningsItemHTML).join('')}
         </div>`;
     }
   } catch (err) {
-    el.innerHTML = `<div class="dash-empty">
-      <div class="dash-empty__icon"><span class="material-symbols-outlined">warning</span></div>
-      <h3>Unable to load earnings</h3>
-      <p>${esc(err.message)}</p>
-    </div>`;
+    el.innerHTML = renderEmptyState('warning', 'Unable to load earnings', err.message);
   }
 }
 
@@ -475,4 +417,16 @@ function logout() {
 document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-logout')?.addEventListener('click', logout);
   await initAuth();
+
+  document.addEventListener('click', e => {
+    const detailBtn = e.target.closest('[data-action="gotoDetail"]');
+    if (detailBtn) {
+      window.location.href = 'prompt-detail.html?id=' + detailBtn.dataset.id;
+      return;
+    }
+
+    if (e.target.closest('[data-action="stopProp"]')) {
+      e.stopPropagation();
+    }
+  });
 });

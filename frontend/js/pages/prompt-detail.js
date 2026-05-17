@@ -7,6 +7,8 @@ const promptId = params.get('id');
 
 lucide.createIcons();
 
+let currentUserVote = 0;
+
 async function loadDetail() {
     if (!promptId) return;
     try {
@@ -19,9 +21,12 @@ async function loadDetail() {
             document.getElementById('prompt-desc').textContent = p.description || 'No description provided.';
             document.getElementById('prompt-content').textContent = p.content;
             document.getElementById('author-name').textContent = p.user?.username || 'architect';
-            document.getElementById('stat-stars').textContent = p.score || 0;
+            document.getElementById('vote-score').textContent = Math.max(0, p.score || 0);
             document.getElementById('stat-forks').textContent = p.bookmarksCount || 0;
             document.title = `${p.title} · PromptFeed Architecture`;
+
+            currentUserVote = p.userVote || 0;
+            document.getElementById('vote-up').classList.toggle('active', currentUserVote === 1);
 
             // Time Ago in header
             const timeAgoHeader = document.getElementById('time-ago-header');
@@ -33,22 +38,34 @@ async function loadDetail() {
                 document.getElementById('perf-success').textContent = p.metrics.successRate ? `${p.metrics.successRate}%` : '--';
             }
 
-            // Handle Run Button
+            // Handle Run / Buy button based on isPaid (isPremium) flag
             const runBtn = document.getElementById('btn-run');
-            if (runBtn) {
-                runBtn.onclick = () => {
-                    window.location.href = `playground.html?id=${promptId}`;
-                };
-            }
-
-            // Handle Purchase UI
             const buyBtn = document.getElementById('btn-buy');
-            if (p.isPremium && p.product) {
-                buyBtn.textContent = `Buy for $${p.product.price}`;
-                buyBtn.onclick = () => handlePurchase(p.product.id);
-                updatePurchaseUI(p.product.id);
+            const isPaid = p.isPremium || false;
+
+            if (isPaid) {
+                // Show Buy Prompt button
+                if (runBtn) runBtn.style.display = 'none';
+                if (buyBtn) {
+                    const priceLabel = p.product?.price
+                        ? ` — $${parseFloat(p.product.price).toFixed(2)}`
+                        : (p.price ? ` — $${parseFloat(p.price).toFixed(2)}` : '');
+                    buyBtn.textContent = `Buy Prompt${priceLabel}`;
+                    buyBtn.style.display = '';
+                    if (p.product) {
+                        buyBtn.addEventListener('click', () => handlePurchase(p.product.id));
+                        updatePurchaseUI(p.product.id);
+                    }
+                }
             } else {
-                buyBtn.style.display = 'none';
+                // Show Run Prompt button
+                if (buyBtn) buyBtn.style.display = 'none';
+                if (runBtn) {
+                    runBtn.style.display = '';
+                    runBtn.addEventListener('click', () => {
+                        window.location.href = `playground.html?id=${promptId}`;
+                    });
+                }
             }
         } else {
             throw new Error("Prompt not found");
@@ -69,6 +86,42 @@ function renderErrorState() {
               <span class="text-sm text-gray-400" style="color: #9ca3af; font-size: 14px;">Please try again later.</span>
             </div>
           `;
+    }
+}
+
+async function handleDetailVote() {
+    if (!Auth.isLoggedIn()) {
+        alert("Please sign in to vote.");
+        return;
+    }
+    const btn = document.getElementById('vote-up');
+    btn.disabled = true;
+    try {
+        let res;
+        if (currentUserVote === 1) {
+            // Already upvoted — remove vote
+            res = await fetch(`${API}/api/prompts/${promptId}/upvote`, {
+                method: 'DELETE',
+                headers: Auth.headers()
+            });
+        } else {
+            // Add upvote
+            res = await fetch(`${API}/api/prompts/${promptId}/upvote`, {
+                method: 'POST',
+                headers: Auth.headers()
+            });
+        }
+        const data = await res.json();
+        if (data.success) {
+            await loadDetail();
+        } else {
+            alert(data.message || "Vote failed");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Connection error");
+    } finally {
+        btn.disabled = false;
     }
 }
 
@@ -138,7 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
     UI.injectNavigation('prompt-detail.html');
     loadDetail();
 
-    // Listen for state updates to refresh UI (e.g., after purchase sync)
+    // Upvote button click handler
+    document.getElementById('vote-up').addEventListener('click', handleDetailVote);
+
     window.addEventListener('appstate:updated', () => {
         // Find existing product UI if any
         const buyBtn = document.getElementById('btn-buy');

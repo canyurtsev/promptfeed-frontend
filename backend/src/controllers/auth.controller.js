@@ -59,6 +59,15 @@ class AuthController {
     async getMe(req, res) {
         const user = await authService.getUserById(req.user.id);
 
+        let plan = 'free';
+        let subscriptionStatus = null;
+        if (user.subscription && user.subscription.status === 'active') {
+            plan = user.subscription.plan.toLowerCase();
+            subscriptionStatus = user.subscription.status;
+        }
+        user.plan = plan;
+        user.subscriptionStatus = subscriptionStatus;
+
         res.json({
             success: true,
             data: user

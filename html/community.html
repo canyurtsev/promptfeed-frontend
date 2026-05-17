@@ -156,10 +156,26 @@
                   <option value="Research">Research</option>
                   <option value="Data">Data</option>
                 </select>
-                <button class="pf-composer__toolbar-btn" type="button" disabled aria-label="Attach image (coming soon)" title="Attach image (coming soon)">
+                <button
+                  class="pf-composer__toolbar-btn pf-composer__toolbar-btn--active"
+                  type="button"
+                  id="composer-toggle-image"
+                  data-action="toggleAttach"
+                  data-panel="image"
+                  aria-label="Attach image URL"
+                  title="Attach image URL"
+                >
                   <span class="material-symbols-outlined" aria-hidden="true">image</span>
                 </button>
-                <button class="pf-composer__toolbar-btn" type="button" disabled aria-label="Attach link (coming soon)" title="Attach link (coming soon)">
+                <button
+                  class="pf-composer__toolbar-btn pf-composer__toolbar-btn--active"
+                  type="button"
+                  id="composer-toggle-resource"
+                  data-action="toggleAttach"
+                  data-panel="resource"
+                  aria-label="Attach resource link URL"
+                  title="Attach resource link URL"
+                >
                   <span class="material-symbols-outlined" aria-hidden="true">link</span>
                 </button>
               </div>
@@ -173,7 +189,35 @@
               </div>
 
             </div><!-- /.pf-composer__toolbar -->
+
+            <!-- Attachment panel (hidden until toggled) -->
+            <div id="composer-attach-panel" class="pf-composer__attach-panel" aria-label="Media attachments">
+              <div class="pf-composer__attach-row">
+                <span class="material-symbols-outlined pf-composer__attach-icon" aria-hidden="true">image</span>
+                <input
+                  id="composer-image-url"
+                  class="pf-composer__attach-input"
+                  type="url"
+                  name="imageUrl"
+                  placeholder="Image URL (https://...)"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="pf-composer__attach-row">
+                <span class="material-symbols-outlined pf-composer__attach-icon" aria-hidden="true">link</span>
+                <input
+                  id="composer-resource-url"
+                  class="pf-composer__attach-input"
+                  type="url"
+                  name="resourceUrl"
+                  placeholder="Resource / reference URL (https://...)"
+                  autocomplete="off"
+                />
+              </div>
+            </div><!-- /.pf-composer__attach-panel -->
+
           </div><!-- /.pf-composer__compose-col -->
+
 
         </form>
       </div>

@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Dashboard - PromptFeed</title>
+<title>Dashboard — PromptFeed</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
@@ -17,7 +17,7 @@
     <a href="index.html" class="pf-topnav__logo">
       <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
     </a>
-    <nav class="pf-topnav__nav" aria-label="Main">
+    <nav class="pf-topnav__nav" aria-label="Main navigation">
       <a href="index.html" class="pf-topnav__nav-link">News</a>
       <a href="community.html" class="pf-topnav__nav-link">Community</a>
       <a href="marketplace.html" class="pf-topnav__nav-link">Marketplace</a>
@@ -28,197 +28,200 @@
     </nav>
     <div class="pf-topnav__search">
       <span class="material-symbols-outlined pf-topnav__search-icon">search</span>
-      <input type="search" placeholder="Search..." disabled aria-label="Search"/>
+      <input type="search" placeholder="Search prompts..." disabled aria-label="Search prompts"/>
     </div>
     <div class="pf-topnav__actions" id="nav-auth-area"></div>
   </div>
 </header>
 
-<div class="pd-loading" id="init-loading">
+<div class="pr-loading" id="init-loading">
   <div class="pf-spinner"></div>
 </div>
 
-<div class="dash-container" id="page-content" hidden>
+<div class="pr-container" id="page-content" hidden>
+
   <!-- Dashboard Header -->
-  <div class="dash-header">
-    <div class="dash-header__left">
-      <div class="dash-header__avatar" id="dash-avatar">?</div>
-      <div class="dash-header__info">
-        <h1 id="dash-name">Account</h1>
-        <p id="dash-email">email@example.com</p>
+  <div class="pr-header">
+    <div class="pr-header__left">
+      <div class="pr-header__avatar" id="dash-avatar">?</div>
+      <div class="pr-header__info">
+        <h1 class="pr-header__title" id="dash-name">Account</h1>
+        <p class="pr-header__sub" id="dash-email">email@example.com</p>
       </div>
     </div>
-    <div class="dash-header__cta">
-      <a href="create.html" class="pf-btn pf-btn--primary">
-        <span class="material-symbols-outlined dash-btn-icon-sm">add</span>
-        Create Prompt
+    <div class="pr-header__cta">
+      <a href="community.html?compose=1" class="pf-btn pf-btn--primary pr-hero-btn">
+        <span class="material-symbols-outlined" aria-hidden="true">add</span>
+        Sell a Prompt
       </a>
     </div>
   </div>
 
   <!-- Summary Cards -->
-  <div class="dash-summary">
-    <div class="dash-summary__card">
-      <div class="dash-summary__icon dash-summary__icon--prompts">
-        <span class="material-symbols-outlined">edit</span>
+  <div class="pr-stat-grid">
+    <div class="pr-stat-card">
+      <div class="pr-stat-card__icon pr-stat-card__icon--prompts">
+        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
       </div>
-      <div class="dash-summary__content">
-        <div class="dash-summary__value" id="sum-prompts">—</div>
-        <div class="dash-summary__label">Published</div>
-      </div>
-    </div>
-    <div class="dash-summary__card">
-      <div class="dash-summary__icon dash-summary__icon--saved">
-        <span class="material-symbols-outlined">bookmark</span>
-      </div>
-      <div class="dash-summary__content">
-        <div class="dash-summary__value" id="sum-saved">—</div>
-        <div class="dash-summary__label">Saved</div>
+      <div class="pr-stat-card__content">
+        <div class="pr-stat-card__val" id="sum-prompts">—</div>
+        <div class="pr-stat-card__label">Published</div>
       </div>
     </div>
-    <div class="dash-summary__card">
-      <div class="dash-summary__icon dash-summary__icon--plan">
-        <span class="material-symbols-outlined">workspace_premium</span>
+    <div class="pr-stat-card">
+      <div class="pr-stat-card__icon pr-stat-card__icon--saved">
+        <span class="material-symbols-outlined" aria-hidden="true">bookmark</span>
       </div>
-      <div class="dash-summary__content">
-        <div class="dash-plan-badge" id="sum-plan">
-          <span class="material-symbols-outlined">workspace_premium</span>
+      <div class="pr-stat-card__content">
+        <div class="pr-stat-card__val" id="sum-saved">—</div>
+        <div class="pr-stat-card__label">Saved</div>
+      </div>
+    </div>
+    <div class="pr-stat-card">
+      <div class="pr-stat-card__icon pr-stat-card__icon--plan">
+        <span class="material-symbols-outlined" aria-hidden="true">workspace_premium</span>
+      </div>
+      <div class="pr-stat-card__content">
+        <div class="pr-plan-badge" id="sum-plan">
+          <span class="material-symbols-outlined pr-plan-badge__icon" aria-hidden="true">workspace_premium</span>
           FREE
         </div>
-        <div class="dash-summary__label">Plan</div>
+        <div class="pr-stat-card__label">Plan</div>
       </div>
     </div>
-    <div class="dash-summary__card">
-      <div class="dash-summary__icon dash-summary__icon--wallet">
-        <span class="material-symbols-outlined">account_balance_wallet</span>
+    <div class="pr-stat-card">
+      <div class="pr-stat-card__icon pr-stat-card__icon--wallet">
+        <span class="material-symbols-outlined" aria-hidden="true">account_balance_wallet</span>
       </div>
-      <div class="dash-summary__content">
-        <div class="dash-summary__value" id="sum-wallet">$0.00</div>
-        <div class="dash-summary__label">Wallet</div>
+      <div class="pr-stat-card__content">
+        <div class="pr-stat-card__val" id="sum-wallet">$0.00</div>
+        <div class="pr-stat-card__label">Wallet</div>
       </div>
     </div>
   </div>
 
-  <!-- Two-Column Layout -->
-  <div class="dash-grid">
+  <div class="pr-layout">
     <!-- Main Column -->
-    <div class="dash-main">
+    <main class="pr-main" role="main">
+
       <!-- My Prompts Section -->
-      <section class="dash-section" aria-labelledby="my-prompts-heading">
-        <div class="dash-section__header">
-          <div class="dash-section__title">
-            <span class="material-symbols-outlined">edit</span>
+      <section class="pr-panel" aria-labelledby="my-prompts-heading">
+        <div class="pr-panel__header">
+          <div class="pr-panel__title">
+            <span class="material-symbols-outlined pr-panel__icon" aria-hidden="true">edit</span>
             My Prompts
           </div>
-          <a href="community.html?filter=mine" class="pf-btn pf-btn--ghost dash-btn-sm">View All</a>
+          <a href="community.html?filter=mine" class="pf-btn pf-btn--ghost pr-btn-sm">View All</a>
         </div>
-        <div class="dash-section__body" id="my-prompts-content">
-          <div class="pf-loading"><div class="pf-spinner"></div></div>
+        <div class="pr-panel__body" id="my-prompts-content">
+          <div class="pr-loading-box"><div class="pf-spinner"></div></div>
         </div>
       </section>
 
       <!-- Saved Prompts Section -->
-      <section class="dash-section" aria-labelledby="saved-prompts-heading">
-        <div class="dash-section__header">
-          <div class="dash-section__title dash-section__title--saved">
-            <span class="material-symbols-outlined">bookmark</span>
+      <section class="pr-panel" aria-labelledby="saved-prompts-heading">
+        <div class="pr-panel__header">
+          <div class="pr-panel__title">
+            <span class="material-symbols-outlined pr-panel__icon pr-color-success" aria-hidden="true">bookmark</span>
             Saved Prompts
           </div>
-          <a href="community.html?filter=saved" class="pf-btn pf-btn--ghost dash-btn-sm">View All</a>
+          <a href="community.html?filter=saved" class="pf-btn pf-btn--ghost pr-btn-sm">View All</a>
         </div>
-        <div class="dash-section__body" id="saved-prompts-content">
-          <div class="pf-loading"><div class="pf-spinner"></div></div>
+        <div class="pr-panel__body" id="saved-prompts-content">
+          <div class="pr-loading-box"><div class="pf-spinner"></div></div>
         </div>
       </section>
 
       <!-- Purchased Prompts Section -->
-      <section class="dash-section" aria-labelledby="purchased-prompts-heading">
-        <div class="dash-section__header">
-          <div class="dash-section__title dash-section__title--purchased">
-            <span class="material-symbols-outlined">shopping_cart</span>
+      <section class="pr-panel" aria-labelledby="purchased-prompts-heading">
+        <div class="pr-panel__header">
+          <div class="pr-panel__title">
+            <span class="material-symbols-outlined pr-panel__icon pr-color-warning" aria-hidden="true">shopping_cart</span>
             Purchased Prompts
           </div>
         </div>
-        <div class="dash-section__body" id="purchased-prompts-content">
-          <div class="pf-loading"><div class="pf-spinner"></div></div>
+        <div class="pr-panel__body" id="purchased-prompts-content">
+          <div class="pr-loading-box"><div class="pf-spinner"></div></div>
         </div>
       </section>
 
       <!-- Creator Dashboard -->
-      <section class="dash-section" aria-labelledby="creator-heading" id="creator-panel">
-        <div class="dash-section__header">
-          <div class="dash-section__title dash-plan-pro">
-            <span class="material-symbols-outlined">storefront</span>
+      <section class="pr-panel" aria-labelledby="creator-heading" id="creator-panel">
+        <div class="pr-panel__header">
+          <div class="pr-panel__title">
+            <span class="material-symbols-outlined pr-panel__icon pr-color-pro" aria-hidden="true">storefront</span>
             Creator Dashboard
           </div>
         </div>
-        <div class="dash-section__body" id="creator-content">
-          <div class="pf-loading"><div class="pf-spinner"></div></div>
+        <div class="pr-panel__body" id="creator-content">
+          <div class="pr-loading-box"><div class="pf-spinner"></div></div>
         </div>
       </section>
-    </div>
+    </main>
 
     <!-- Side Column -->
-    <aside class="dash-rail">
+    <aside class="pr-sidebar">
+      
       <!-- Account Card -->
-      <div class="dash-rail-card">
-        <div class="dash-rail-card__header">
-          <span class="material-symbols-outlined">person</span>
+      <div class="pr-panel">
+        <div class="pr-panel__header pr-panel__header--small">
+          <span class="material-symbols-outlined pr-panel__icon" aria-hidden="true">person</span>
           Account
         </div>
-        <div class="dash-account-grid">
-          <div class="dash-account-row">
-            <div class="dash-account-label">Username</div>
-            <div class="dash-account-value" id="detail-username">—</div>
+        <div class="pr-account-grid">
+          <div class="pr-account-row">
+            <div class="pr-account-label">Username</div>
+            <div class="pr-account-value" id="detail-username">—</div>
           </div>
-          <div class="dash-account-row">
-            <div class="dash-account-label">Joined</div>
-            <div class="dash-account-value" id="detail-joined">—</div>
+          <div class="pr-account-row">
+            <div class="pr-account-label">Joined</div>
+            <div class="pr-account-value" id="detail-joined">—</div>
           </div>
         </div>
       </div>
 
       <!-- Wallet Card -->
-      <div class="dash-rail-card">
-        <div class="dash-rail-card__header">
-          <span class="material-symbols-outlined">account_balance_wallet</span>
+      <div class="pr-panel">
+        <div class="pr-panel__header pr-panel__header--small">
+          <span class="material-symbols-outlined pr-panel__icon" aria-hidden="true">account_balance_wallet</span>
           Wallet
         </div>
-        <div class="dash-wallet-value" id="wallet-display">$0.00</div>
-        <button class="pf-btn pf-btn--ghost pd-full-btn dash-btn-funds" disabled>Add Funds</button>
+        <div class="pr-wallet-value" id="wallet-display">$0.00</div>
+        <button class="pf-btn pf-btn--ghost pr-full-btn" disabled>Add Funds</button>
       </div>
 
       <!-- Upgrade Card (shown for Free) -->
-      <div class="dash-upgrade dash-hidden" id="upgrade-box">
-        <div class="dash-upgrade__title">Upgrade to Pro</div>
-        <p class="dash-upgrade__desc">Unlock unlimited prompt publishing and advanced features.</p>
-        <a href="subscription.html" class="dash-upgrade__link">
+      <div class="pr-upgrade pr-hidden" id="upgrade-box">
+        <div class="pr-upgrade__title">Upgrade to Pro</div>
+        <p class="pr-upgrade__desc">Unlock unlimited prompt publishing and advanced features.</p>
+        <a href="subscription.html" class="pr-upgrade__link">
           View Plans
-          <span class="material-symbols-outlined">arrow_forward</span>
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
         </a>
       </div>
 
       <!-- Actions -->
-      <div class="dash-rail-card">
-        <div class="dash-rail-card__header">
-          <span class="material-symbols-outlined">settings</span>
+      <div class="pr-panel">
+        <div class="pr-panel__header pr-panel__header--small">
+          <span class="material-symbols-outlined pr-panel__icon" aria-hidden="true">settings</span>
           Settings
         </div>
-        <div class="dash-actions">
-          <button class="dash-action-btn" disabled>
-            <span class="material-symbols-outlined">vpn_key</span>
+        <div class="pr-actions">
+          <button class="pr-action-btn" disabled>
+            <span class="material-symbols-outlined" aria-hidden="true">vpn_key</span>
             API Keys
           </button>
-          <button class="dash-action-btn" disabled>
-            <span class="material-symbols-outlined">notifications</span>
+          <button class="pr-action-btn" disabled>
+            <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
             Notifications
           </button>
-          <button class="dash-action-btn dash-action-btn--danger" id="btn-logout">
-            <span class="material-symbols-outlined">logout</span>
+          <button class="pr-action-btn pr-action-btn--danger" id="btn-logout">
+            <span class="material-symbols-outlined" aria-hidden="true">logout</span>
             Log Out
           </button>
         </div>
       </div>
+
     </aside>
   </div>
 </div>

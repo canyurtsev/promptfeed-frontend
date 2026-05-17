@@ -83,6 +83,30 @@
       color: var(--text-secondary);
       margin-bottom: 0.5rem;
     }
+
+    .vote-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .vote-btn:hover {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+    }
+
+    .vote-btn.up.active {
+      color: #22c55e;
+    }
+
+    .vote-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 
@@ -181,8 +205,15 @@
           <h4 class="sidebar-heading">About</h4>
           <p id="prompt-desc" style="font-size: 14px; color: var(--text-primary); margin-bottom: 1rem;">Architectural
             implementation for specialized AI agency tasks.</p>
-          <div class="stat-row"><i data-lucide="star" size="14"></i> <strong id="stat-stars">0</strong> <span
-              style="margin-left: 4px;">stars</span></div>
+          
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.75rem;">
+            <div class="vote-widget" style="display: flex; align-items: center; gap: 4px;">
+              <button class="vote-btn up" id="vote-up"><i data-lucide="chevron-up" size="16"></i></button>
+              <span class="vote-score" id="vote-score" style="font-size: 14px; font-weight: 600; color: var(--text-primary);">0</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);">votes</span>
+          </div>
+          
           <div class="stat-row"><i data-lucide="eye" size="14"></i> <strong id="stat-watching">0</strong> <span
               style="margin-left: 4px;">watching</span></div>
           <div class="stat-row"><i data-lucide="git-fork" size="14"></i> <strong id="stat-forks">0</strong> <span

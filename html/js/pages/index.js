@@ -24,11 +24,11 @@ async function initAuth() {
       area.innerHTML = `
         <div class="pf-wallet-chip" title="Wallet balance">
           <span class="material-symbols-outlined pf-wallet-chip__icon">toll</span>
-          <span>${esc(String(u.walletBalance ?? '—'))}</span>
+          <span>${esc(String(u.wallet?.balance ?? u.walletBalance ?? '—'))}</span>
         </div>
         <div class="pf-avatar" id="user-avatar" title="Profile"
           style="${u.avatarUrl ? 'background-image:url('+esc(u.avatarUrl)+')' : ''}"
-          id="user-avatar-btn"></div>`;
+          id="user-avatar-btn">${currentUser.avatarUrl ? '' : esc(String(currentUser.username || currentUser.fullName || currentUser.email || 'A')[0].toUpperCase())}</div>`;
       if (plan === 'free') {
         document.getElementById('top-ad-banner').classList.remove('pf-ad-banner--hidden');
       }
@@ -83,7 +83,7 @@ async function loadFeaturedPosts() {
     const items = d.data?.prompts || d.data || [];
     if (!items.length) { el.innerHTML = emptyRow('No posts yet', 'community.html'); return; }
     el.innerHTML = items.slice(0,4).map(p => `
-      <a class="lp-featured__row" href="prompt-detail.html?id=${esc(p.id)}">
+      <a class="lp-featured__row" href="prompt-detail.html?id=${esc(p.id)}#id=${esc(p.id)}">
         <span class="lp-featured__row-title">${esc(p.title)}</span>
         <span class="lp-featured__row-meta">${fmtN(p.score??0)} pts · ${ago(p.createdAt)}</span>
       </a>`).join('');

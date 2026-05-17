@@ -1,4 +1,4 @@
-﻿/* ================================================================
+/* ================================================================
    community.html - Page Controller
    Direct API calls only. No shared backend client. No mock data.
    Protected actions gate to signin.html?returnUrl=...
@@ -78,6 +78,7 @@ async function initAuth() {
     renderComposer();
     return;
   }
+  area.innerHTML = '<div class="pf-spinner" style="width:20px;height:20px;margin:5px"></div>';
 
   try {
     const r = await fetch(API + '/api/users/me', { headers: { Authorization: 'Bearer ' + token } });
@@ -183,10 +184,18 @@ function renderComposer() {
   }
 }
 
-function composerSetMsg(text, type) {
+function composerSetMsg(textOrArray, type) {
   const el = document.getElementById('composer-msg');
   if (!el) return;
-  el.textContent = text;
+  
+  if (Array.isArray(textOrArray)) {
+    el.innerHTML = '<div>Could not publish prompt:</div><ul>' + 
+      textOrArray.map(item => '<li>' + esc(item) + '</li>').join('') + 
+      '</ul>';
+  } else {
+    el.textContent = textOrArray;
+  }
+  
   el.className = 'pf-composer__msg' + (type ? ' pf-composer__msg--' + type : '');
 }
 
@@ -198,12 +207,37 @@ function composerClearMsg() {
 }
 
 function composerClearForm() {
-  ['composer-title', 'composer-content', 'composer-description', 'composer-tags'].forEach(id => {
+  ['composer-title', 'composer-content', 'composer-description', 'composer-tags',
+   'composer-image-url', 'composer-resource-url'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
   const cat = document.getElementById('composer-category');
   if (cat) cat.selectedIndex = 0;
+  // Close attachment panel
+  const panel = document.getElementById('composer-attach-panel');
+  if (panel) panel.classList.remove('open');
+}
+
+function handleAttachToggle(panel) {
+  const attachPanel = document.getElementById('composer-attach-panel');
+  if (!attachPanel) return;
+  const focusId = panel === 'image' ? 'composer-image-url' : 'composer-resource-url';
+  const isOpen = attachPanel.classList.contains('open');
+  // If panel is closed, open it and focus relevant input
+  if (!isOpen) {
+    attachPanel.classList.add('open');
+    document.getElementById(focusId)?.focus();
+  } else {
+    // If already open, check if both inputs are empty — then close, else just focus
+    const imgVal = document.getElementById('composer-image-url')?.value.trim() || '';
+    const resVal = document.getElementById('composer-resource-url')?.value.trim() || '';
+    if (!imgVal && !resVal) {
+      attachPanel.classList.remove('open');
+    } else {
+      document.getElementById(focusId)?.focus();
+    }
+  }
 }
 
 function composerSetSubmitting(on) {
@@ -226,11 +260,11 @@ function cleanTags(value) {
 async function readComposerError(res) {
   try {
     const data = await res.json();
+    if (data.error && Array.isArray(data.error.details) && data.error.details.length) {
+      return data.error.details.map(d => d.message);
+    }
     if (data.message) return data.message;
     if (data.error && data.error.message) return data.error.message;
-    if (Array.isArray(data.error && data.error.details) && data.error.details.length) {
-      return data.error.details.map(d => d.message).join(' ');
-    }
   } catch { /* ignore */ }
   return 'Unable to publish prompt.';
 }
@@ -272,6 +306,9 @@ async function handleComposerSubmit(event) {
     return;
   }
 
+  const imageUrl = (document.getElementById('composer-image-url')?.value.trim()) || '';
+  const resourceUrl = (document.getElementById('composer-resource-url')?.value.trim()) || '';
+
   const payload = {
     title,
     description,
@@ -280,6 +317,8 @@ async function handleComposerSubmit(event) {
     price: 0
   };
   if (category) payload.category = category;
+  if (imageUrl) payload.imageUrl = imageUrl;
+  if (resourceUrl) payload.resourceUrl = resourceUrl;
 
   composerSetSubmitting(true);
 
@@ -363,6 +402,33 @@ function filterByTag(tag) {
 
 /* ─── Feed rows ──────────────────────────────────────────────────── */
 
+function isValidImageUrl(url) {
+  if (!url) return false;
+  try {
+    const p = new URL(url);
+    const path = p.pathname.toLowerCase();
+    return /\.(png|jpe?g|webp|gif|avif|svg)$/.test(path) ||
+           p.hostname.includes('unsplash.com') ||
+           p.hostname.includes('cloudinary.com') ||
+           p.hostname.includes('imgur.com');
+  } catch { return false; }
+}
+
+function buildMediaHtml(p) {
+  let html = '';
+  const validImg = isValidImageUrl(p.imageUrl);
+  if (validImg) {
+    html += '<img class="pf-topic-row__img-thumb" src="' + esc(p.imageUrl) + '" alt="Prompt image" loading="lazy"/>';
+  }
+  if (p.resourceUrl) {
+    html += '<a class="pf-topic-row__resource-link" href="' + esc(p.resourceUrl) + '" target="_blank" rel="noopener noreferrer">'
+      + '<span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>'
+      + esc(p.resourceUrl)
+      + '</a>';
+  }
+  return html ? '<div class="pf-topic-row__media">' + html + '</div>' : '';
+}
+
 function topicRow(p) {
   const score = p.score != null ? p.score : (p.upvotes != null ? p.upvotes : 0);
   const hasUpvoted = p.userVote === 1;
@@ -382,13 +448,14 @@ function topicRow(p) {
     + '<span class="pf-vote-count" id="score-' + esc(p.id) + '">' + fmtN(Math.max(0, score)) + '</span>'
     + '</div>'
     + '<div class="pf-topic-row__body">'
-    + '<a class="pf-topic-row__title" href="prompt-detail.html?id=' + esc(p.id) + '">' + esc(p.title) + '</a>'
+    + '<a class="pf-topic-row__title" href="prompt-detail.html?id=' + esc(p.id) + '#id=' + esc(p.id) + '">' + esc(p.title) + '</a>'
     + '<div class="pf-topic-row__meta">'
     + '<span class="pf-topic-row__author">by <strong>' + esc(author) + '</strong></span>'
     + '<span class="pf-topic-row__sep">\u00b7</span>'
     + '<span class="pf-topic-row__author">' + ago(p.createdAt) + '</span>'
     + tagSpans
     + '</div>'
+    + buildMediaHtml(p)
     + '</div>'
     + '<div class="pf-topic-row__stats">'
     + '<span class="pf-stat"><span class="material-symbols-outlined pf-topic-row__stat-icon">chat_bubble</span><span>' + cmts + '</span></span>'
@@ -578,6 +645,17 @@ document.getElementById('search-input').addEventListener('input', e => {
   renderSidebar();
   loadFeed();
   loadRailSkills();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('compose') === '1') {
+    setTimeout(() => {
+      const section = document.getElementById('composer-section');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+      if (token) {
+        document.getElementById('composer-title')?.focus();
+      }
+    }, 100);
+  }
 }());
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -589,6 +667,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', e => {
     if (e.target.id === 'pf-gate') {
       closeGate();
+      return;
+    }
+
+    const attachBtn = e.target.closest('[data-action="toggleAttach"]');
+    if (attachBtn) {
+      e.stopPropagation();
+      handleAttachToggle(attachBtn.dataset.panel);
       return;
     }
 

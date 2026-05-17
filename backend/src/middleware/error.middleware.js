@@ -34,10 +34,8 @@ export const errorHandler = (err, req, res, next) => {
             code: err.errorCode || errorCodes[err.name] || 'INTERNAL_ERROR',
             message: message,
             requestId: req.requestId || err.requestId,
-            ...(process.env.NODE_ENV === 'development' && {
-                stack: err.stack,
-                details: err.details
-            })
+            ...(err.details && { details: err.details }),
+            ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
         }
     });
 };

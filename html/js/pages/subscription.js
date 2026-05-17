@@ -35,11 +35,11 @@ async function initAuth() {
       area.innerHTML = `
         <div class="pf-wallet-chip" title="Wallet balance">
           <span class="material-symbols-outlined pf-wallet-chip__icon">toll</span>
-          <span>${esc(String(currentUser.walletBalance ?? '—'))}</span>
+          <span>${esc(String(currentUser.wallet?.balance ?? currentUser.walletBalance ?? '—'))}</span>
         </div>
         <div class="pf-avatar" id="user-avatar" title="Profile"
           style="${currentUser.avatarUrl ? 'background-image:url(' + esc(currentUser.avatarUrl) + ')' : ''}"
-          data-action="goto-profile"></div>`;
+          data-action="goto-profile">${currentUser.avatarUrl ? '' : esc(String(currentUser.username || currentUser.fullName || currentUser.email || 'A')[0].toUpperCase())}</div>`;
 
       applyPlanState(currentUser.plan || 'free');
     } else {
@@ -65,7 +65,8 @@ function applyPlanState(plan) {
 
   const btnFree = document.getElementById('btn-free');
   const btnPro = document.getElementById('btn-pro');
-  const btnCreator = document.getElementById('btn-creator');
+  const badgeFree = document.getElementById('badge-free');
+  const badgePro = document.getElementById('badge-pro');
 
   btnFree.textContent = 'Downgrade to Free';
   btnFree.classList.replace('pf-btn--primary', 'pf-btn--ghost');
@@ -73,12 +74,11 @@ function applyPlanState(plan) {
   btnPro.textContent = 'Upgrade to Pro';
   btnPro.classList.replace('pf-btn--ghost', 'pf-btn--primary');
 
-  btnCreator.textContent = 'Become a Creator';
-
   if (p === 'free') {
     btnFree.textContent = 'Current Plan';
     btnFree.disabled = true;
     document.getElementById('card-free').style.borderColor = 'var(--pf-success)';
+    badgeFree.style.display = 'block';
   } else if (p === 'pro') {
     btnPro.textContent = 'Current Plan';
     btnPro.disabled = true;
@@ -86,12 +86,11 @@ function applyPlanState(plan) {
     btnFree.classList.replace('pf-btn--primary', 'pf-btn--ghost');
     document.getElementById('card-pro').style.borderColor = 'var(--pf-success)';
     document.getElementById('card-pro').style.boxShadow = '0 0 0 2px var(--pf-success)';
-  } else if (p === 'creator') {
-    btnCreator.textContent = 'Current Plan';
-    btnCreator.disabled = true;
-    btnFree.classList.replace('pf-btn--primary', 'pf-btn--ghost');
-    btnPro.classList.replace('pf-btn--primary', 'pf-btn--ghost');
-    document.getElementById('card-creator').style.borderColor = 'var(--pf-success)';
+    badgePro.style.display = 'block';
+    badgeFree.style.display = 'block';
+  } else {
+    btnFree.textContent = 'Downgrade to Free';
+    btnPro.textContent = 'Upgrade to Pro';
   }
 }
 
@@ -102,7 +101,16 @@ function handlePlanAction(targetPlan) {
     return;
   }
 
-  toast('Checkout integration is Coming Soon.', false);
+  const currentPlan = (currentUser.plan || 'free').toLowerCase();
+  if (targetPlan === currentPlan) {
+    return;
+  }
+
+  if (targetPlan === 'pro') {
+    toast('Stripe checkout is coming soon! Check back later to upgrade to Pro.', false);
+  } else if (targetPlan === 'free' && currentPlan !== 'free') {
+    toast('Downgrade functionality coming soon.', false);
+  }
 }
 
 /* —— Event Delegation + Init —— */

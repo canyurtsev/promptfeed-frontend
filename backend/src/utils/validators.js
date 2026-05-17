@@ -51,7 +51,9 @@ export const createPromptSchema = z.object({
         v.split(',').map(t => t.trim().toLowerCase()).filter(Boolean).join(',')
     ),
     isPremium: z.boolean().default(false),
-    price: z.number().min(0).optional()
+    price: z.number().min(0).optional(),
+    imageUrl: z.string().url('imageUrl must be a valid URL').optional().or(z.literal('')).transform(v => v || undefined),
+    resourceUrl: z.string().url('resourceUrl must be a valid URL').optional().or(z.literal('')).transform(v => v || undefined)
 });
 
 export const updatePromptSchema = z.object({
@@ -63,7 +65,9 @@ export const updatePromptSchema = z.object({
         v ? v.split(',').map(t => t.trim().toLowerCase()).filter(Boolean).join(',') : v
     ),
     isPremium: z.boolean().optional(),
-    price: z.number().min(0).optional()
+    price: z.number().min(0).optional(),
+    imageUrl: z.string().url('imageUrl must be a valid URL').optional().or(z.literal('')).transform(v => v || undefined),
+    resourceUrl: z.string().url('resourceUrl must be a valid URL').optional().or(z.literal('')).transform(v => v || undefined)
 });
 
 // ============================================

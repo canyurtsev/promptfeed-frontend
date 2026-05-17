@@ -1,42 +1,24 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Marketplace — PromptFeed</title>
 <meta name="description" content="Buy proven prompts, skill packs and AI workflow templates from the community."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 <link rel="stylesheet" href="pf-layout.css"/>
-<style>
-.mk-card{background:var(--pf-card);border:1px solid var(--pf-border);border-radius:var(--pf-radius-lg);padding:16px;display:flex;flex-direction:column;gap:10px;transition:border-color .15s,transform .15s;cursor:pointer}
-.mk-card:hover{border-color:var(--pf-accent);transform:translateY(-2px)}
-.mk-card__title{font-size:14px;font-weight:700;color:var(--pf-text-primary);line-height:1.4}
-.mk-card__desc{font-size:12px;color:var(--pf-text-secondary);line-height:1.5;flex:1}
-.mk-card__meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--pf-text-muted);flex-wrap:wrap}
-.mk-card__price{font-size:20px;font-weight:800;color:var(--pf-accent);font-family:var(--pf-font-mono)}
-.mk-card__footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--pf-border)}
-.mk-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:3px;text-transform:uppercase}
-.mk-badge--free{background:#3fb95020;color:var(--pf-success);border:1px solid #3fb95030}
-.mk-badge--premium{background:#a371f720;color:var(--pf-pro);border:1px solid #a371f730}
-.mk-badge--featured{background:#d2992220;color:var(--pf-warning);border:1px solid #d2992230}
-.mk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.mk-metrics{display:flex;gap:12px;font-size:11px;color:var(--pf-text-muted);flex-wrap:wrap}
-.mk-metric{display:flex;align-items:center;gap:3px}
-.mk-metric span{color:var(--pf-text-secondary);font-weight:600}
-.pf-pagination-btn{background:var(--pf-surface);border:1px solid var(--pf-border);color:var(--pf-text-primary);padding:6px 12px;border-radius:var(--pf-radius);font-size:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px}
-.pf-pagination-btn:hover:not(:disabled){border-color:var(--pf-accent);background:var(--pf-surface-hover)}
-.pf-pagination-btn:disabled{opacity:.5;cursor:not-allowed}
-.pf-pagination-info{font-size:12px;color:var(--pf-text-muted);display:flex;align-items:center;padding:0 8px}
-</style>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 </head>
 <body>
 
-<!-- Gate Modal -->
+<!-- Sign-in Gate Modal -->
 <div id="pf-gate" class="pf-gate-overlay">
   <div class="pf-gate-modal">
-    <div class="pf-gate-modal__icon">🔒</div>
+    <div class="pf-gate-modal__icon">
+      <span class="material-symbols-outlined">lock</span>
+    </div>
     <div class="pf-gate-modal__title">Sign in required</div>
     <div class="pf-gate-modal__desc" id="gate-desc">Sign in to purchase.</div>
     <div class="pf-gate-modal__actions">
@@ -52,7 +34,7 @@
     <a href="index.html" class="pf-topnav__logo">
       <span class="pf-logo-text"><span class="pf-logo-prompt">Prompt</span><span class="pf-logo-feed">Feed</span><span class="pf-logo-dot">.</span></span>
     </a>
-    <nav class="pf-topnav__nav" aria-label="Main">
+    <nav class="pf-topnav__nav" aria-label="Main navigation">
       <a href="index.html" class="pf-topnav__nav-link">News</a>
       <a href="community.html" class="pf-topnav__nav-link">Community</a>
       <a href="marketplace.html" class="pf-topnav__nav-link active" aria-current="page">Marketplace</a>
@@ -63,7 +45,7 @@
     </nav>
     <div class="pf-topnav__search">
       <span class="material-symbols-outlined pf-topnav__search-icon">search</span>
-      <input id="search-input" type="search" placeholder="Search marketplace..." autocomplete="off" aria-label="Search marketplace"/>
+      <input id="search-input" type="search" placeholder="Search marketplace…" autocomplete="off" aria-label="Search marketplace"/>
     </div>
     <div class="pf-topnav__actions" id="nav-auth-area"></div>
   </div>
@@ -72,7 +54,8 @@
 <!-- AD BANNER -->
 <div id="top-ad-banner" class="pf-ad-banner pf-ad-banner--hidden">
   <span class="pf-ad-banner__label">AD</span>
-  Advertisement — <a href="subscription.html" style="color:var(--pf-accent)">Upgrade to Pro</a> to remove ads
+  Advertisement —
+  <a href="subscription.html" class="pf-ad-banner__link">Upgrade to Pro</a> to remove ads
 </div>
 
 <!-- LAYOUT -->
@@ -81,44 +64,47 @@
   <!-- LEFT SIDEBAR: Filters -->
   <aside class="pf-sidebar-left" aria-label="Marketplace filters">
     <div class="pf-sidebar-label">Browse</div>
-    <button class="pf-sidebar-link active" id="filter-all" data-cat="" data-action="setCategory" data-val="">
-      <span class="material-symbols-outlined" style="font-size:16px">apps</span>All Listings
+    <button class="pf-sidebar-link active" id="filter-all" data-action="setCategory" data-val="">
+      <span class="material-symbols-outlined pf-sidebar-link__icon">apps</span>All Listings
     </button>
-    <button class="pf-sidebar-link" data-cat="prompt" data-action="setCategory" data-val="prompt">
-      <span class="material-symbols-outlined" style="font-size:16px">text_fields</span>Prompt Packs
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="prompt">
+      <span class="material-symbols-outlined pf-sidebar-link__icon">text_fields</span>Prompt Packs
     </button>
-    <button class="pf-sidebar-link" data-cat="skill" data-action="setCategory" data-val="skill">
-      <span class="material-symbols-outlined" style="font-size:16px">psychology</span>Skill Packs
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="skill">
+      <span class="material-symbols-outlined pf-sidebar-link__icon">psychology</span>Skill Packs
     </button>
-    <button class="pf-sidebar-link" data-cat="workflow" data-action="setCategory" data-val="workflow">
-      <span class="material-symbols-outlined" style="font-size:16px">account_tree</span>Agent Workflows
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="workflow">
+      <span class="material-symbols-outlined pf-sidebar-link__icon">account_tree</span>Agent Workflows
     </button>
+
     <div class="pf-sidebar-divider"></div>
     <div class="pf-sidebar-label">Category</div>
-    <button class="pf-sidebar-link" data-cat="Coding" data-action="setCategory" data-val="Coding">
-      <span class="pf-sidebar-link__dot" style="background:#3fb950"></span>Coding
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Coding">
+      <span class="pf-sidebar-link__dot pf-sidebar-link__dot--coding"></span>Coding
     </button>
-    <button class="pf-sidebar-link" data-cat="Marketing" data-action="setCategory" data-val="Marketing">
-      <span class="pf-sidebar-link__dot" style="background:#d29922"></span>Marketing
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Marketing">
+      <span class="pf-sidebar-link__dot pf-sidebar-link__dot--marketing"></span>Marketing
     </button>
-    <button class="pf-sidebar-link" data-cat="Security" data-action="setCategory" data-val="Security">
-      <span class="pf-sidebar-link__dot" style="background:#f85149"></span>Security
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Security">
+      <span class="pf-sidebar-link__dot pf-sidebar-link__dot--security"></span>Security
     </button>
-    <button class="pf-sidebar-link" data-cat="Automation" data-action="setCategory" data-val="Automation">
-      <span class="pf-sidebar-link__dot" style="background:#ffa657"></span>Automation
+    <button class="pf-sidebar-link" data-action="setCategory" data-val="Automation">
+      <span class="pf-sidebar-link__dot pf-sidebar-link__dot--automation"></span>Automation
     </button>
+
     <div class="pf-sidebar-divider"></div>
     <div class="pf-sidebar-label">Price</div>
-    <button class="pf-sidebar-link" data-price="free" data-action="setPrice" data-val="free">
-      <span class="material-symbols-outlined" style="font-size:16px">redeem</span>Free Only
+    <button class="pf-sidebar-link" data-action="setPrice" data-val="free">
+      <span class="material-symbols-outlined pf-sidebar-link__icon">redeem</span>Free Only
     </button>
-    <button class="pf-sidebar-link" data-price="premium" data-action="setPrice" data-val="premium">
-      <span class="material-symbols-outlined" style="font-size:16px">workspace_premium</span>Premium Only
+    <button class="pf-sidebar-link" data-action="setPrice" data-val="premium">
+      <span class="material-symbols-outlined pf-sidebar-link__icon">workspace_premium</span>Premium Only
     </button>
+
     <div class="pf-sidebar-divider"></div>
-    <div style="padding:0 8px">
-      <label style="font-size:11px;color:var(--pf-text-muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Sort By</label>
-      <select id="sort-select"  style="width:100%;background:var(--pf-surface);border:1px solid var(--pf-border);border-radius:var(--pf-radius);color:var(--pf-text-primary);font-size:12px;padding:6px 8px;outline:none">
+    <div class="mk-sort-group">
+      <label class="mk-sort-label" for="sort-select">Sort By</label>
+      <select id="sort-select" class="mk-sort-select">
         <option value="trending">Trending (Popular)</option>
         <option value="newest">Newest First</option>
         <option value="price_low">Price: Low → High</option>
@@ -129,13 +115,21 @@
 
   <!-- CENTER: Products -->
   <main class="pf-feed" role="main">
-    <div style="margin-bottom:16px">
-      <h1 style="font-size:22px;font-weight:800;color:var(--pf-text-primary);margin-bottom:4px">Marketplace</h1>
-      <p style="font-size:13px;color:var(--pf-text-secondary)">Buy proven prompts, skill packs and AI workflow templates from the community.</p>
+
+    <!-- Marketplace hero header -->
+    <div class="mk-hero">
+      <div class="mk-hero__text">
+        <h1 class="mk-hero__title">Marketplace</h1>
+        <p class="mk-hero__sub">Buy proven prompts, skill packs and AI workflow templates from the community.</p>
+      </div>
+      <a href="community.html?compose=1" class="pf-btn pf-btn--primary mk-hero__cta">
+        <span class="material-symbols-outlined" aria-hidden="true">add</span>
+        Sell a Prompt
+      </a>
     </div>
 
     <!-- Tabs -->
-    <div class="pf-feed-tabs" role="tablist">
+    <div class="pf-feed-tabs" role="tablist" aria-label="Marketplace filters">
       <button class="pf-feed-tab active" data-tab="featured" role="tab" aria-selected="true">Featured</button>
       <button class="pf-feed-tab" data-tab="latest" role="tab" aria-selected="false">Latest</button>
       <button class="pf-feed-tab" data-tab="popular" role="tab" aria-selected="false">Popular</button>
@@ -144,12 +138,17 @@
       <button class="pf-feed-tab" data-tab="workflows" role="tab" aria-selected="false">Workflows</button>
     </div>
 
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span id="product-count" style="font-size:12px;color:var(--pf-text-muted)"></span>
+    <!-- Result count row -->
+    <div class="mk-count-row">
+      <span id="product-count" class="mk-count-label"></span>
     </div>
 
+    <!-- Cards grid -->
     <div id="products-container" class="mk-grid" aria-live="polite"></div>
-    <div id="pagination-controls" style="margin-top:24px;display:flex;justify-content:center;gap:8px"></div>
+
+    <!-- Pagination -->
+    <div id="pagination-controls" class="mk-pagination"></div>
+
   </main>
 
   <!-- RIGHT RAIL -->
@@ -160,22 +159,30 @@
     </div>
 
     <div class="pf-rail-widget">
-      <div class="pf-rail-widget__header">🚀 Promoted Listings</div>
-      <div class="pf-rail-widget__body" style="font-size:12px;color:var(--pf-text-muted)">
+      <div class="pf-rail-widget__header">
+        <span class="material-symbols-outlined pf-rail-widget__icon" aria-hidden="true">rocket_launch</span>
+        Promoted Listings
+      </div>
+      <div class="pf-rail-widget__body">
         <span class="pf-stub-badge">Coming Soon</span>
       </div>
     </div>
 
     <div class="pf-rail-widget">
-      <div class="pf-rail-widget__header">👑 Top Creators</div>
-      <div class="pf-rail-widget__body" style="font-size:12px;color:var(--pf-text-muted)">
+      <div class="pf-rail-widget__header">
+        <span class="material-symbols-outlined pf-rail-widget__icon" aria-hidden="true">emoji_events</span>
+        Top Creators
+      </div>
+      <div class="pf-rail-widget__body mk-rail-sub">
         <span class="pf-stub-badge">Coming Soon</span>
-        <span style="margin-left:6px;font-size:11px">— GET /api/creators</span>
       </div>
     </div>
 
     <div id="pro-box" class="pf-pro-box pf-ad-banner--hidden">
-      <span class="pf-pro-box__badge">🛒 Creator</span>
+      <span class="pf-pro-box__badge">
+        <span class="material-symbols-outlined" aria-hidden="true">storefront</span>
+        Creator
+      </span>
       <div class="pf-pro-box__title">Sell Your Prompts</div>
       <ul class="pf-pro-box__list">
         <li>List prompt packs</li>

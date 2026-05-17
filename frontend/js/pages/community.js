@@ -54,10 +54,10 @@ function buildCard(p) {
     const el = document.createElement('div');
     el.className = "feed-card";
     el.onclick = (e) => {
-        if (!e.target.closest('button')) window.location.href = `prompt-detail.html?id=${p.id}`;
+        if (!e.target.closest('button') && !e.target.closest('.vote-widget')) window.location.href = `prompt-detail.html?id=${p.id}`;
     };
 
-    const score = p.score || 0;
+    const score = Math.max(0, p.score || 0);
     const userVote = p.userVote || 0;
     
     // Performance Metrics (Placeholders if missing from backend)
@@ -76,9 +76,8 @@ function buildCard(p) {
 
           <div style="display: flex; gap: 1rem;">
             <div class="vote-widget" style="margin-top: 4px;">
-              <button class="vote-btn up ${userVote === 1 ? 'active' : ''}" data-dir="1"><i data-lucide="chevron-up"></i></button>
+              <button class="vote-btn up ${userVote === 1 ? 'active' : ''}" data-prompt-id="${p.id}"><i data-lucide="chevron-up"></i></button>
               <span class="vote-score">${score}</span>
-              <button class="vote-btn down ${userVote === -1 ? 'active' : ''}" data-dir="-1"><i data-lucide="chevron-down"></i></button>
             </div>
             <div style="flex: 1;">
               <h3 style="font-size: 16px; color: var(--text-white); margin-bottom: 4px;">${p.title}</h3>
@@ -109,6 +108,45 @@ function buildCard(p) {
     return el;
 }
 
+async function handleVote(e, promptId) {
+    e.stopPropagation();
+    if (!Auth.isLoggedIn()) {
+        alert("Please sign in to vote.");
+        return;
+    }
+    const btn = e.target.closest('button');
+    btn.disabled = true;
+    // Determine current vote state from active class
+    const isActive = btn.classList.contains('active');
+    try {
+        let res;
+        if (isActive) {
+            // Already upvoted — remove vote
+            res = await fetch(`${API}/api/prompts/${promptId}/upvote`, {
+                method: 'DELETE',
+                headers: Auth.headers()
+            });
+        } else {
+            // Add upvote
+            res = await fetch(`${API}/api/prompts/${promptId}/upvote`, {
+                method: 'POST',
+                headers: Auth.headers()
+            });
+        }
+        const data = await res.json();
+        if (data.success) {
+            loadFeed();
+        } else {
+            alert(data.message || "Vote failed");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Connection error");
+    } finally {
+        btn.disabled = false;
+    }
+}
+
 function timeAgo(date) {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     if (seconds < 60) return `${seconds}s`;
@@ -123,4 +161,16 @@ function timeAgo(date) {
 document.addEventListener('DOMContentLoaded', () => {
     UI.injectNavigation('community.html');
     loadFeed();
+
+    // Event delegation for upvote buttons (CSP-compliant, no inline onclick)
+    const feed = document.getElementById('prompt-feed');
+    if (feed) {
+        feed.addEventListener('click', (e) => {
+            const btn = e.target.closest('button.vote-btn.up');
+            if (btn) {
+                const promptId = btn.dataset.promptId;
+                if (promptId) handleVote(e, promptId);
+            }
+        });
+    }
 });
