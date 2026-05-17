@@ -2,7 +2,11 @@
    benchmarks.html — Controller
    Fallback logic: GET /api/benchmarks -> GET /api/prompts?sort=efficiency
    ================================================================ */
-const API = 'http://localhost:5000';
+const API_BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://promptfeed-backend.onrender.com";
+const API = API_BASE_URL;
 const token = localStorage.getItem('accessToken');
 let currentUser = null;
 let activeFilters = { metric: 'efficiency', model: '', category: '', search: '' };

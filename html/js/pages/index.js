@@ -2,7 +2,11 @@
    index.html — Landing Page Controller
    No shared backend client. No mock data. Direct API calls.
    ================================================================ */
-const API   = 'http://localhost:5000';
+const API_BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://promptfeed-backend.onrender.com";
+const API = API_BASE_URL;
 const token = localStorage.getItem('accessToken');
 
 /* ── Auth Nav ── */

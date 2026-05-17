@@ -1,6 +1,12 @@
 // js/pages/playground.js
 'use strict';
 
+const API_BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://promptfeed-backend.onrender.com";
+const API = API_BASE_URL;
+
 document.addEventListener('DOMContentLoaded', async () => {
   function getPromptId() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -43,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (navAuthArea) {
     if (token) {
       try {
-        const meRes = await fetch('/api/users/me', {
+        const meRes = await fetch(API + '/api/users/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (meRes.ok) {
@@ -102,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const headers = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`/api/prompts/${promptId}`, { headers });
+      const res = await fetch(API + `/api/prompts/${promptId}`, { headers });
       const data = await res.json();
 
       if (data.success && data.data) {
@@ -174,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-      const res = await fetch('/api/users/me/executions', {
+      const res = await fetch(API + '/api/users/me/executions', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -215,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     promptOutput.className = 'pg-output pg-output--loading';
 
     try {
-      const res = await fetch(`/api/prompts/${promptId}/run`, {
+      const res = await fetch(API + `/api/prompts/${promptId}/run`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

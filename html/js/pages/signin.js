@@ -3,7 +3,11 @@
    ================================================================ */
 'use strict';
 
-const API = 'http://localhost:5000';
+const API_BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://promptfeed-backend.onrender.com";
+const API = API_BASE_URL;
 let mode = 'login';
 const urlParams = new URLSearchParams(window.location.search);
 const returnUrl = urlParams.get('returnUrl');
